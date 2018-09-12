@@ -1,2 +1,3 @@
 # A DATE
-things happening
+* things happening
+* other things
