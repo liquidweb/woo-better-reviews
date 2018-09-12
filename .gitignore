@@ -1,0 +1,13 @@
+.DS_Store
+phpcs.xml
+phpunit.xml
+Thumbs.db
+wp-cli.local.yml
+_notes.txt
+dist
+release
+node_modules/
+.sass-cache
+*.sql
+*.tar.gz
+*.zip
