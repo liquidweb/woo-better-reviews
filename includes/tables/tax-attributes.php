@@ -34,9 +34,9 @@ function install_table() {
 
 	// Setup the SQL syntax.
 	//
-	// Here, we are setting attributes, acting like a taxonomy. The
-	// attribute_type will be set to either "product" or "author", which
-	// will make them available to be set in the review form.
+	// This stores the individual review attributes that can
+	// be applied to a product. The results are stored in the
+	// data-ratings table.
 	//
 	$table_args = "
 		CREATE TABLE {$table_name} (
@@ -44,7 +44,8 @@ function install_table() {
 			attribute_name varchar(200) NOT NULL DEFAULT '',
 			attribute_desc text NOT NULL DEFAULT '',
 			attribute_slug varchar(200) NOT NULL DEFAULT '',
-			attribute_type varchar(50) NOT NULL DEFAULT '',
+			min_value bigint(20) NOT NULL DEFAULT 0,
+			max_value bigint(20) NOT NULL DEFAULT 0,
 		PRIMARY KEY  (attribute_id)
 		) $char_coll;
 	";
@@ -54,4 +55,37 @@ function install_table() {
 
 	// And return true because it exists.
 	return true;
+}
+
+/**
+ * Insert a single item into the database.
+ *
+ * @param  array  $insert_args  The data we are inserting.
+ *
+ * @return boolean
+ */
+function insert_row( $insert_args = array() ) {
+	// @@todo things here
+}
+
+/**
+ * Update an existing item in the database.
+ *
+ * @param  array  $update_args  The data we are updating.
+ *
+ * @return boolean
+ */
+function update_row( $update_args = array() ) {
+	// @@todo things here
+}
+
+/**
+ * Delete an existing item in the database.
+ *
+ * @param  integer $delete_id  The ID we are deleting.
+ *
+ * @return boolean
+ */
+function delete_row( $delete_id = 0 ) {
+	// @@todo things here
 }

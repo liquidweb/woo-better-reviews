@@ -50,11 +50,13 @@ require_once __DIR__ . '/includes/helpers.php';
 
 // Load the database and custom table items.
 require_once __DIR__ . '/includes/database.php';
-require_once __DIR__ . '/includes/tables/content.php';
-require_once __DIR__ . '/includes/tables/authors.php';
-require_once __DIR__ . '/includes/tables/attributes.php';
-require_once __DIR__ . '/includes/tables/metadata.php';
-require_once __DIR__ . '/includes/tables/relationships.php';
+require_once __DIR__ . '/includes/tables/data-content.php';
+require_once __DIR__ . '/includes/tables/data-ratings.php';
+require_once __DIR__ . '/includes/tables/data-authormeta.php';
+require_once __DIR__ . '/includes/tables/tax-attributes.php';
+require_once __DIR__ . '/includes/tables/tax-characteristics.php';
+require_once __DIR__ . '/includes/tables/group-authorsetup.php';
+require_once __DIR__ . '/includes/tables/group-productsetup.php';
 
 // Load the triggered file loads.
 require_once __DIR__ . '/includes/activate.php';
