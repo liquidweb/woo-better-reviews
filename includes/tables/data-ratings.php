@@ -41,10 +41,14 @@ function install_table() {
 		CREATE TABLE {$table_name} (
 			rating_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
 			review_id BIGINT UNSIGNED NOT NULL DEFAULT 0,
+			author_id BIGINT UNSIGNED NOT NULL DEFAULT 0,
+			product_id BIGINT UNSIGNED NOT NULL DEFAULT 0,
 			attribute_id BIGINT UNSIGNED NOT NULL DEFAULT 0,
 			rating_score varchar(8) NOT NULL DEFAULT '',
-		PRIMARY KEY  (meta_id),
+		PRIMARY KEY  (rating_id),
 		KEY `review_id` (`review_id`),
+		KEY `author_id` (`author_id`),
+		KEY `product_id` (`product_id`),
 		KEY `attribute_id` (`attribute_id`)
 		) $char_coll;
 	";

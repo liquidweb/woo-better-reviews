@@ -43,8 +43,8 @@ function install_table() {
 		CREATE TABLE {$table_name} (
 			charstcs_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
 			charstcs_name varchar(200) NOT NULL DEFAULT '',
-			charstcs_desc text NOT NULL DEFAULT '',
 			charstcs_slug varchar(200) NOT NULL DEFAULT '',
+			charstcs_desc text NOT NULL DEFAULT '',
 			charstcs_type varchar(20) NOT NULL DEFAULT '',
 			charstcs_values longtext NOT NULL DEFAULT '',
 		PRIMARY KEY  (charstcs_id)

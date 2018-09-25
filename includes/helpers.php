@@ -25,10 +25,10 @@ function get_table_args( $keys = false ) {
 		'content'      => 'Review Content',
 		'authormeta'   => 'Author Meta',
 		'ratings'      => 'Review Ratings',
-		'authorsetup'  => 'Author Setup',
-		'productsetup' => 'Product Setup',
 		'attributes'   => 'Product Attributes',
 		'charstcs'     => 'Author Characteristics',
+		'authorsetup'  => 'Author Setup',
+		'productsetup' => 'Product Setup',
 	);
 
 	// Either return the full array, or just the keys if requested.

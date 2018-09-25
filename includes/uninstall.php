@@ -20,7 +20,7 @@ use LiquidWeb\WooBetterReviews\Database as Database;
 function uninstall() {
 
 	// Run the database table deletes.
-	Database\purge_tables();
+	Database\drop_tables();
 
 	// Include our action so that we may add to this later.
 	do_action( Core\HOOK_PREFIX . 'uninstall_process' );

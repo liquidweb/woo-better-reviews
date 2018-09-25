@@ -42,10 +42,10 @@ function install_table() {
 		CREATE TABLE {$table_name} (
 			attribute_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
 			attribute_name varchar(200) NOT NULL DEFAULT '',
-			attribute_desc text NOT NULL DEFAULT '',
 			attribute_slug varchar(200) NOT NULL DEFAULT '',
-			min_value bigint(20) NOT NULL DEFAULT 0,
-			max_value bigint(20) NOT NULL DEFAULT 0,
+			attribute_desc text NOT NULL DEFAULT '',
+			min_label varchar(100) NOT NULL DEFAULT '',
+			max_label varchar(100) NOT NULL DEFAULT '',
 		PRIMARY KEY  (attribute_id)
 		) $char_coll;
 	";

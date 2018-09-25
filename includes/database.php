@@ -18,7 +18,6 @@ use LiquidWeb\WooBetterReviews\Tables\AuthorMeta as AuthorMeta;
 use LiquidWeb\WooBetterReviews\Tables\Ratings as Ratings;
 use LiquidWeb\WooBetterReviews\Tables\Attributes as Attributes;
 use LiquidWeb\WooBetterReviews\Tables\Characteristics as Characteristics;
-use LiquidWeb\WooBetterReviews\Tables\AuthorSetup as AuthorSetup;
 use LiquidWeb\WooBetterReviews\Tables\ProductSetup as ProductSetup;
 
 /**
@@ -46,7 +45,6 @@ function register_tables() {
 	$wpdb->wc_better_rvs_charstcs     = $wpdb->prefix . Core\TABLE_PREFIX . 'charstcs';
 
 	// Set the grouping focused tables.
-	$wpdb->wc_better_rvs_authorsetup  = $wpdb->prefix . Core\TABLE_PREFIX . 'authorsetup';
 	$wpdb->wc_better_rvs_productsetup = $wpdb->prefix . Core\TABLE_PREFIX . 'productsetup';
 }
 
@@ -164,10 +162,6 @@ function install_single_table( $table_name = '' ) {
 			return Characteristics\install_table();
 			break;
 
-		case 'authorsetup' :
-			return AuthorSetup\install_table();
-			break;
-
 		case 'productsetup' :
 			return ProductSetup\install_table();
 			break;
@@ -208,18 +202,18 @@ function drop_single_table( $table_name = '' ) {
  *
  * @return boolean
  */
-function purge_tables() {
+function drop_tables() {
 
-	// Get my array of tables.
-	$tables = Helpers\get_table_args( true );
+	// Get my array of table names.
+	$table_names    = Helpers\get_table_args( true );
 
 	// Bail without tables.
-	if ( empty( $tables ) ) {
+	if ( empty( $table_names ) ) {
 		return false; // @@todo figure out if better error is needed.
 	}
 
 	// Now loop my tables and check.
-	foreach ( $tables as $table_name ) {
+	foreach ( $table_names as $table_name ) {
 
 		// Attempt to delete the table.
 		$table_dropped  = drop_single_table( $table_name );
@@ -291,10 +285,6 @@ function insert( $table_name = '', $insert_args = array() ) {
 			return Characteristics\insert_row( $insert_args );
 			break;
 
-		case 'authorsetup' :
-			return AuthorSetup\insert_row( $insert_args );
-			break;
-
 		case 'productsetup' :
 			return ProductSetup\insert_row( $insert_args );
 			break;
@@ -363,10 +353,6 @@ function update( $table_name = '', $update_args = array() ) {
 			return Characteristics\update_row( $update_args );
 			break;
 
-		case 'authorsetup' :
-			return AuthorSetup\update_row( $update_args );
-			break;
-
 		case 'productsetup' :
 			return ProductSetup\update_row( $update_args );
 			break;
@@ -433,10 +419,6 @@ function delete( $table_name = '', $delete_id = 0 ) {
 
 		case 'charstcs' :
 			return Characteristics\delete_row( $delete_id );
-			break;
-
-		case 'authorsetup' :
-			return AuthorSetup\delete_row( $delete_id );
 			break;
 
 		case 'productsetup' :

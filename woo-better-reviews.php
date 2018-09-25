@@ -55,7 +55,6 @@ require_once __DIR__ . '/includes/tables/data-ratings.php';
 require_once __DIR__ . '/includes/tables/data-authormeta.php';
 require_once __DIR__ . '/includes/tables/tax-attributes.php';
 require_once __DIR__ . '/includes/tables/tax-characteristics.php';
-require_once __DIR__ . '/includes/tables/group-authorsetup.php';
 require_once __DIR__ . '/includes/tables/group-productsetup.php';
 
 // Load the triggered file loads.
