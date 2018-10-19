@@ -19,6 +19,10 @@ use LiquidWeb\WooBetterReviews\Tables\Ratings as Ratings;
 use LiquidWeb\WooBetterReviews\Tables\Attributes as Attributes;
 use LiquidWeb\WooBetterReviews\Tables\Characteristics as Characteristics;
 use LiquidWeb\WooBetterReviews\Tables\ProductSetup as ProductSetup;
+use LiquidWeb\WooBetterReviews\Tables\Consolidated as Consolidated;
+
+// And pull in any other namespaces.
+use WP_Error;
 
 /**
  * Start our engines.
@@ -46,6 +50,265 @@ function register_tables() {
 
 	// Set the grouping focused tables.
 	$wpdb->wc_better_rvs_productsetup = $wpdb->prefix . Core\TABLE_PREFIX . 'productsetup';
+
+	// And set our consolidated table for queries.
+	$wpdb->wc_better_rvs_consolidated = $wpdb->prefix . Core\TABLE_PREFIX . 'consolidated';
+}
+
+/**
+ * Check if a given ID exists in a column on a table.
+ *
+ * @param  integer $lookup_id   The ID of the thing we are checking.
+ * @param  string  $table_slug  Which table we want to look in.
+ * @param  string  $column      The column we want (if we wanna check it specific).
+ *
+ * @return boolean
+ */
+function maybe_id_exists( $lookup_id = 0, $table_slug = '', $column = '' ) {
+
+	// Bail if we don't have the required pieces.
+	if ( empty( $lookup_id ) || empty( $table_slug ) ) {
+		return false; // @@todo check each item separate and return.
+	}
+
+	// If we didn't get a column name, set the variable based on the table.
+	if ( empty( $column ) ) {
+		$column = get_primary_keys( $table_slug );
+	}
+
+	// Make sure we have a column.
+	if ( empty( $column ) ) {
+		return new WP_Error( 'missing_column_name', __( 'The required column name is missing.', 'woo-better-reviews' ) );
+	}
+
+	// Call the global class.
+	global $wpdb;
+
+	// Set my table name.
+	$table_name = $wpdb->prefix . Core\TABLE_PREFIX . esc_attr( $table_slug );
+
+	// Set up our query.
+	$query_args = $wpdb->prepare("
+		SELECT   COUNT(*)
+		FROM     $table_name
+		WHERE    $column = '%d'
+	", absint( $lookup_id ) );
+
+	// Process the query.
+	$query_run  = $wpdb->get_col( $query_args );
+
+	// Return the result.
+	return ! empty( $query_run[0] ) ? true : false; // @@todo return string instead?
+}
+
+/**
+ * Return the primary key name for each table.
+ *
+ * @param  integer $lookup_id    The ID of the thing we are checking.
+ * @param  string  $table_slug   Which table we want to look in.
+ * @param  string  $column_name  The column we want (if we wanna check it specific).
+ *
+ * @return mixed
+ */
+function get_primary_keys( $table_name = '' ) {
+
+	// Set up the array.
+	$primary_keys   = array(
+		'content'      => 'review_id',
+		'authormeta'   => 'ameta_id',
+		'ratings'      => 'rating_id',
+		'attributes'   => 'attribute_id',
+		'charstcs_id'  => 'charstcs_id',
+		'productsetup' => 'psetup_id',
+		'consolidated' => 'con_id',
+	);
+
+	// If we didn't specify a table name, return the whole thing.
+	if ( empty( $table_name ) ) {
+		return $primary_keys;
+	}
+
+	// Now return the single item or false if it doesn't exist.
+	return ! empty( $primary_keys[ $table_name ] ) ? $primary_keys[ $table_name ] : false;
+}
+
+/**
+ * Include the required items when making DB changes.
+ *
+ * @param  string $table_name   The name of the table we are working with.
+ * @param  string $return_type  What return type is requested.
+ *
+ * @return array
+ */
+function get_required_args( $table_name = '', $return_type = 'columns' ) {
+
+	// Bail if we don't have a name to check.
+	if ( empty( $table_name ) ) {
+		return new WP_Error( 'missing_table_name', __( 'The required table name was not provided.', 'woo-better-reviews' ) );
+	}
+
+	// Handle the table install based on the provided name.
+	switch ( sanitize_text_field( $table_name ) ) {
+
+		case 'content' :
+			return Content\required_args( $return_type );
+			break;
+
+		case 'authormeta' :
+			return AuthorMeta\required_args( $return_type );
+			break;
+
+		case 'ratings' :
+			return Ratings\required_args( $return_type );
+			break;
+
+		case 'attributes' :
+			return Attributes\required_args( $return_type );
+			break;
+
+		case 'charstcs' :
+			return Characteristics\required_args( $return_type );
+			break;
+
+		case 'productsetup' :
+			return ProductSetup\required_args( $return_type );
+			break;
+
+		case 'consolidated' :
+			return Consolidated\required_args( $return_type );
+			break;
+
+		// No more case breaks, no more tables.
+	}
+
+	// Got none, say none.
+	return false;
+}
+
+/**
+ * Check that we have the required args for a DB insert.
+ *
+ * @param  string $table_name   What table we are doing, which will determine the checks.
+ * @param  array  $insert_args  What the specific args are.
+ *
+ * @return mixed
+ */
+function validate_insert_args( $table_name = '', $insert_args = array() ) {
+
+	// Bail if we don't have a name or args to check.
+	if ( empty( $table_name ) || empty( $insert_args ) ) {
+		return false;
+	}
+
+	// Get the requirements for the table.
+	$required_args  = get_required_args( $table_name );
+
+	// Bail without the args to check.
+	if ( ! $required_args ) {
+		return new WP_Error( 'no_required_args', __( 'No required arguments could be found.', 'woo-better-reviews' ) );
+	}
+
+	// Loop our requirements and check.
+	foreach ( $required_args as $required_arg ) {
+
+		// Check if it is in the array.
+		if ( array_key_exists( $required_arg, $insert_args ) ) {
+			continue;
+		}
+
+		// Set a variable for the arg display if returned.
+		$arg_formatted  = '<code>' . esc_attr( $required_arg ) . '</code>';
+
+		// Not in the array? Return the error.
+		return new WP_Error( 'missing_required_arg', sprintf( __( 'The required %s argument is missing.', 'woo-better-reviews' ), $arg_formatted ) );
+	}
+
+	// We good!
+	return true;
+}
+
+/**
+ * Check that we have the required args for a DB update.
+ *
+ * @param  string $table_name   What table we are doing, which will determine the checks.
+ * @param  array  $update_args  What the specific args are.
+ *
+ * @return mixed
+ */
+function validate_update_args( $table_name = '', $update_args = array() ) {
+
+	// Bail if we don't have a name or args to check.
+	if ( empty( $table_name ) || empty( $update_args ) ) {
+		return false;
+	}
+
+	// Get the requirements for the table.
+	$required_args  = get_required_args( $table_name );
+
+	// Bail without the args to check.
+	if ( ! $required_args ) {
+		return new WP_Error( 'no_required_args', __( 'No required arguments could be found.', 'woo-better-reviews' ) );
+	}
+
+	// Loop the args we have present and check.
+	foreach ( $update_args as $update_key => $update_value ) {
+
+		// Check if it is in the array.
+		if ( in_array( $update_key, $required_args ) ) {
+			continue;
+		}
+
+		// Set a variable for the arg display if returned.
+		$arg_formatted  = '<code>' . esc_attr( $update_key ) . '</code>';
+
+		// Not in the array? Return the error.
+		return new WP_Error( 'invalid_arg_provided', sprintf( __( 'The %s argument is not valid for this table.', 'woo-better-reviews' ), $arg_formatted ) );
+	}
+
+	// We good!
+	return true;
+}
+
+/**
+ * Format the args we are updating.
+ *
+ * @param  string $table_name   What table we are doing, which will determine the checks.
+ * @param  array  $update_args  What the specific args are.
+ *
+ * @return mixed
+ */
+function set_update_format( $table_name = '', $update_args = array() ) {
+
+	// Bail if we don't have a name or args to check.
+	if ( empty( $table_name ) || empty( $update_args ) ) {
+		return false;
+	}
+
+	// Get the formats for the table.
+	$table_dataset  = get_required_args( $table_name, 'dataset' );
+
+	// Bail without the args to check.
+	if ( ! $table_dataset ) {
+		return new WP_Error( 'no_table_datasets', __( 'No argument formatting could be found.', 'woo-better-reviews' ) );
+	}
+
+	// Set an empty.
+	$formats    = array();
+
+	// Loop the args we have present and check.
+	foreach ( $table_dataset as $column_key => $column_format ) {
+
+		// If we don't have the column, skip it.
+		if ( ! array_key_exists( $column_key, $update_args ) ) {
+			continue;
+		}
+
+		// Now set up the array of formats.
+		$formats[]  = $column_format;
+	}
+
+	// We good!
+	return ! empty( $formats ) ? $formats : false;
 }
 
 /**
@@ -164,6 +427,10 @@ function install_single_table( $table_name = '' ) {
 
 		case 'productsetup' :
 			return ProductSetup\install_table();
+			break;
+
+		case 'consolidated' :
+			return Consolidated\install_table();
 			break;
 
 		// No more case breaks, no more tables.
@@ -289,6 +556,10 @@ function insert( $table_name = '', $insert_args = array() ) {
 			return ProductSetup\insert_row( $insert_args );
 			break;
 
+		case 'consolidated' :
+			return Consolidated\insert_row( $insert_args );
+			break;
+
 		// No more case breaks, no more tables.
 	}
 
@@ -302,16 +573,27 @@ function insert( $table_name = '', $insert_args = array() ) {
 /**
  * Update an existing record in our database.
  *
- * @param  string $table_name   Which table we want to update in.
- * @param  array  $update_args  The individual bits we wanna include.
+ * @param  string  $table_name   Which table we want to update in.
+ * @param  array   $update_args  The individual bits we wanna include.
+ * @param  integer $update_id    The ID of the thing we are updating.
  *
  * @return boolean
  */
-function update( $table_name = '', $update_args = array() ) {
+function update( $table_name = '', $update_id = 0, $update_args = array() ) {
 
 	// Make sure we have a table name.
 	if ( empty( $table_name ) ) {
 		return new WP_Error( 'missing_table_name', __( 'The required table name is missing.', 'woo-better-reviews' ) );
+	}
+
+	// Make sure we have args.
+	if ( empty( $update_args ) || ! is_array( $update_args ) ) {
+		return new WP_Error( 'missing_update_args', __( 'The required database arguments are missing or invalid.', 'woo-better-reviews' ) );
+	}
+
+	// Make sure we have an ID.
+	if ( empty( $update_id ) ) {
+		return new WP_Error( 'missing_update_id', __( 'The required ID was missing or invalid.', 'woo-better-reviews' ) );
 	}
 
 	// Check to make sure the table provided is approved.
@@ -322,46 +604,56 @@ function update( $table_name = '', $update_args = array() ) {
 		return new WP_Error( 'invalid_table_name', __( 'The provided table name is not valid.', 'woo-better-reviews' ) );
 	}
 
-	// Make sure we have args.
-	if ( empty( $update_args ) || ! is_array( $update_args ) ) {
-		return new WP_Error( 'missing_update_args', __( 'The required database arguments are missing or invalid.', 'woo-better-reviews' ) );
+	// Get my primary key.
+	$primary_key    = get_primary_keys( $table_name );
+
+	// Make sure it exists.
+	$maybe_exists   = maybe_id_exists( $update_id, $table_name, $primary_key );
+
+	// If the ID doesn't exist, bail.
+	if ( ! $maybe_exists ) {
+		return new WP_Error( 'invalid_update_id', __( 'The provided ID does not exist in the database.', 'woo-better-reviews' ) );
 	}
 
 	// Run the action before doing anything.
-	do_action( Core\HOOK_PREFIX . 'before_update', $table_name, $update_args );
+	do_action( Core\HOOK_PREFIX . 'before_update', $table_name, $update_id, $update_args );
 
 	// Handle the database insert based on the provided name.
 	switch ( sanitize_text_field( $table_name ) ) {
 
 		case 'content' :
-			return Content\update_row( $update_args );
+			return Content\update_row( $update_id, $update_args );
 			break;
 
 		case 'authormeta' :
-			return AuthorMeta\update_row( $update_args );
+			return AuthorMeta\update_row( $update_id, $update_args );
 			break;
 
 		case 'ratings' :
-			return Ratings\update_row( $update_args );
+			return Ratings\update_row( $update_id, $update_args );
 			break;
 
 		case 'attributes' :
-			return Attributes\update_row( $update_args );
+			return Attributes\update_row( $update_id, $update_args );
 			break;
 
 		case 'charstcs' :
-			return Characteristics\update_row( $update_args );
+			return Characteristics\update_row( $update_id, $update_args );
 			break;
 
 		case 'productsetup' :
-			return ProductSetup\update_row( $update_args );
+			return ProductSetup\update_row( $update_id, $update_args );
+			break;
+
+		case 'consolidated' :
+			return Consolidated\update_row( $update_id, $update_args );
 			break;
 
 		// No more case breaks, no more tables.
 	}
 
 	// Run the action after doing everything.
-	do_action( Core\HOOK_PREFIX . 'after_update', $table_name, $update_args );
+	do_action( Core\HOOK_PREFIX . 'after_update', $table_name, $update_id, $update_args );
 
 	// Return true.
 	return true;
@@ -395,6 +687,17 @@ function delete( $table_name = '', $delete_id = 0 ) {
 		return new WP_Error( 'missing_delete_id', __( 'The required ID was missing or invalid.', 'woo-better-reviews' ) );
 	}
 
+	// Get my primary key.
+	$primary_key    = get_primary_keys( $table_name );
+
+	// Make sure it exists.
+	$maybe_exists   = maybe_id_exists( $delete_id, $table_name, $primary_key );
+
+	// If the ID doesn't exist, bail.
+	if ( ! $maybe_exists ) {
+		return new WP_Error( 'invalid_delete_id', __( 'The provided ID does not exist in the database.', 'woo-better-reviews' ) );
+	}
+
 	// Run the action before doing anything.
 	do_action( Core\HOOK_PREFIX . 'before_delete', $table_name, $delete_id );
 
@@ -423,6 +726,10 @@ function delete( $table_name = '', $delete_id = 0 ) {
 
 		case 'productsetup' :
 			return ProductSetup\delete_row( $delete_id );
+			break;
+
+		case 'consolidated' :
+			return Consolidated\delete_row( $delete_id );
 			break;
 
 		// No more case breaks, no more tables.

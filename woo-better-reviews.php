@@ -41,6 +41,9 @@ define( __NAMESPACE__ . '\HOOK_PREFIX', 'wc_better_reviews_' );
 // Set our custom table prefix.
 define( __NAMESPACE__ . '\TABLE_PREFIX', 'woocommerce_better_reviews_' );
 
+// Set the name for our settings anchor.
+define( __NAMESPACE__ . '\SETTINGS_ANCHOR', 'woo-better-reviews' );
+
 // Set the option key and DB versions used to store the schemas.
 define( __NAMESPACE__ . '\DB_VERS', '1' );
 define( __NAMESPACE__ . '\SCHEMA_KEY', HOOK_PREFIX . 'db_version' );
@@ -56,8 +59,28 @@ require_once __DIR__ . '/includes/tables/data-authormeta.php';
 require_once __DIR__ . '/includes/tables/tax-attributes.php';
 require_once __DIR__ . '/includes/tables/tax-characteristics.php';
 require_once __DIR__ . '/includes/tables/group-productsetup.php';
+require_once __DIR__ . '/includes/tables/query-consolidated.php';
+
+// Load the files loaded plugin-wide.
+require_once __DIR__ . '/includes/queries.php';
+
+// Load the admin specific files.
+if ( is_admin() ) {
+	require_once __DIR__ . '/includes/admin/menu-items.php';
+	require_once __DIR__ . '/includes/admin/admin-pages.php';
+	require_once __DIR__ . '/includes/admin/list-reviews.php';
+	require_once __DIR__ . '/includes/admin/list-attributes.php';
+}
+
+// Load the front-end specific files.
+if ( ! is_admin() ) {
+
+}
 
 // Load the triggered file loads.
 require_once __DIR__ . '/includes/activate.php';
 require_once __DIR__ . '/includes/deactivate.php';
 require_once __DIR__ . '/includes/uninstall.php';
+
+// And my testing.
+require_once __DIR__ . '/includes/testing.php';
