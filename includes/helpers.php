@@ -105,14 +105,14 @@ function admin_page_redirect( $custom_args = array(), $menu_slug = '', $response
 	}
 
 	// Set my slug.
-	$menu_slug  = ! empty( $menu_slug ) ? trim( $menu_slug ) : trim( Core\SETTINGS_ANCHOR );
+	$redirect_slug  = ! empty( $menu_slug ) ? trim( $menu_slug ) : trim( Core\SETTINGS_ANCHOR );
 
 	// Handle the setup.
-	$redirect_args  = wp_parse_args( $custom_args, array( 'page' => $menu_slug ) );
+	$redirect_args  = wp_parse_args( $custom_args, array( 'page' => $redirect_slug ) );
 
 	// Add the default args we need in the return.
 	if ( $response ) {
-		$redirect_args  = wp_parse_args( array( 'something-will-go-here' => 1 ), $redirect_args );
+		$redirect_args  = wp_parse_args( array( 'wbr-action-complete' => 1 ), $redirect_args );
 	}
 
 	// Now set my redirect link.
@@ -121,4 +121,58 @@ function admin_page_redirect( $custom_args = array(), $menu_slug = '', $response
 	// Do the redirect.
 	wp_safe_redirect( $redirect_link );
 	exit;
+}
+
+/**
+ * Check an code and (usually an error) return the appropriate text.
+ *
+ * @param  string $code  The code provided.
+ *
+ * @return string
+ */
+function get_admin_notice_text( $code = '' ) {
+
+	// Return if we don't have an error code.
+	if ( empty( $code ) ) {
+		return __( 'There was an error with your request.', 'woo-better-reviews' );
+	}
+
+	// Handle my different error codes.
+	switch ( esc_attr( strtolower( $code ) ) ) {
+
+		case 'attribute-updated' :
+			return __( 'The attribute has been updated.', 'woo-better-reviews' );
+			break;
+
+		case 'attribute-unchanged' :
+			return __( 'No changes were requested.', 'woo-better-reviews' );
+			break;
+
+		case 'missing-posted-args' :
+			return __( 'The required attribute arguments were not posted.', 'woo-better-reviews' );
+			break;
+
+		case 'missing-attribute-args' :
+			return __( 'The required attribute arguments were not provided.', 'woo-better-reviews' );
+			break;
+
+		case 'missing-formatted-args' :
+			return __( 'The attribute arguments could not be formatted.', 'woo-better-reviews' );
+			break;
+
+		case 'attribute-update-failed' :
+			return __( 'The attribute could not be updated at this time.', 'woo-better-reviews' );
+			break;
+
+		case 'unknown' :
+		case 'unknown-error' :
+			return __( 'There was an unknown error with your request.', 'woo-better-reviews' );
+			break;
+
+		default :
+			return __( 'There was an error with your request.', 'woo-better-reviews' );
+			break;
+
+		// End all case breaks.
+	}
 }

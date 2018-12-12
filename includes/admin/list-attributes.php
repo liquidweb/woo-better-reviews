@@ -83,7 +83,6 @@ class WooBetterReviews_ListAttributes extends WP_List_Table {
 		$this->items = $dataset;
 	}
 
-
 	/**
 	 * Override the parent columns method. Defines the columns to use in your listing table.
 	 *
@@ -102,7 +101,7 @@ class WooBetterReviews_ListAttributes extends WP_List_Table {
 		);
 
 		// Return filtered.
-		return apply_filters( Core\HOOK_PREFIX . 'attribute_table_column_items', $setup );
+		return apply_filters( Core\HOOK_PREFIX . 'attributes_table_column_items', $setup );
 	}
 
 	/**
@@ -113,7 +112,7 @@ class WooBetterReviews_ListAttributes extends WP_List_Table {
 	public function display() {
 
 		// Add a nonce for the bulk action.
-		wp_nonce_field( 'wbr_list_reviews_action', 'wbr_list_reviews_nonce' );
+		wp_nonce_field( 'wbr_list_attributes_action', 'wbr_list_attributes_nonce' );
 
 		// And the parent display (which is most of it).
 		parent::display();
@@ -127,7 +126,7 @@ class WooBetterReviews_ListAttributes extends WP_List_Table {
 	 * @return HTML
 	 */
 	protected function extra_tablenav( $which ) {
-		return apply_filters( Core\HOOK_PREFIX . 'attribute_table_extra_tablenav', '', $which );
+		return apply_filters( Core\HOOK_PREFIX . 'attributes_table_extra_tablenav', '', $which );
 	}
 
 	/**
@@ -140,7 +139,7 @@ class WooBetterReviews_ListAttributes extends WP_List_Table {
 	 * @return null
 	 */
 	protected function handle_row_actions( $item, $column_name, $primary ) {
-		return apply_filters( Core\HOOK_PREFIX . 'attribute_table_row_actions', '', $item, $column_name, $primary );
+		return apply_filters( Core\HOOK_PREFIX . 'attributes_table_row_actions', '', $item, $column_name, $primary );
 	}
 
 	/**
@@ -156,7 +155,7 @@ class WooBetterReviews_ListAttributes extends WP_List_Table {
 		);
 
 		// Return it, filtered.
-		return apply_filters( Core\HOOK_PREFIX . 'attribute_table_sortable_columns', $setup );
+		return apply_filters( Core\HOOK_PREFIX . 'attributes_table_sortable_columns', $setup );
 	}
 
 	/**
@@ -172,7 +171,7 @@ class WooBetterReviews_ListAttributes extends WP_List_Table {
 		);
 
 		// Return a blank array, filtered.
-		return apply_filters( Core\HOOK_PREFIX . 'attribute_table_hidden_columns', $setup );
+		return apply_filters( Core\HOOK_PREFIX . 'attributes_table_hidden_columns', $setup );
 	}
 
 	/**
@@ -184,11 +183,11 @@ class WooBetterReviews_ListAttributes extends WP_List_Table {
 
 		// Make a basic array of the actions we wanna include.
 		$setup  = array(
-			'woo_better_reviews_action' => __( 'Some Action', 'woo-better-reviews' ),
+			'wbr_bulk_delete' => __( 'Delete Attributes', 'woo-better-reviews' ),
 		);
 
 		// Return it filtered.
-		return apply_filters( Core\HOOK_PREFIX . 'attribute_table_bulk_actions', $setup );
+		return apply_filters( Core\HOOK_PREFIX . 'attributes_table_bulk_actions', $setup );
 	}
 
 	/**
@@ -225,11 +224,26 @@ class WooBetterReviews_ListAttributes extends WP_List_Table {
 	 */
 	protected function column_attribute_name( $item ) {
 
-		// Escape the name output.
-		$setup  = esc_html( $item['attribute_name'] );
+		// Get my edit link.
+		$edit_link  = $this->get_single_attribute_action_link( absint( $item['id'] ), 'edit' );
+
+		// Set up my ARIA label.
+		$aria_label = sprintf( __( '"%s" (Edit)', 'woo-better-reviews' ), $item['attribute_name'] );
+
+		// Set my empty.
+		$build  = '';
+
+		// Put a strong tag on it.
+		$build .= '<strong>';
+
+			// Set the link markup.
+			$build .= '<a class="row-title" href="' . esc_url( $edit_link ) . '" aria-label="' . esc_attr( $aria_label ) . '">' . esc_html( $item['attribute_name'] ) . '</a>';
+
+		// Close the strong tag.
+		$build .= '</strong>';
 
 		// Create my formatted date.
-		$setup  = apply_filters( Core\HOOK_PREFIX . 'attribute_table_column_attribute_name', $setup, $item );
+		$setup  = apply_filters( Core\HOOK_PREFIX . 'attributes_table_column_attribute_name', $build, $item );
 
 		// Return, along with our row actions.
 		return $setup . $this->row_actions( $this->setup_row_action_items( $item ) );
@@ -248,7 +262,7 @@ class WooBetterReviews_ListAttributes extends WP_List_Table {
 		$setup  = ! empty( $item['attribute_desc'] ) ? esc_html( $item['attribute_desc'] ) : $this->empty_column_text( __( 'No description', 'woo-better-reviews' ) );
 
 		// Return my formatted product name.
-		return apply_filters( Core\HOOK_PREFIX . 'attribute_table_column_attribute_desc', $setup, $item );
+		return apply_filters( Core\HOOK_PREFIX . 'attributes_table_column_attribute_desc', $setup, $item );
 	}
 
 	/**
@@ -260,7 +274,6 @@ class WooBetterReviews_ListAttributes extends WP_List_Table {
 
 		// Get all the attribute data.
 		$attribute_objects  = Queries\get_all_attributes();
-
 		//preprint( $attribute_objects, true );
 
 		// Bail with no data.
@@ -279,17 +292,17 @@ class WooBetterReviews_ListAttributes extends WP_List_Table {
 				'id'             => absint( $attribute_object->attribute_id ),
 				'attribute_name' => esc_attr( $attribute_object->attribute_name ),
 				'attribute_slug' => esc_attr( $attribute_object->attribute_slug ),
-				'attribute_desc' => esc_attr( $attribute_object->attribute_desc ),
+				'attribute_desc' => esc_textarea( $attribute_object->attribute_desc ),
 				'min_label'      => esc_attr( $attribute_object->min_label ),
 				'max_label'      => esc_attr( $attribute_object->max_label ),
 			);
 
 			// Run it through a filter.
-			$data[] = apply_filters( Core\HOOK_PREFIX . 'attribute_table_data_item', $setup, $attribute_object );
+			$data[] = apply_filters( Core\HOOK_PREFIX . 'attributes_table_data_item', $setup, $attribute_object );
 		}
 
 		// Return our data.
-		return apply_filters( Core\HOOK_PREFIX . 'attribute_table_data_array', $data, $attribute_objects );
+		return apply_filters( Core\HOOK_PREFIX . 'attributes_table_data_array', $data, $attribute_objects );
 	}
 
 	/**
@@ -356,7 +369,7 @@ class WooBetterReviews_ListAttributes extends WP_List_Table {
 				break;
 
 			default :
-				return apply_filters( Core\HOOK_PREFIX . 'attribute_table_column_default', '', $dataset, $column_name );
+				return apply_filters( Core\HOOK_PREFIX . 'attributes_table_column_default', '', $dataset, $column_name );
 		}
 	}
 
@@ -377,7 +390,155 @@ class WooBetterReviews_ListAttributes extends WP_List_Table {
 	 * @return array
 	 */
 	private function setup_row_action_items( $item ) {
-		return apply_filters( Core\HOOK_PREFIX . 'attribute_table_row_actions', array(), $item );
+
+		// Grab our settings page admin link.
+		$settings_link  = Helpers\get_admin_menu_link( 'woo-better-reviews-product-attributes' );
+
+		// Set my attribute ID.
+		$attribute_id   = absint( $item['id'] );
+
+		// Create the array of action items.
+		$action_dataset = $this->get_row_action_dataset( $attribute_id );
+
+		// Set an empty array.
+		$setup  = array();
+
+		// Now loop and create the links.
+		foreach ( $action_dataset as $action_name => $args ) {
+
+			// Make my action link.
+			$action_link    = $this->get_single_attribute_action_link( $attribute_id, $action_name );
+
+			// Set the classes.
+			$action_class   = 'woo-better-reviews-action-link woo-better-reviews-attribute-action-link woo-better-reviews-attribute-' . esc_attr( $action_name ) . '-action-link';
+
+			// Set an empty.
+			$build  = '';
+
+			// Now set up the markup.
+			$build .= '<a class="' . esc_attr( $action_class ) . '"';
+
+			// Check for a title.
+			if ( ! empty( $args['title'] ) ) {
+				$build .= ' title="' . esc_attr( $args['title'] ) . '"';
+			}
+
+			// Check for data attributes.
+			if ( ! empty( $args['data'] ) ) {
+
+				// Loop and add.
+				foreach ( $args['data'] as $data_key => $data_val ) {
+
+					// Add each one to the build string.
+					$build .= ' data-' . esc_attr( $data_key ) . '="' . esc_attr( $data_val ) . '"';
+				}
+			}
+
+			// Now add the actual link and text to finish it.
+			$build .= ' href="' . esc_url( $action_link ) . '">' . esc_html( $args['label'] ) . '</a>';
+
+			// Add it to the array.
+			$setup[ $action_name ] = $build;
+		}
+
+		// Return our row actions.
+		return apply_filters( Core\HOOK_PREFIX . 'attributes_table_row_actions', $setup, $item );
+	}
+
+	/**
+	 * Get the dataset for the action links.
+	 *
+	 * @param  integer $attribute_id   The individual attribute we are making links for.
+	 * @param  string  $single_action  Request one action from the entire array.
+	 *
+	 * @return array
+	 */
+	protected function get_row_action_dataset( $attribute_id = 0, $single_action = '' ) {
+
+		// Create the two nonces.
+		$edit_nonce     = wp_create_nonce( 'lw_woo_edit_single_' . $attribute_id );
+		$delete_nonce   = wp_create_nonce( 'lw_woo_delete_single_' . $attribute_id );
+
+		// Create the array of action items.
+		$action_dataset = array(
+			'edit' => array(
+				'nonce'  => $edit_nonce,
+				'label'  => __( 'Edit', 'woo-better-reviews' ),
+				'title'  => __( 'Edit Attribute', 'woo-better-reviews' ),
+				'data'   => array(
+					'item-id'   => $attribute_id,
+					'item-type' => 'attribute',
+					'nonce'     => $edit_nonce,
+				),
+			),
+
+			'delete' => array(
+				'nonce'  => $delete_nonce,
+				'label'  => __( 'Delete', 'woo-better-reviews' ),
+				'title'  => __( 'Delete Attribute', 'woo-better-reviews' ),
+				'data'   => array(
+					'item-id'   => $attribute_id,
+					'item-type' => 'attribute',
+					'nonce'     => $delete_nonce,
+				),
+			),
+		);
+
+		// Return the array of data if no single was requested.
+		if ( empty( $single_action ) ) {
+			return $action_dataset;
+		}
+
+		// Now return the single or false.
+		return isset( $action_dataset[ $single_action ] ) ? $action_dataset[ $single_action ] : $single_action;
+	}
+
+	/**
+	 * Create the raw URL for a single attribute action.
+	 *
+	 * @param  integer $attribute_id  The individual attribute we are making links for.
+	 * @param  string  $action_name   The name of the action we want.
+	 *
+	 * @return string
+	 */
+	protected function get_single_attribute_action_link( $attribute_id = 0, $action_name = '' ) {
+
+		// Bail without the attribute ID or action name.
+		if ( empty( $attribute_id ) || empty( $action_name ) ) {
+			return;
+		}
+
+		// Fetch the dataset for an edit link.
+		$action_dataset = $this->get_row_action_dataset( $attribute_id, $action_name );
+		// preprint( $action_dataset, true );
+
+		// Bail without the action dataset.
+		if ( empty( $action_dataset ) ) {
+			return;
+		}
+
+		// Get our primary settings link.
+		$settings_link  = Helpers\get_admin_menu_link( 'woo-better-reviews-product-attributes' );
+
+		// Set the action link args.
+		$action_linkset = array(
+			'wbr-action-name' => $action_name,
+			'wbr-item-id'     => absint( $attribute_id ),
+			'wbr-item-type'   => 'attribute',
+			'wbr-nonce'       => $action_dataset['nonce'],
+		);
+
+		// Create and return the string of the URL.
+		return add_query_arg( $action_linkset, $settings_link );
+	}
+
+	/**
+	 * Handle the display text for when no items exist.
+	 *
+	 * @return string
+	 */
+	public function no_items() {
+		_e( 'No attributes exist', 'woo-better-reviews' );
 	}
 
 	/**

@@ -41,8 +41,10 @@ define( __NAMESPACE__ . '\HOOK_PREFIX', 'wc_better_reviews_' );
 // Set our custom table prefix.
 define( __NAMESPACE__ . '\TABLE_PREFIX', 'woocommerce_better_reviews_' );
 
-// Set the name for our settings anchor.
+// Set the name for our various settings anchors.
 define( __NAMESPACE__ . '\SETTINGS_ANCHOR', 'woo-better-reviews' );
+define( __NAMESPACE__ . '\ATTRIBUTES_ANCHOR', 'woo-better-reviews-product-attributes' );
+define( __NAMESPACE__ . '\CHARACTERISTICS_ANCHOR', 'woo-better-reviews-author-characteristics' );
 
 // Set the option key and DB versions used to store the schemas.
 define( __NAMESPACE__ . '\DB_VERS', '1' );
@@ -67,7 +69,9 @@ require_once __DIR__ . '/includes/queries.php';
 // Load the admin specific files.
 if ( is_admin() ) {
 	require_once __DIR__ . '/includes/admin/menu-items.php';
+	require_once __DIR__ . '/includes/admin/admin-notices.php';
 	require_once __DIR__ . '/includes/admin/admin-pages.php';
+	require_once __DIR__ . '/includes/admin/admin-process.php';
 	require_once __DIR__ . '/includes/admin/list-reviews.php';
 	require_once __DIR__ . '/includes/admin/list-attributes.php';
 }

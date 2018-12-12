@@ -72,41 +72,62 @@ function load_review_list_table() {
 function display_product_attributes_page() {
 
 	// Fetch the action link.
-	$action = Helpers\get_admin_menu_link( 'woo-better-reviews-product-attributes' );
+	$action = Helpers\get_admin_menu_link( Core\ATTRIBUTES_ANCHOR );
+
+	// Check to see if we are editing an attribute or not.
+	$isedit = ! empty( $_GET['wbr-action-name'] ) && 'edit' === sanitize_text_field( $_GET['wbr-action-name'] ) ? 1 : 0;
 
 	// Wrap the entire thing.
 	echo '<div class="wrap woo-better-reviews-admin-wrap woo-better-reviews-admin-attributes-wrap">';
 
-		// Handle the title.
+		// Output the title tag.
 		echo '<h1 class="wp-heading-inline woo-better-reviews-admin-title">' . esc_html( get_admin_page_title() ) . '</h1>';
 
-		// Wrap the whole thing in a container for columns.
-		echo '<div id="col-container" class="wp-clearfix">';
-
-			// Handle the left column.
-			echo '<div id="col-left">';
-				echo '<div class="col-wrap">';
-
-				// Load the add new item form section.
-				echo load_add_attribute_form( $action ); // WPCS: XSS ok.
-
-				echo '</div>';
-			echo '</div>';
-
-			// Handle the right column.
-			echo '<div id="col-right">';
-				echo '<div class="col-wrap">';
-
-				// Load the table form with the existing.
-				load_edit_attributes_form(); // WPCS: XSS ok.
-
-				echo '</div>';
-			echo '</div>';
-
-		// Close the column container.
-		echo '</div>';
+		// Load the proper page.
+		echo ! $isedit ? load_attributes_primary_display( $action ) : load_edit_single_attribute_form( $action );
 
 	// Close the wrapper.
+	echo '</div>';
+}
+
+/**
+ * Load the primary display, which is the add new and table list.
+ *
+ * @param  string $action  The URL to include in the form action.
+ *
+ * @return void
+ */
+function load_attributes_primary_display( $action = '' ) {
+
+	// Bail if we shouldn't be here.
+	if ( ! current_user_can( 'manage_options' ) ) {
+		wp_die( __( 'You are not permitted to view this page.', 'woo-better-reviews' ) );
+	}
+
+	// Wrap the whole thing in a container for columns.
+	echo '<div id="col-container" class="wp-clearfix">';
+
+		// Handle the left column.
+		echo '<div id="col-left">';
+			echo '<div class="col-wrap">';
+
+			// Load the add new item form section.
+			echo load_add_new_attribute_form( $action ); // WPCS: XSS ok.
+
+			echo '</div>';
+		echo '</div>';
+
+		// Handle the right column.
+		echo '<div id="col-right">';
+			echo '<div class="col-wrap">';
+
+			// Load the table form with the existing.
+			load_attributes_list_table_form( $action ); // WPCS: XSS ok.
+
+			echo '</div>';
+		echo '</div>';
+
+	// Close the column container.
 	echo '</div>';
 }
 
@@ -117,7 +138,12 @@ function display_product_attributes_page() {
  *
  * @return HTML
  */
-function load_add_attribute_form( $action = '' ) {
+function load_add_new_attribute_form( $action = '' ) {
+
+	// Bail if we shouldn't be here.
+	if ( ! current_user_can( 'manage_options' ) ) {
+		wp_die( __( 'You are not permitted to view this page.', 'woo-better-reviews' ) );
+	}
 
 	// Add a key to the action link.
 	$action = add_query_arg( array( 'wbr-action' => 'add' ), $action );
@@ -204,7 +230,12 @@ function load_add_attribute_form( $action = '' ) {
  *
  * @return HTML
  */
-function load_edit_attributes_form( $action = '' ) {
+function load_attributes_list_table_form( $action = '' ) {
+
+	// Bail if we shouldn't be here.
+	if ( ! current_user_can( 'manage_options' ) ) {
+		wp_die( __( 'You are not permitted to view this page.', 'woo-better-reviews' ) );
+	}
 
 	// Add a key to the action link.
 	$action = add_query_arg( array( 'wbr-action' => 'edit' ), $action );
@@ -225,7 +256,143 @@ function load_edit_attributes_form( $action = '' ) {
 	echo '</form>';
 }
 
+/**
+ * Load the form to edit an existing attribute.
+ *
+ * @param  string $action  The URL to include in the form action.
+ *
+ * @return HTML
+ */
+function load_edit_single_attribute_form( $action ) {
 
+	// Bail if we shouldn't be here.
+	if ( ! current_user_can( 'manage_options' ) ) {
+		wp_die( __( 'You are not permitted to view this page.', 'woo-better-reviews' ) );
+	}
+
+	// Get the attribute data.
+	$attribute_data = Queries\get_single_attribute( $_GET['wbr-item-id'] );
+
+	// Set an empty.
+	$build  = '';
+
+	// Now set the actual form itself.
+	$build .= '<form class="woo-better-reviews-admin-form" id="woo-better-reviews-admin-edit-attribute-form" action="' . esc_url( $action ) . '" method="post">';
+
+		$build .= '<input type="hidden" name="action" value="update">';
+		$build .= '<input type="hidden" name="item-id" value="' . absint( $_GET['wbr-item-id'] ) . '">';
+		$build .= '<input type="hidden" name="item-type" value="attribute">';
+
+		// Output our nonce.
+		$build .= wp_nonce_field( 'wbr_edit_attribute_action', 'wbr_edit_attribute_nonce', true, false );
+
+		// Now set the table wrap.
+		$build .= '<table class="form-table">';
+
+			// Set up the table body.
+			$build .= '<tbody>';
+
+				// Set the name field.
+				$build .= '<tr class="form-field woo-better-reviews-form-field form-required attribute-name-wrap">';
+
+					// Output the label.
+					$build .= '<th scope="row">';
+						$build .= '<label for="attribute-name">' . esc_html__( 'Name', 'woo-better-reviews' ) . '</label>';
+					$build .= '</th>';
+
+					// Output the actual field.
+					$build .= '<td>';
+
+						// The field input.
+						$build .= '<input name="attribute-args[name]" id="attribute-name" value="' . esc_attr( $attribute_data['attribute_name'] ) . '" size="40" aria-required="true" type="text">';
+
+						// Include some explain text.
+						$build .= '<p class="description">' . esc_html__( 'Eventual description text', 'woo-better-reviews' ) . '</p>';
+
+					$build .= '</td>';
+
+				// Close the name field.
+				$build .= '</tr>';
+
+				// Set the description field.
+				$build .= '<tr class="form-field woo-better-reviews-form-field attribute-desc-wrap">';
+
+					// Output the label.
+					$build .= '<th scope="row">';
+						$build .= '<label for="attribute-desc">' . esc_html__( 'Description', 'woo-better-reviews' ) . '</label>';
+					$build .= '</th>';
+
+					// Output the actual field.
+					$build .= '<td>';
+
+						// The field input.
+						$build .= '<textarea name="attribute-args[desc]" id="attribute-desc" rows="5" cols="40">' . esc_textarea( $attribute_data['attribute_desc'] ) . '</textarea>';
+
+						// Include some explain text.
+						$build .= '<p class="description">' . esc_html__( 'Eventual description text', 'woo-better-reviews' ) . '</p>';
+
+					$build .= '</td>';
+
+				// Close the description field.
+				$build .= '</tr>';
+
+				// Set the min / max labels field.
+				$build .= '<tr class="form-field woo-better-reviews-form-field attribute-labels-wrap">';
+
+					// Output the label.
+					$build .= '<th scope="row">';
+						$build .= '<label for="attribute-labels">' . esc_html__( 'Rating Labels', 'woo-better-reviews' ) . '</label>';
+					$build .= '</th>';
+
+					// Output the actual field.
+					$build .= '<td>';
+
+						// Output the left side label and actual field.
+						$build .= '<span class="woo-better-reviews-form-split woo-better-reviews-form-split-left">';
+							$build .= '<input name="attribute-args[min-label]" id="attribute-label-min" value="' . esc_attr( $attribute_data['min_label'] ) . '" class="widefat" type="text">';
+							$build .= '<label class="woo-better-reviews-form-split-label" for="attribute-label-min">' . esc_html__( 'Minimum', 'woo-better-reviews' ) . '</label>';
+						$build .= '</span>';
+
+						// Output the left side label and actual field.
+						$build .= '<span class="woo-better-reviews-form-split woo-better-reviews-form-split-right">';
+							$build .= '<input name="attribute-args[max-label]" id="attribute-label-max" value="' . esc_attr( $attribute_data['max_label'] ) . '" class="widefat" type="text">';
+							$build .= '<label class="woo-better-reviews-form-split-label" for="attribute-label-max">' . esc_html__( 'Maximum', 'woo-better-reviews' ) . '</label>';
+						$build .= '</span>';
+
+						// Include some explain text.
+						$build .= '<p class="description">' . esc_html__( 'Eventual description text', 'woo-better-reviews' ) . '</p>';
+
+					$build .= '</td>';
+
+				// Close the description field.
+				$build .= '</tr>';
+
+			// Close up the table body.
+			$build .= '</tbody>';
+
+		// Close up the table.
+		$build .= '</table>';
+
+		// Output the submit button.
+		$build .= '<div class="edit-tag-actions">';
+			$build .= get_submit_button( __( 'Update Attribute', 'woo-better-reviews' ), 'primary', 'edit-existing-attribute' );
+		$build .= '</div>';
+
+	// Close up the form markup.
+	$build .= '</form>';
+
+	// Return the entire form build.
+	return $build;
+
+}
+
+/**
+ * Load the form to something authors.
+ *
+ * @param  string $action  The URL to include in the form action.
+ *
+ * @return HTML
+ */
 function display_author_characteristics_page() {
 	echo 'hello characteristics';
 }

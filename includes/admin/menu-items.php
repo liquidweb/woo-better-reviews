@@ -33,8 +33,8 @@ function load_admin_menus() {
 
 	// Load my top-level admin menu.
 	add_menu_page(
-		__( 'Product Reviews', 'woo-better-reviews' ),
-		__( 'Reviews','woo-better-reviews' ),
+		get_menu_page_title( 'reviews' ),
+		__( 'Reviews', 'woo-better-reviews' ),
 		$user_menu_cap,
 		Core\SETTINGS_ANCHOR,
 		__NAMESPACE__ . '\load_primary_settings_page',
@@ -45,20 +45,20 @@ function load_admin_menus() {
 	// Add the attributes page.
 	add_submenu_page(
 		Core\SETTINGS_ANCHOR,
-		__( 'Product Attributes', 'woo-better-reviews' ),
+		get_menu_page_title( 'attributes' ),
 		__( 'Attributes','woo-better-reviews' ),
 		$user_menu_cap,
-		Core\SETTINGS_ANCHOR . '-product-attributes',
+		Core\ATTRIBUTES_ANCHOR,
 		__NAMESPACE__ . '\load_product_attributes_page'
 	);
 
 	// Add the characteristics page.
 	add_submenu_page(
 		Core\SETTINGS_ANCHOR,
-		__( 'User Characteristics', 'woo-better-reviews' ),
-		__( 'Characteristics','woo-better-reviews' ),
+		get_menu_page_title( 'characteristics' ),
+		__( 'Characteristics', 'woo-better-reviews' ),
 		$user_menu_cap,
-		Core\SETTINGS_ANCHOR . '-author-characteristics',
+		Core\CHARACTERISTICS_ANCHOR,
 		__NAMESPACE__ . '\load_author_characteristics_page'
 	);
 }
@@ -88,4 +88,38 @@ function load_product_attributes_page() {
  */
 function load_author_characteristics_page() {
 	AdminPages\display_author_characteristics_page();
+}
+
+/**
+ * Determine the page title for each menu.
+ *
+ * @param  string $menu  Which menu we're checking.
+ *
+ * @return string
+ */
+function get_menu_page_title( $menu = '' ) {
+
+	// Handle our title creation based on the menu.
+	switch ( sanitize_text_field( $menu ) ) {
+
+		case 'reviews' :
+			return __( 'Reviews','woo-better-reviews' );
+			break;
+
+		case 'attributes' :
+
+			// Check to see if we are editing an attribute or not.
+			$isedit = ! empty( $_GET['wbr-action-name'] ) && 'edit' === sanitize_text_field( $_GET['wbr-action-name'] ) ? 1 : 0;
+
+			// Make and return my label.
+			return ! $isedit ? __( 'Product Attributes', 'woo-better-reviews' ) : __( 'Edit Attribute', 'woo-better-reviews' );
+			break;
+
+		case 'characteristics' :
+			return __( 'Characteristics','woo-better-reviews' );
+			break;
+
+		// No more case breaks, no more menues.
+	}
+
 }

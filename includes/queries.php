@@ -13,6 +13,9 @@ use LiquidWeb\WooBetterReviews as Core;
 use LiquidWeb\WooBetterReviews\Helpers as Helpers;
 use LiquidWeb\WooBetterReviews\Database as Database;
 
+// And pull in any other namespaces.
+use WP_Error;
+
 /**
  * Get all the reviews for a given product ID.
  *
@@ -706,4 +709,65 @@ function get_all_attributes( $return_type = 'objects', $purge = false ) {
 
 	// No reason we should get down this far but here we go.
 	return false;
+}
+
+/**
+ * Get the data for a single attribute.
+ *
+ * @param  integer $attribute_id  The ID we are checking for.
+ * @param  boolean $purge         Optional to purge the cache'd version before looking up.
+ *
+ * @return mixed
+ */
+function get_single_attribute( $attribute_id = 0, $purge = false ) {
+
+	// Make sure we have an attribute ID.
+	if ( empty( $attribute_id ) ) {
+		return new WP_Error( 'missing_attribute_id', __( 'The required attribute ID is missing.', 'woo-better-reviews' ) );
+	}
+
+	// Set the key to use in our transient.
+	$ky = Core\HOOK_PREFIX . 'single_attribute_' . absint( $attribute_id );
+
+	// If we don't want the cache'd version, delete the transient first.
+	if ( defined( 'WP_DEBUG' ) && WP_DEBUG || ! empty( $purge ) ) {
+		delete_transient( $ky );
+	}
+
+	// Attempt to get the reviews from the cache.
+	$cached_dataset = get_transient( $ky );
+
+	// If we have none, do the things.
+	if ( false === $cached_dataset ) {
+
+		// Call the global database.
+		global $wpdb;
+
+		// Set our table name.
+		$table_name = $wpdb->prefix . Core\TABLE_PREFIX .  'attributes';
+
+		// Set up our query.
+		$query_args = $wpdb->prepare("
+			SELECT   *
+			FROM     $table_name
+			WHERE    attribute_id = '%d'
+		", absint( $attribute_id ) );
+
+		// Process the query.
+		$query_run  = $wpdb->get_row( $query_args, ARRAY_A );
+
+		// Bail without any reviews.
+		if ( empty( $query_run ) ) {
+			return false;
+		}
+
+		// Set our transient with our data.
+		set_transient( $ky, $query_run, HOUR_IN_SECONDS );
+
+		// And change the variable to do the things.
+		$cached_dataset = $query_run;
+	}
+
+	// Return the dataset.
+	return $cached_dataset;
 }

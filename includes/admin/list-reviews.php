@@ -374,6 +374,15 @@ class WooBetterReviews_ListReviews extends WP_List_Table {
 	}
 
 	/**
+	 * Handle the display text for when no items exist.
+	 *
+	 * @return string
+	 */
+	public function no_items() {
+		_e( 'No reviews avaliable.', 'woo-better-reviews' );
+	}
+
+	/**
 	 * Allows you to sort the data by the variables set in the $_GET
 	 *
 	 * @return Mixed
