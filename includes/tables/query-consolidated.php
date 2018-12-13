@@ -170,7 +170,7 @@ function insert_row( $insert_args = array() ) {
  *
  * @return mixed
  */
-function update_row( $update_id = 0, $update_args = array(), $return_bool = false ) {
+function update_row( $update_id = 0, $update_args = array(), $return_bool = true ) {
 
 	// Make sure we have an ID.
 	if ( empty( $update_id ) ) {

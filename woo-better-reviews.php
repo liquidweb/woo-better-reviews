@@ -35,6 +35,9 @@ define( __NAMESPACE__ . '\BASE', plugin_basename( __FILE__ ) );
 // Plugin Folder URL.
 define( __NAMESPACE__ . '\URL', plugin_dir_url( __FILE__ ) );
 
+// Set our assets directory constant.
+define( __NAMESPACE__ . '\ASSETS_URL', URL . 'assets' );
+
 // Set the prefix for our actions and filters.
 define( __NAMESPACE__ . '\HOOK_PREFIX', 'wc_better_reviews_' );
 
@@ -69,6 +72,7 @@ require_once __DIR__ . '/includes/queries.php';
 // Load the admin specific files.
 if ( is_admin() ) {
 	require_once __DIR__ . '/includes/admin/menu-items.php';
+	require_once __DIR__ . '/includes/admin/admin-assets.php';
 	require_once __DIR__ . '/includes/admin/admin-notices.php';
 	require_once __DIR__ . '/includes/admin/admin-pages.php';
 	require_once __DIR__ . '/includes/admin/admin-process.php';

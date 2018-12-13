@@ -147,7 +147,7 @@ function get_required_args( $table_name = '', $return_type = 'columns' ) {
 		return new WP_Error( 'missing_table_name', __( 'The required table name was not provided.', 'woo-better-reviews' ) );
 	}
 
-	// Handle the table install based on the provided name.
+	// Fetch the required args based on the table requested.
 	switch ( sanitize_text_field( $table_name ) ) {
 
 		case 'content' :
@@ -510,7 +510,7 @@ function insert( $table_name = '', $insert_args = array() ) {
 
 	// Make sure we have a table name.
 	if ( empty( $table_name ) ) {
-		return new WP_Error( 'missing_table_name', __( 'The required table name is missing.', 'woo-better-reviews' ) );
+		return new WP_Error( 'missing-table-name', __( 'The required table name is missing.', 'woo-better-reviews' ) );
 	}
 
 	// Check to make sure the table provided is approved.
@@ -518,12 +518,12 @@ function insert( $table_name = '', $insert_args = array() ) {
 
 	// Throw an error if it's not a valid table.
 	if ( ! $table_valid ) {
-		return new WP_Error( 'invalid_table_name', __( 'The provided table name is not valid.', 'woo-better-reviews' ) );
+		return new WP_Error( 'invalid-table-name', __( 'The provided table name is not valid.', 'woo-better-reviews' ) );
 	}
 
 	// Make sure we have args.
 	if ( empty( $insert_args ) || ! is_array( $insert_args ) ) {
-		return new WP_Error( 'missing_insert_args', __( 'The required database arguments are missing or invalid.', 'woo-better-reviews' ) );
+		return new WP_Error( 'missing-insert-args', __( 'The required database arguments are missing or invalid.', 'woo-better-reviews' ) );
 	}
 
 	// Run the action before doing anything.

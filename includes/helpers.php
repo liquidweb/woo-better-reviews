@@ -108,15 +108,13 @@ function admin_page_redirect( $custom_args = array(), $menu_slug = '', $response
 	$redirect_slug  = ! empty( $menu_slug ) ? trim( $menu_slug ) : trim( Core\SETTINGS_ANCHOR );
 
 	// Handle the setup.
-	$redirect_args  = wp_parse_args( $custom_args, array( 'page' => $redirect_slug ) );
+	$redirect_base  = get_admin_menu_link( $redirect_slug );
 
-	// Add the default args we need in the return.
-	if ( $response ) {
-		$redirect_args  = wp_parse_args( array( 'wbr-action-complete' => 1 ), $redirect_args );
-	}
+	// Set our redirect args.
+	$redirect_args  = false !== $response ? wp_parse_args( array( 'wbr-action-complete' => 1 ), $custom_args ) : $custom_args;
 
 	// Now set my redirect link.
-	$redirect_link  = add_query_arg( $redirect_args, admin_url( 'admin.php' ) );
+	$redirect_link  = add_query_arg( $redirect_args, $redirect_base );
 
 	// Do the redirect.
 	wp_safe_redirect( $redirect_link );
@@ -126,26 +124,29 @@ function admin_page_redirect( $custom_args = array(), $menu_slug = '', $response
 /**
  * Check an code and (usually an error) return the appropriate text.
  *
- * @param  string $code  The code provided.
+ * @param  string $return_code  The code provided.
  *
  * @return string
  */
-function get_admin_notice_text( $code = '' ) {
-
-	// Return if we don't have an error code.
-	if ( empty( $code ) ) {
-		return __( 'There was an error with your request.', 'woo-better-reviews' );
-	}
+function get_admin_notice_text( $return_code = '' ) {
 
 	// Handle my different error codes.
-	switch ( esc_attr( strtolower( $code ) ) ) {
+	switch ( esc_attr( $return_code ) ) {
 
-		case 'attribute-updated' :
-			return __( 'The attribute has been updated.', 'woo-better-reviews' );
+		case 'attribute-added' :
+			return __( 'The new attribute has been added.', 'woo-better-reviews' );
 			break;
 
-		case 'attribute-unchanged' :
-			return __( 'No changes were requested.', 'woo-better-reviews' );
+		case 'attribute-updated' :
+			return __( 'The selected attribute has been updated.', 'woo-better-reviews' );
+			break;
+
+		case 'attribute-deleted' :
+			return __( 'The selected attribute has been deleted.', 'woo-better-reviews' );
+			break;
+
+		case 'attribute-deleted-bulk' :
+			return __( 'The selected attributes have been deleted.', 'woo-better-reviews' );
 			break;
 
 		case 'missing-posted-args' :

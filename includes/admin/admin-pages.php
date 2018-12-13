@@ -1,6 +1,6 @@
 <?php
 /**
- * Handle the specific layouts fo admin pages.
+ * Handle the specific layouts for admin pages.
  *
  * @package WooBetterReviews
  */
@@ -159,6 +159,10 @@ function load_add_new_attribute_form( $action = '' ) {
 
 		// Now set the actual form itself.
 		$build .= '<form id="woo-better-reviews-add-attribute" class="woo-better-reviews-admin-form" method="post" action="' . esc_url( $action ) . '">';
+
+			// Add some hidden fields to handle the addition.
+			$build .= '<input type="hidden" name="action" value="add-new">';
+			$build .= '<input type="hidden" name="item-type" value="attribute">';
 
 			// Output our nonce.
 			$build .= wp_nonce_field( 'wbr_add_attribute_action', 'wbr_add_attribute_nonce', true, false );

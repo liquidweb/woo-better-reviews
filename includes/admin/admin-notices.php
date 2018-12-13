@@ -90,6 +90,16 @@ function display_admin_notice_markup( $notice = '', $result = 'error', $dismiss 
 		// Display the actual message.
 		$field .= '<p><strong>' . wp_kses_post( $notice ) . '</strong></p>';
 
+		// Check for the return.
+		if ( ! empty( $_GET['wbr-action-return'] ) ) {
+
+			// Get my return link.
+			$return = Helpers\get_admin_menu_link( $_GET['wbr-action-return'] );
+
+			// Build the markup.
+			$field .= '<p><a href="' . esc_url( $return ) . '">&larr; ' . __( 'Return to the main list', 'woo-better-reviews' ) . '</a></p>';
+		}
+
 		// Show the button if we set dismiss and button variables.
 		$field .= $dismiss && $show_button ? '<button type="button" class="notice-dismiss">' . screen_reader_text() . '</button>' : '';
 

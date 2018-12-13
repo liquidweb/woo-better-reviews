@@ -8,6 +8,7 @@
 // Set our aliases.
 use LiquidWeb\WooBetterReviews as Core;
 use LiquidWeb\WooBetterReviews\Helpers as Helpers;
+use LiquidWeb\WooBetterReviews\Database as Database;
 use LiquidWeb\WooBetterReviews\Queries as Queries;
 
 // Exit if accessed directly.
@@ -196,7 +197,78 @@ class WooBetterReviews_ListAttributes extends WP_List_Table {
 	 * @see $this->prepare_items()
 	 */
 	protected function process_bulk_action() {
-		return;
+
+		// Make sure we have the page we want.
+		if ( empty( $_GET['page'] ) || Core\ATTRIBUTES_ANCHOR !== sanitize_text_field( $_GET['page'] ) ) {
+			return;
+		}
+
+		// Bail if we aren't on the doing our requested action.
+		if ( empty( $this->current_action() ) || ! in_array( $this->current_action(), array_keys( $this->get_bulk_actions() ) ) ) {
+			return;
+		}
+
+		// Handle the nonce check.
+		if ( empty( $_POST['wbr_list_attributes_nonce'] ) || ! wp_verify_nonce( $_POST['wbr_list_attributes_nonce'], 'wbr_list_attributes_action' ) ) {
+			wp_die( __( 'Your security nonce failed.', 'woo-better-reviews' ) );
+		}
+
+		// Check for the array of attribute IDs being passed.
+		if ( empty( $_POST['attribute-ids'] ) ) {
+
+			// Set my error return args.
+			$redirect_args  = array(
+				'success'           => false,
+				'wbr-action-result' => 'failed',
+				'wbr-error-code'    => 'missing-attribute-ids',
+			);
+
+			// And redirect.
+			Helpers\admin_page_redirect( $redirect_args, Core\ATTRIBUTES_ANCHOR );
+		}
+
+		// Set my attribute IDs.
+		$attribute_ids  = array_filter( $_POST['attribute-ids'], 'absint' );
+
+		// Now loop my IDs and attempt to delete each one.
+		foreach ( $attribute_ids as $attribute_id ) {
+
+			// Attempt to delete the attribute.
+			$maybe_deleted  = Database\delete( 'attributes', $attribute_id );
+
+			// Check for the boolean true result.
+			if ( false !== $maybe_deleted ) {
+				continue;
+			}
+
+			// First check for empty or just false.
+			if ( empty( $maybe_deleted ) || false === $maybe_deleted || is_wp_error( $maybe_deleted ) ) {
+
+				// Determine the error code.
+				$get_error_code = is_wp_error( $maybe_deleted ) ? $maybe_deleted->get_error_code() : 'attribute-delete-failed';
+
+				// Set my error return args.
+				$redirect_args  = array(
+					'success'           => false,
+					'wbr-action-result' => 'failed',
+					'wbr-error-code'    => esc_attr( $get_error_code ),
+				);
+
+				// And redirect.
+				Helpers\admin_page_redirect( $redirect_args, Core\ATTRIBUTES_ANCHOR );
+			}
+
+			// Nothing left in the loop to do.
+		}
+
+		// Set my success args.
+		$redirect_args  = array(
+			'success'           => 1,
+			'wbr-action-result' => 'attribute-deleted-bulk',
+		);
+
+		// And redirect.
+		Helpers\admin_page_redirect( $redirect_args, Core\ATTRIBUTES_ANCHOR );
 	}
 
 	/**
@@ -212,7 +284,7 @@ class WooBetterReviews_ListAttributes extends WP_List_Table {
 		$id = absint( $item['id'] );
 
 		// Return my checkbox.
-		return '<input type="checkbox" name="attribute-id[]" class="woo-better-reviews-admin-checkbox" id="cb-' . $id . '" value="' . $id . '" /><label for="cb-' . $id . '" class="screen-reader-text">' . __( 'Select attribute', 'woo-better-reviews' ) . '</label>';
+		return '<input type="checkbox" name="attribute-ids[]" class="woo-better-reviews-admin-checkbox" id="cb-' . $id . '" value="' . $id . '" /><label for="cb-' . $id . '" class="screen-reader-text">' . __( 'Select attribute', 'woo-better-reviews' ) . '</label>';
 	}
 
 	/**
@@ -518,7 +590,7 @@ class WooBetterReviews_ListAttributes extends WP_List_Table {
 		}
 
 		// Get our primary settings link.
-		$settings_link  = Helpers\get_admin_menu_link( 'woo-better-reviews-product-attributes' );
+		$settings_link  = Helpers\get_admin_menu_link( Core\ATTRIBUTES_ANCHOR );
 
 		// Set the action link args.
 		$action_linkset = array(

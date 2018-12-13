@@ -20,7 +20,9 @@ use WP_Error;
  * Start our engines.
  */
 add_filter( 'removable_query_args', __NAMESPACE__ . '\filter_removable_args' );
+add_action( 'admin_init', __NAMESPACE__ . '\add_new_attribute' );
 add_action( 'admin_init', __NAMESPACE__ . '\update_existing_attribute' );
+add_action( 'admin_init', __NAMESPACE__ . '\delete_existing_attribute' );
 
 /**
  * Add our custom strings to the vars.
@@ -36,6 +38,7 @@ function filter_removable_args( $args ) {
 		'wbr-item-type',
 		'wbr-action-complete',
 		'wbr-action-result',
+		'wbr-action-return',
 		'wbr-nonce',
 		'wbr-error-code',
 	);
@@ -45,6 +48,61 @@ function filter_removable_args( $args ) {
 
 	// Include my new args and return.
 	return ! empty( $setup ) ? wp_parse_args( $setup, $args ) : $args;
+}
+
+/**
+ * Check for the add new function of an attribute.
+ *
+ * @return void
+ */
+function add_new_attribute() {
+
+	// Confirm we're on the right place.
+	if ( ! isset( $_POST['add-new-attribute'] ) || empty( $_POST['action'] ) || 'add-new' !== sanitize_text_field( $_POST['action'] ) ) {
+		return;
+	}
+
+	// Handle the nonce check.
+	if ( empty( $_POST['wbr_add_attribute_nonce'] ) || ! wp_verify_nonce( $_POST['wbr_add_attribute_nonce'], 'wbr_add_attribute_action' ) ) {
+		wp_die( __( 'Your security nonce failed.', 'woo-better-reviews' ) );
+	}
+
+	// Create my base redirect link.
+	$base_redirect  = Helpers\get_admin_menu_link( Core\ATTRIBUTES_ANCHOR );
+
+	// Check for the item type.
+	if ( empty( $_POST['item-type'] ) || 'attribute' !== sanitize_text_field( $_POST['item-type'] ) ) {
+		redirect_item_action_result( $base_redirect, 'missing-required-args' );
+	}
+
+	// Bail if we don't have a name to check.
+	if ( empty( $_POST['new-attribute'] ) ) {
+		redirect_item_action_result( $base_redirect, 'missing-attribute-args' );
+	}
+
+	// Format the arguments passed for updating.
+	$formatted_args = format_attribute_db_args( $_POST['new-attribute'] );
+
+	// Bail without the args coming back.
+	if ( empty( $formatted_args ) ) {
+		redirect_item_action_result( $base_redirect, 'missing-formatted-args' );
+	}
+
+	// Run the update.
+	$maybe_inserted = Database\insert( 'attributes', $formatted_args );
+
+	// Check for the boolean true result.
+	if ( empty( $maybe_inserted ) || false === $maybe_inserted ) {
+		redirect_item_action_result( $base_redirect, 'attribute-insert-failed' );
+	}
+
+	// Check the result for a WP_Error instance.
+	if ( is_wp_error( $maybe_inserted ) ) {
+		redirect_item_action_result( $base_redirect, $maybe_inserted->get_error_code() );
+	}
+
+	// Redirect a happy one.
+	redirect_item_action_result( $base_redirect, false, 'attribute-added', true );
 }
 
 /**
@@ -64,90 +122,92 @@ function update_existing_attribute() {
 		wp_die( __( 'Your security nonce failed.', 'woo-better-reviews' ) );
 	}
 
-	// Confirm we're on the right place (again).
-	if ( empty( $_POST['item-id'] ) || empty( $_POST['item-type'] ) || 'attribute' !== sanitize_text_field( $_POST['item-type'] ) ) {
+	// Confirm we have an ID, which is sorta critical.
+	if ( empty( $_POST['item-id'] ) ) {
+		redirect_item_action_result( Core\ATTRIBUTES_ANCHOR, 'missing-item-id' );
+	}
 
-		// Set up my redirect args.
-		$redirect_args  = array(
-			'success'           => false,
-			'wbr-action-result' => 'failed',
-			'wbr-error-code'    => 'missing-posted-args',
-		);
+	// Make my edit link.
+	$edit_redirect  = create_item_action_link( $_POST['item-id'] );
 
-		// Process the redirect args.
-		Helpers\admin_page_redirect( $redirect_args, Core\ATTRIBUTES_ANCHOR );
+	// Check for the remainder of items.
+	if ( empty( $_POST['item-type'] ) || 'attribute' !== sanitize_text_field( $_POST['item-type'] ) ) {
+		redirect_item_action_result( $edit_redirect, 'missing-posted-args' );
 	}
 
 	// Bail if we don't have a name to check.
 	if ( empty( $_POST['attribute-args'] ) ) {
-
-		// Set up my redirect args.
-		$redirect_args  = array(
-			'success'           => false,
-			'wbr-action-result' => 'failed',
-			'wbr-error-code'    => 'missing-attribute-args',
-		);
-
-		// Process the redirect args.
-		Helpers\admin_page_redirect( $redirect_args, Core\ATTRIBUTES_ANCHOR );
+		redirect_item_action_result( $edit_redirect, 'missing-attribute-args' );
 	}
 
 	// Format the arguments passed for updating.
-	$formatted_args = format_attribute_args( $_POST['attribute-args'] );
+	$formatted_args = format_attribute_db_args( $_POST['attribute-args'] );
 
 	// Bail without the args coming back.
 	if ( empty( $formatted_args ) ) {
-
-		// Set up my redirect args.
-		$redirect_args  = array(
-			'success'           => false,
-			'wbr-action-result' => 'failed',
-			'wbr-error-code'    => 'missing-formatted-args',
-		);
-
-		// Process the redirect args.
-		Helpers\admin_page_redirect( $redirect_args, Core\ATTRIBUTES_ANCHOR );
+		redirect_item_action_result( $edit_redirect, 'missing-formatted-args' );
 	}
 
 	// Run the update.
 	$maybe_updated  = Database\update( 'attributes', absint( $_POST['item-id'] ), $formatted_args );
 
+	// Check for the boolean true result.
+	if ( empty( $maybe_updated ) || false === $maybe_updated ) {
+		redirect_item_action_result( $edit_redirect, 'attribute-update-failed' );
+	}
+
 	// Check the result for a WP_Error instance.
 	if ( is_wp_error( $maybe_updated ) ) {
-
-		// Set up my redirect args.
-		$redirect_args  = array(
-			'success'           => false,
-			'wbr-action-result' => 'failed',
-			'wbr-error-code'    => $maybe_updated->get_error_code(),
-		);
-
-		// Process the redirect args.
-		Helpers\admin_page_redirect( $redirect_args, Core\ATTRIBUTES_ANCHOR );
+		redirect_item_action_result( $edit_redirect, $maybe_updated->get_error_code() );
 	}
 
-	// Check for the 'updated' or 'unchanged' result.
-	if ( ! in_array( $maybe_updated, array( 'updated', 'unchanged' ) ) ) {
+	// Redirect a happy one.
+	redirect_item_action_result( $edit_redirect, false, 'attribute-updated', true, Core\ATTRIBUTES_ANCHOR );
+}
 
-		// Set up my redirect args.
-		$redirect_args  = array(
-			'success'           => false,
-			'wbr-action-result' => 'failed',
-			'wbr-error-code'    => 'attribute-update-failed'
-		);
+/**
+ * Check for the delete function of an attribute.
+ *
+ * @return void
+ */
+function delete_existing_attribute() {
 
-		// Process the redirect args.
-		Helpers\admin_page_redirect( $redirect_args, Core\ATTRIBUTES_ANCHOR );
+	// Confirm we're on the right place.
+	if ( empty( $_GET['page'] ) || empty( $_GET['wbr-action-name'] ) || 'woo-better-reviews-product-attributes' !== sanitize_text_field( $_GET['page'] ) || 'delete' !== sanitize_text_field( $_GET['wbr-action-name'] ) ) {
+		return;
 	}
 
-	// Set up my redirect args.
-	$redirect_args  = array(
-		'success'           => true,
-		'wbr-action-result' => 'attribute-' . $maybe_updated,
-	);
+	// Create my base redirect link.
+	$base_redirect  = Helpers\get_admin_menu_link( Core\ATTRIBUTES_ANCHOR );
 
-	// Process the redirect args.
-	Helpers\admin_page_redirect( $redirect_args, Core\ATTRIBUTES_ANCHOR );
+	// Confirm we have an ID, which is sorta critical.
+	if ( empty( $_GET['wbr-item-id'] ) || empty( $_GET['wbr-item-type'] ) || 'attribute' !== sanitize_text_field( $_GET['wbr-item-type'] ) ) {
+		redirect_item_action_result( $base_redirect, 'missing-item-id' );
+	}
+
+	// Set my attribute item ID.
+	$attribute_id   = absint( $_GET['wbr-item-id'] );
+
+	// Handle the nonce check.
+	if ( empty( $_GET['wbr-nonce'] ) || ! wp_verify_nonce( $_GET['wbr-nonce'], 'lw_woo_delete_single_' . $attribute_id ) ) {
+		wp_die( __( 'Your security nonce failed.', 'woo-better-reviews' ) );
+	}
+
+	// Run the delete.
+	$maybe_deleted  = Database\delete( 'attributes', $attribute_id );
+
+	// Check for the boolean true result.
+	if ( empty( $maybe_deleted ) || false === $maybe_deleted ) {
+		redirect_item_action_result( $base_redirect, 'attribute-delete-failed' );
+	}
+
+	// Check the result for a WP_Error instance.
+	if ( is_wp_error( $maybe_deleted ) ) {
+		redirect_item_action_result( $base_redirect, $maybe_deleted->get_error_code() );
+	}
+
+	// Redirect a happy one.
+	redirect_item_action_result( $base_redirect, false, 'attribute-deleted', true );
 }
 
 /**
@@ -157,7 +217,7 @@ function update_existing_attribute() {
  *
  * @return array
  */
-function format_attribute_args( $posted_args = array() ) {
+function format_attribute_db_args( $posted_args = array() ) {
 
 	// Bail if we don't have args.
 	if ( empty( $posted_args ) ) {
@@ -173,15 +233,103 @@ function format_attribute_args( $posted_args = array() ) {
 	$attribute_min  = ! empty( $stripped_args['min-label'] ) ? trim( $stripped_args['min-label'] ) : '';
 	$attribute_max  = ! empty( $stripped_args['max-label'] ) ? trim( $stripped_args['max-label'] ) : '';
 
-	// Format the new array structure.
-	$filtered_array = array(
+	// Format the new array structure and return it.
+	return array(
 		'attribute_name' => $attribute_name,
 		'attribute_slug' => sanitize_title_with_dashes( $attribute_name, null, 'save' ),
 		'attribute_desc' => $attribute_desc,
 		'min_label'      => $attribute_min,
 		'max_label'      => $attribute_max,
 	);
+}
 
-	// Now return without the slashes.
-	return array_filter( $filtered_array, 'sanitize_text_field' );
+/**
+ * Create the link to redirect on an edit.
+ *
+ * @param  integer $item_id   The ID of the item we are editing.
+ * @param  string  $action    The action being taken. Defaults to 'edit'.
+ * @param  string  $type      The item type we are handling. Defaults to 'attribute'.
+ * @param  string  $redirect  Our base link to build off of.
+ *
+ * @return string
+ */
+function create_item_action_link( $item_id = 0, $action = 'edit', $type = 'attribute', $redirect = '' ) {
+
+	// Bail if we don't have the required pieces.
+	if ( empty( $item_id ) || empty( $action ) || empty( $type ) ) {
+		return new WP_Error( 'missing-required-args', __( 'The required arguments to create a link were not provided.', 'woo-better-reviews' ) );
+	}
+
+	// Determine which thing we're editing.
+	switch ( esc_attr( $type ) ) {
+
+		case 'settings' :
+
+			// Set my proper anchor.
+			$redirect = Helpers\get_admin_menu_link( Core\ATTRIBUTES_ANCHOR );
+			break;
+
+		case 'attribute' :
+
+			// Set my proper anchor.
+			$redirect = Helpers\get_admin_menu_link( Core\ATTRIBUTES_ANCHOR );
+			break;
+
+		case 'characteristics' :
+
+			// Set my proper anchor.
+			$redirect = Helpers\get_admin_menu_link( Core\CHARACTERISTICS_ANCHOR );
+			break;
+
+		// End all case breaks.
+	}
+
+	// Bail without a base redirect link.
+	if ( empty( $redirect ) ) {
+		return new WP_Error( 'missing-base-redirect', __( 'The base link for editing this item could not be determined.', 'woo-better-reviews' ) );
+	}
+
+	// Set the edit action link args.
+	$edit_args  = array(
+		'wbr-action-name' => esc_attr( $action ),
+		'wbr-item-id'     => absint( $item_id ),
+		'wbr-item-type'   => esc_attr( $type ),
+	);
+
+	// Create the edit link we can redirect to.
+	return add_query_arg( $edit_args, $redirect );
+}
+
+/**
+ * Redirect based on an edit action result.
+ *
+ * @param  string  $redirect  The link to redirect to.
+ * @param  string  $error     Optional error code.
+ * @param  string  $result    What the result of the action was.
+ * @param  boolean $success   Whether it was successful.
+ * @param  string  $return    Slug of the menu page to add a return link for.
+ *
+ * @return void
+ */
+function redirect_item_action_result( $redirect = '', $error = '', $result = 'failed', $success = false, $return = '' ) {
+
+	// Set up my redirect args.
+	$redirect_args  = array(
+		'success'             => $success,
+		'wbr-action-complete' => 1,
+		'wbr-action-result'   => esc_attr( $result ),
+	);
+
+	// Add the error code if we have one.
+	$redirect_args  = ! empty( $error ) ? wp_parse_args( $redirect_args, array( 'wbr-error-code' => esc_attr( $error ) ) ) : $redirect_args;
+
+	// Now check to see if we have a return, which means a return link.
+	$redirect_args  = ! empty( $return ) ? wp_parse_args( $redirect_args, array( 'wbr-action-return' => $return ) ) : $redirect_args;
+
+	// Now set my redirect link.
+	$redirect_link  = add_query_arg( $redirect_args, $redirect );
+
+	// Do the redirect.
+	wp_safe_redirect( $redirect_link );
+	exit;
 }
