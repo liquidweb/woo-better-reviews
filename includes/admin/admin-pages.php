@@ -46,7 +46,7 @@ function display_primary_settings_page() {
 function load_review_list_table() {
 
 	// Fetch the action link.
-	$action = Helpers\get_admin_menu_link();
+	// $action = Helpers\get_admin_menu_link();
 
 	// Call our table class.
 	$table  = new \WooBetterReviews_ListReviews();
@@ -55,13 +55,13 @@ function load_review_list_table() {
 	$table->prepare_items();
 
 	// And handle the display
-	echo '<form class="woo-better-reviews-admin-form" id="woo-better-reviews-admin-reviews-form" action="' . esc_url( $action ) . '" method="post">';
+	// echo '<form class="woo-better-reviews-admin-form" id="woo-better-reviews-admin-reviews-form" action="' . esc_url( $action ) . '" method="post">';
 
 	// The actual table itself.
 	$table->display();
 
 	// And close it up.
-	echo '</form>';
+	// echo '</form>';
 }
 
 /**
@@ -77,11 +77,19 @@ function display_product_attributes_page() {
 	// Check to see if we are editing an attribute or not.
 	$isedit = ! empty( $_GET['wbr-action-name'] ) && 'edit' === sanitize_text_field( $_GET['wbr-action-name'] ) ? 1 : 0;
 
+	// Check for a search string.
+	$search = Helpers\maybe_search_term( 'string' );
+
 	// Wrap the entire thing.
 	echo '<div class="wrap woo-better-reviews-admin-wrap woo-better-reviews-admin-attributes-wrap">';
 
 		// Output the title tag.
 		echo '<h1 class="wp-heading-inline woo-better-reviews-admin-title">' . esc_html( get_admin_page_title() ) . '</h1>';
+
+		// Output the search subtitle.
+		if ( ! empty( $search ) ) {
+			printf( '<span class="subtitle">' . __( 'Search results for &#8220;%s&#8221;' ) . '</span>', esc_html( $search ) );
+		}
 
 		// Load the proper page.
 		echo ! $isedit ? load_attributes_primary_display( $action ) : load_edit_single_attribute_form( $action );
@@ -105,10 +113,10 @@ function load_attributes_primary_display( $action = '' ) {
 	}
 
 	// Wrap the whole thing in a container for columns.
-	echo '<div id="col-container" class="wp-clearfix">';
+	echo '<div id="col-container" class="col-attributes-container wp-clearfix">';
 
 		// Handle the left column.
-		echo '<div id="col-left">';
+		echo '<div id="col-left" class="col-attributes-left">';
 			echo '<div class="col-wrap">';
 
 			// Load the add new item form section.
@@ -118,11 +126,11 @@ function load_attributes_primary_display( $action = '' ) {
 		echo '</div>';
 
 		// Handle the right column.
-		echo '<div id="col-right">';
+		echo '<div id="col-right" class="col-attributes-right">';
 			echo '<div class="col-wrap">';
 
 			// Load the table form with the existing.
-			load_attributes_list_table_form( $action ); // WPCS: XSS ok.
+			load_attributes_list_table_form(); // WPCS: XSS ok.
 
 			echo '</div>';
 		echo '</div>';
@@ -234,15 +242,12 @@ function load_add_new_attribute_form( $action = '' ) {
  *
  * @return HTML
  */
-function load_attributes_list_table_form( $action = '' ) {
+function load_attributes_list_table_form() {
 
 	// Bail if we shouldn't be here.
 	if ( ! current_user_can( 'manage_options' ) ) {
 		wp_die( __( 'You are not permitted to view this page.', 'woo-better-reviews' ) );
 	}
-
-	// Add a key to the action link.
-	$action = add_query_arg( array( 'wbr-action' => 'edit' ), $action );
 
 	// Call our table class.
 	$table  = new \WooBetterReviews_ListAttributes();
@@ -250,14 +255,8 @@ function load_attributes_list_table_form( $action = '' ) {
 	// And output the table.
 	$table->prepare_items();
 
-	// And handle the display
-	echo '<form class="woo-better-reviews-admin-form" id="woo-better-reviews-admin-attributes-form" action="' . esc_url( $action ) . '" method="post">';
-
 	// The actual table itself.
 	$table->display();
-
-	// And close it up.
-	echo '</form>';
 }
 
 /**
@@ -387,7 +386,6 @@ function load_edit_single_attribute_form( $action ) {
 
 	// Return the entire form build.
 	return $build;
-
 }
 
 /**

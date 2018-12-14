@@ -56,6 +56,32 @@ function maybe_valid_table( $table_name = '' ) {
 	return in_array( $table_name, $tables ) ? true : false;
 }
 
+/**
+ * Check to see if there is a search term and return it.
+ *
+ * @param  string $return  The return type we wanna have. Boolean or string.
+ *
+ * @return mixed.
+ */
+function maybe_search_term( $return = 'string' ) {
+
+	// Determine which thing we're returning.
+	switch ( esc_attr( $return ) ) {
+
+		case 'string' :
+
+			return isset( $_REQUEST['s'] ) ? wp_unslash( $_REQUEST['s'] ) : '';
+			break;
+
+		case 'bool' :
+		case 'boolean' :
+
+			return isset( $_REQUEST['s'] ) ? true : false;
+			break;
+
+		// End all case breaks.
+	}
+}
 
 /**
  * Return our base link, with function fallbacks.

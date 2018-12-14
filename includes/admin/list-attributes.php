@@ -53,6 +53,11 @@ class WooBetterReviews_ListAttributes extends WP_List_Table {
 		$sortable   = $this->get_sortable_columns();
 		$dataset    = $this->table_data();
 
+		// Check for the action key value to filter.
+		if ( ! empty( $_POST['wbr-action-filter'] ) ) { // WPCS: CSRF ok.
+			$dataset    = $this->maybe_filter_dataset( $dataset );
+		}
+
 		// Handle our sorting.
 		usort( $dataset, array( $this, 'sort_data' ) );
 
@@ -112,11 +117,102 @@ class WooBetterReviews_ListAttributes extends WP_List_Table {
 	 */
 	public function display() {
 
-		// Add a nonce for the bulk action.
-		wp_nonce_field( 'wbr_list_attributes_action', 'wbr_list_attributes_nonce' );
+		// Handle our search output.
+		$this->search_box( __( 'Search Attributes', 'woo-better-reviews' ), 'attributes' );
 
-		// And the parent display (which is most of it).
-		parent::display();
+		// And handle the display.
+		echo '<form class="woo-better-reviews-admin-form" id="woo-better-reviews-admin-attributes-form" method="post">';
+
+			// Add a nonce for the bulk action.
+			wp_nonce_field( 'wbr_bulk_attributes_action', 'wbr_bulk_attributes_nonce' );
+
+			// And the parent display (which is most of it).
+			parent::display();
+
+		// And close the form.
+		echo '</form>';
+	}
+
+	/**
+	 * Displays the search box.
+	 *
+	 * @param string $text      The 'submit' button label.
+	 * @param string $input_id  ID attribute value for the search input field.
+	 */
+	public function search_box( $text, $input_id ) {
+
+		// Do the quick check to make sure it's ok to be here.
+		if ( empty( $_REQUEST['s'] ) && ! $this->has_items() ) {
+			return;
+		}
+
+		// Fetch the action link.
+		$search_action  = Helpers\get_admin_menu_link( Core\ATTRIBUTES_ANCHOR );
+
+		// Set our actual input IDs.
+		$input_field_id = $input_id . '-search-input';
+		$submt_field_id = $input_id . 'search-submit';
+
+		// Check for the search query.
+		$search_query   = Helpers\maybe_search_term( 'string' );
+
+		// Wrap our search in a form itself.
+		echo '<form class="search-form wp-clearfix" action="' . esc_url( $search_action ) . '" method="post">';
+
+			// Handle some hidden fields.
+			echo '<input type="hidden" name="wbr-action-filter" value="1">';
+			echo '<input type="hidden" name="wbr-action-name" value="search">';
+
+			// Wrap our search in a paragraph tag.
+			echo '<p class="search-box attributes-search-box">';
+
+				// Handle the label for screen readers.
+				echo '<label class="screen-reader-text" for="' . esc_attr( $input_field_id ) . '">' . esc_attr( $text ) . ':</label>';
+
+				// Output the search field.
+				echo '<input type="search" id="' . esc_attr( $input_field_id ) . '" name="s" value="' . esc_attr( $search_query ) . '" />';
+
+				// And the button.
+				echo get_submit_button( esc_attr( $text ), 'secondary', '', false, array( 'id' => esc_attr( $submt_field_id ) ) );
+
+			// Close up the paragraph tag.
+			echo '</p>';
+
+		// Close up my form.
+		echo '</form>';
+	}
+
+	/**
+	 * Generate the table navigation above or below the table
+	 *
+	 * @since 3.1.0
+	 * @param string $which
+	 */
+	protected function display_tablenav( $which ) {
+
+		// Wrap it in a div.
+		echo '<div class="tablenav ' . esc_attr( $which ) . '">';
+
+			// Loop and handle the items if they exist.
+			if ( $this->has_items() ) {
+
+				// Wrap the left aligned tablenav.
+				echo '<div class="alignleft actions bulkactions">';
+				echo $this->bulk_actions( $which );
+				echo '</div>';
+			}
+
+			// Handle the extras.
+			$this->extra_tablenav( $which );
+
+			// Output the pagination.
+			$this->pagination( $which );
+
+			// Throw a clear in there.
+			echo '<br class="clear" />';
+
+		// And close the entire div.
+		echo '</div>';
 	}
 
 	/**
@@ -209,7 +305,7 @@ class WooBetterReviews_ListAttributes extends WP_List_Table {
 		}
 
 		// Handle the nonce check.
-		if ( empty( $_POST['wbr_list_attributes_nonce'] ) || ! wp_verify_nonce( $_POST['wbr_list_attributes_nonce'], 'wbr_list_attributes_action' ) ) {
+		if ( empty( $_POST['wbr_bulk_attributes_nonce'] ) || ! wp_verify_nonce( $_POST['wbr_bulk_attributes_nonce'], 'wbr_bulk_attributes_action' ) ) {
 			wp_die( __( 'Your security nonce failed.', 'woo-better-reviews' ) );
 		}
 
@@ -386,37 +482,100 @@ class WooBetterReviews_ListAttributes extends WP_List_Table {
 	 */
 	protected function maybe_filter_dataset( $dataset = array() ) {
 
+		// Check for the search query.
+		if ( ! empty( $_POST['wbr-action-name'] ) && 'search' === sanitize_text_field( $_POST['wbr-action-name'] ) ) {
+
+			// Fetch the search term.
+			$search = Helpers\maybe_search_term( 'string' );
+
+			// And return the dataset.
+			return $this->filter_search_dataset( $dataset, $search );
+		}
+
 		// And return the dataset, however we have it.
 		return $dataset;
 	}
 
 	/**
-	 * Filter out the dataset by ID.
+	 * Get our search fields.
 	 *
-	 * @param  array   $dataset  The dataset we wanna filter.
-	 * @param  integer $id       The specific ID we wanna check for.
-	 * @param  string  $type     Which ID type. Either 'product_id', 'customer_id', or 'id'.
+	 * @return array.
+	 */
+	protected function get_search_fields() {
+
+		// Set our array of search fields.
+		$fields = array(
+			'attribute_name',
+			'attribute_desc',
+			'min_label',
+			'max_label',
+		);
+
+		// Return the fields, filtered.
+		return apply_filters( Core\HOOK_PREFIX . 'attributes_table_search_fields', $fields );
+	}
+
+	/**
+	 * Filter out the dataset by search terms.
+	 *
+	 * @param  array  $dataset  The dataset we wanna filter.
+	 * @param  string $search   What we're searching for.
 	 *
 	 * @return array
 	 */
-	private function filter_dataset_by_id( $dataset = array(), $id = 0, $type = '' ) {
+	private function filter_search_dataset( $dataset = array(), $search = '' ) {
 
-		// Bail without a dataset, ID, or type.
-		if ( empty( $dataset ) || empty( $id ) || empty( $type ) ) {
-			return;
+		// Bail without a dataset or search term.
+		if ( empty( $dataset ) || empty( $search ) ) {
+			return $dataset;
 		}
 
-		// Loop the dataset.
+		// Set our array of search fields.
+		$fields = $this->get_search_fields();
+
+		// Bail without fields to search.
+		if ( empty( $fields ) ) {
+			return $dataset;
+		}
+
+		// Set our empty search results.
+		$result = array();
+
+		// First set a loop of the dataset to pull each set of values.
 		foreach ( $dataset as $index => $values ) {
 
-			// If we do not have a match, unset it and go about our day.
-			if ( absint( $id ) !== absint( $values[ $type ] ) ) {
-				unset( $dataset[ $index ] );
+			// Don't bother with anything empty.
+			if ( empty( $values ) ) {
+				continue;
 			}
+
+			// Loop the fields and check the dataset for each.
+			foreach ( $fields as $field ) {
+
+				// Don't bother searching an empty field.
+				if ( empty( $values[ $field ] ) ) {
+					continue;
+				}
+
+				// Check to see if we have a value.
+				$maybe  = stripos( $values[ $field ], $search );
+
+				// If we have it, add it to the new results.
+				if ( $maybe !== false ) {
+
+					// Add the dataset.
+					$result[] = $values;
+
+					// And break the loop.
+					break;
+				}
+			}
+
+			// Finish the loop of the dataset.
 		}
 
-		// Return thge dataset, with the array keys reset.
-		return ! empty( $dataset ) ? array_values( $dataset ) : array();
+		// Return the new resulting dataset.
+		return ! empty( $result ) ? $result : array();
 	}
 
 	/**
@@ -610,7 +769,7 @@ class WooBetterReviews_ListAttributes extends WP_List_Table {
 	 * @return string
 	 */
 	public function no_items() {
-		_e( 'No attributes exist', 'woo-better-reviews' );
+		_e( 'No attributes found.', 'woo-better-reviews' );
 	}
 
 	/**

@@ -1,7 +1,7 @@
 {
 "version": 3,
-"mappings": "AACA,iDAAkD;EACjD,SAAS,EAAE,KAAK",
-"sources": ["../scss/admin/_edit-attribute.scss"],
+"mappings": "AAGC,8BAAU;EACT,UAAU,EAAE,IAAI;;ACHlB,iDAAkD;EACjD,SAAS,EAAE,KAAK",
+"sources": ["../scss/admin/_list-attributes.scss","../scss/admin/_edit-attribute.scss"],
 "names": [],
 "file": "woo-better-reviews-admin.css"
 }
