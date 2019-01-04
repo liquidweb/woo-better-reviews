@@ -52,6 +52,11 @@ class WooBetterReviews_ListReviews extends WP_List_Table {
 		$sortable   = $this->get_sortable_columns();
 		$dataset    = $this->table_data();
 
+		// Check for the action key value to filter.
+		if ( ! empty( $_REQUEST['wbr-review-filter'] ) ) { // WPCS: CSRF ok.
+			$dataset    = $this->maybe_filter_dataset( $dataset );
+		}
+
 		// Handle our sorting.
 		usort( $dataset, array( $this, 'sort_data' ) );
 
@@ -92,9 +97,11 @@ class WooBetterReviews_ListReviews extends WP_List_Table {
 
 		// Build our array of column setups.
 		$setup  = array(
-			'cb'           => '<input type="checkbox" />',
-			'review_title' => __( 'Review Title', 'woo-better-reviews' ),
-			'review_date'  => __( 'Review Date', 'woo-better-reviews' ),
+			'cb'             => '<input type="checkbox" />',
+			'review_title'   => __( 'Title', 'woo-better-reviews' ),
+			'review_product' => __( 'Product', 'woo-better-reviews' ),
+			'review_date'    => __( 'Date', 'woo-better-reviews' ),
+			'review_status'  => __( 'Status', 'woo-better-reviews' ),
 		);
 
 		// Return filtered.
@@ -108,11 +115,205 @@ class WooBetterReviews_ListReviews extends WP_List_Table {
 	 */
 	public function display() {
 
-		// Add a nonce for the bulk action.
-		wp_nonce_field( 'wbr_list_reviews_action', 'wbr_list_reviews_nonce' );
+		// Include our views row.
+		$this->views();
 
-		// And the parent display (which is most of it).
-		parent::display();
+		// Handle our search output.
+		$this->search_box( __( 'Search Reviews', 'woo-better-reviews' ), 'reviews' );
+
+		// Wrap the display in a form.
+		echo '<form class="woo-better-reviews-admin-form" id="woo-better-reviews-admin-reviews-form" method="post">';
+
+			// Add a nonce for the bulk action.
+			wp_nonce_field( 'wbr_list_reviews_action', 'wbr_list_reviews_nonce' );
+
+			// And the parent display (which is most of it).
+			parent::display();
+
+		// Close up the form.
+		echo '</form>';
+	}
+
+	/**
+	 * Displays the search box.
+	 *
+	 * @param string $text      The 'submit' button label.
+	 * @param string $input_id  ID attribute value for the search input field.
+	 */
+	public function search_box( $text, $input_id ) {
+
+		// Do the quick check to make sure it's ok to be here.
+		if ( empty( $_REQUEST['s'] ) && ! $this->has_items() ) {
+			return;
+		}
+
+		// Fetch the action link.
+		$search_action  = Helpers\get_admin_menu_link( Core\REVIEWS_ANCHOR );
+
+		// Set our actual input IDs.
+		$input_field_id = $input_id . '-search-input';
+		$submt_field_id = $input_id . 'search-submit';
+
+		// Check for the search query.
+		$search_query   = Helpers\maybe_search_term( 'string' );
+
+		// Wrap our search in a form itself.
+		echo '<form class="search-form" action="' . esc_url( $search_action ) . '" method="post">';
+
+			// Handle some hidden fields.
+			echo '<input type="hidden" name="wbr-action-filter" value="1">';
+			echo '<input type="hidden" name="wbr-action-name" value="search">';
+
+			// Wrap our search in a paragraph tag.
+			echo '<p class="search-box reviews-search-box">';
+
+				// Handle the label for screen readers.
+				echo '<label class="screen-reader-text" for="' . esc_attr( $input_field_id ) . '">' . esc_attr( $text ) . ':</label>';
+
+				// Output the search field.
+				echo '<input type="search" id="' . esc_attr( $input_field_id ) . '" name="s" value="' . esc_attr( $search_query ) . '" />';
+
+				// And the button.
+				echo get_submit_button( esc_attr( $text ), 'secondary', '', false, array( 'id' => esc_attr( $submt_field_id ) ) );
+
+			// Close up the paragraph tag.
+			echo '</p>';
+
+		// Close up my form.
+		echo '</form>';
+	}
+
+	/**
+	 * Handle displaying the unordered list of views.
+	 *
+	 * @return HTML
+	 */
+	public function views() {
+
+		// Get our views to display.
+		$views  = $this->get_status_filter_views();
+
+		// Bail without any views to render.
+		if ( empty( $views ) ) {
+			return;
+		}
+
+		// Wrap it in an unordered list.
+		echo '<ul class="subsubsub">' . "\n";
+
+		// Loop the views we creatred and output them.
+		foreach ( $views as $class => $view ) {
+			$views[ $class ] = "\t" . '<li class="' . esc_attr( $class ) . '">' . wp_kses_post( $view );
+		}
+
+		// Blow out and implode my list.
+		echo implode( ' |</li>' . "\n", $views ) . '</li>' . "\n";
+
+		// Close the list.
+		echo '</ul>';
+	}
+
+	/**
+	 *
+	 * Get the data for outputing the views list of links.
+	 *
+	 * @return array
+	 */
+	protected function get_status_filter_views() {
+
+		// Get our status counts data.
+		$status_dataset = $this->get_status_counts_data();
+
+		// Bail without a dataset.
+		if ( empty( $status_dataset ) ) {
+			return;
+		}
+
+		// Get our basic link for reviews.
+		$reviews_link   = Helpers\get_admin_menu_link( Core\REVIEWS_ANCHOR );
+
+		// Set an empty array to begin.
+		$status_links   = array();
+
+		// Now loop the status dataset we have and create links.
+		foreach ( $status_dataset as $status_key => $status_data ) {
+
+			// Set up the markup we want in the link.
+			$link_text  = sprintf(
+				_nx(
+					$status_data['label'] . ' <span class="count">(%s)</span>',
+					$status_data['label'] . ' <span class="count">(%s)</span>',
+					absint( $status_data['count'] ),
+					'reviews'
+				),
+				number_format_i18n( absint( $status_data['count'] ) )
+			);
+
+			// Determine the link class.
+			$link_class = empty( $_GET['wbr-review-status'] ) && 'all' === $status_key ? 'current' : '';
+			$link_class = ! empty( $_GET['wbr-review-status'] ) && sanitize_text_field( $_GET['wbr-review-status'] ) === $status_key ? 'current' : $link_class;
+
+			// Now set up the link args.
+			$link_args  = array(
+				'wbr-review-filter' => 1,
+				'wbr-review-status' => esc_attr( $status_key )
+			);
+
+			// And finally make the actual link.
+			$link_href  = add_query_arg( $link_args, $reviews_link );
+
+			// Now create the array bit.
+			$status_links[ $status_key ] = '<a class="' . esc_attr( $link_class ) . '" href="' . esc_url( $link_href ) . '"> ' . $link_text . '</a>';
+		}
+
+		// Return it, filtered.
+		return apply_filters( Core\HOOK_PREFIX . 'status_links_markup', $status_links );
+	}
+
+	/**
+	 * Get our total dataset and return the counts of each status.
+	 *
+	 * @return array
+	 */
+	private function get_status_counts_data() {
+
+		// Get my complete dataset.
+		$dataset    = $this->table_data();
+
+		// Return false without any data.
+		if ( empty( $dataset ) ) {
+			return false;
+		}
+
+		// Trim my list to just the status.
+		$status_ids = wp_list_pluck( $dataset, 'review_status' );
+
+		// Set up the return structure.
+		$setup['all'] = array(
+			'label' => __( 'All', 'woo-better-reviews' ),
+			'count' => count( $status_ids )
+		);
+
+		// Get my statuses.
+		$statuses   = Helpers\get_review_statuses();
+
+		// If we have no statuses, just return the 'all'.
+		if ( empty( $statuses ) ) {
+			return $setup;
+		}
+
+		// Now loop the statuses we have and handle the counts.
+		foreach ( $statuses as $status_key => $status_label ) {
+
+			// Handle the individual count by using the array keys and status.
+			$setup[ $status_key ] = array(
+				'label' => $status_label,
+				'count' => count( array_keys( $status_ids, $status_key ) ),
+			);
+		}
+
+		// Return it, filtered.
+		return apply_filters( Core\HOOK_PREFIX . 'status_counts_data', $setup );
 	}
 
 	/**
@@ -148,8 +349,10 @@ class WooBetterReviews_ListReviews extends WP_List_Table {
 
 		// Build our array of sortable columns.
 		$setup  = array(
-			'review_title' => array( 'review_title', false ),
-			'review_date'  => array( 'review_date', true ),
+			'review_title'   => array( 'review_title', false ),
+			'review_product' => array( 'review_product', false ),
+			'review_date'    => array( 'review_date', true ),
+			'review_status'  => array( 'review_status', true ),
 		);
 
 		// Return it, filtered.
@@ -233,6 +436,46 @@ class WooBetterReviews_ListReviews extends WP_List_Table {
 	}
 
 	/**
+	 * The visible name column.
+	 *
+	 * @param  array  $item  The item from the data array.
+	 *
+	 * @return string
+	 */
+	protected function column_review_product( $item ) {
+
+		// Build my markup.
+		$setup  = '';
+
+		// Assuming we have a product ID, do the stuff.
+		if ( ! empty( $item['product_data'] ) ) {
+
+			// Set the product name.
+			$setup .= '<span class="woo-better-reviews-admin-table-display woo-better-reviews-admin-table-review-product">';
+
+				// First output the title.
+				$setup .= '<span class="woo-better-reviews-admin-table-product-name">' . esc_html( $item['product_data']['title'] ) . '</span>';
+
+				// Now the wrapper for two links.
+				$setup .= '<span class="woo-better-reviews-admin-table-product-links">';
+
+					// The two links themselves.
+					$setup .= '<a class="woo-better-reviews-admin-table-link woo-better-reviews-admin-table-product-view-link" href="' . esc_url( $item['product_data']['permalink'] ) . '">' . esc_html__( 'View', 'woo-better-reviews' ) . '</a>';
+					$setup .= '|';
+					$setup .= '<a class="woo-better-reviews-admin-table-link woo-better-reviews-admin-table-product-edit-link" href="' . esc_url( $item['product_data']['edit-link'] ) . '">' . esc_html__( 'Edit', 'woo-better-reviews' ) . '</a>';
+
+				// Close the links span.
+				$setup .= '</span>';
+
+			// Close the span.
+			$setup .= '</span>';
+		}
+
+		// Return my formatted product name.
+		return apply_filters( Core\HOOK_PREFIX . 'review_table_column_review_product', $setup, $item );
+	}
+
+	/**
 	 * The review date column.
 	 *
 	 * @param  array  $item  The item from the data array.
@@ -246,11 +489,35 @@ class WooBetterReviews_ListReviews extends WP_List_Table {
 
 		// Set the product name.
 		$setup .= '<span class="woo-better-reviews-admin-table-display woo-better-reviews-admin-table-review-date">';
-			$setup .= esc_html( $item['review_date'] );
+			$setup .= '<abbr title="' . date( 'Y/m/d g:i:s a', $item['review_stamp'] ) . '">' . date( 'Y/m/d', $item['review_stamp'] ) . '</abbr>';
 		$setup .= '</span>';
 
 		// Return my formatted product name.
 		return apply_filters( Core\HOOK_PREFIX . 'review_table_column_review_date', $setup, $item );
+	}
+
+	/**
+	 * The review status column.
+	 *
+	 * @param  array  $item  The item from the data array.
+	 *
+	 * @return string
+	 */
+	protected function column_review_status( $item ) {
+
+		// Create my label.
+		$label  = ucwords( $item['review_status'] ); // esc_html( $label )
+
+		// Build my markup.
+		$setup  = '';
+
+		// Set the product name.
+		$setup .= '<span class="woo-better-reviews-admin-table-display woo-better-reviews-admin-table-review-status">';
+			$setup .= '<mark class="review-status status-' . esc_attr( $item['review_status'] ) . '"><span>' . esc_html( $label ) . '</span></mark>';
+		$setup .= '</span>';
+
+		// Return my formatted product name.
+		return apply_filters( Core\HOOK_PREFIX . 'review_table_column_review_status', $setup, $item );
 	}
 
 	/**
@@ -272,14 +539,18 @@ class WooBetterReviews_ListReviews extends WP_List_Table {
 		$data   = array();
 
 		// Now loop each customer info.
-		foreach ( $review_objects as $review_object ) {
+		foreach ( $review_objects as $index => $review_object ) {
 
-			// Set the array of the data we want.
-			$setup  = array(
-				'id'           => absint( $review_object->review_id ),
-				'review_title' => esc_attr( $review_object->review_title ),
-				'review_date'  => esc_attr( $review_object->review_date ),
+			// Set up some custom args to include.
+			$custom = array(
+				'id'             => absint( $review_object->review_id ),
+				'review_stamp'   => strtotime( $review_object->review_date ),
+				'review_product' => get_post_field( 'post_name', absint( $review_object->product_id ), 'raw' ),
+				'product_data'   => Helpers\get_admin_product_data( absint( $review_object->product_id ) ),
 			);
+
+			// Set the base array of the data we want.
+			$setup  = wp_parse_args( (array) $review_object, $custom );
 
 			// Run it through a filter.
 			$data[] = apply_filters( Core\HOOK_PREFIX . 'review_table_data_item', $setup, $review_object );
@@ -298,23 +569,37 @@ class WooBetterReviews_ListReviews extends WP_List_Table {
 	 */
 	protected function maybe_filter_dataset( $dataset = array() ) {
 
+		// One check for the string.
+		if ( ! isset( $_REQUEST['wbr-review-filter'] ) ) {
+			return $dataset;
+		}
+
+		// Check for the filter query.
+		if ( ! empty( $_GET['wbr-review-status'] ) ) {
+
+			// Get my status.
+			$status = sanitize_text_field( $_GET['wbr-review-status'] );
+
+			// And return the dataset.
+			return $this->filter_dataset_by_status( $dataset, $status );
+		}
+
 		// And return the dataset, however we have it.
 		return $dataset;
 	}
 
 	/**
-	 * Filter out the dataset by ID.
+	 * Filter out the dataset by status.
 	 *
-	 * @param  array   $dataset  The dataset we wanna filter.
-	 * @param  integer $id       The specific ID we wanna check for.
-	 * @param  string  $type     Which ID type. Either 'product_id', 'customer_id', or 'id'.
+	 * @param  array  $dataset  The dataset we wanna filter.
+	 * @param  string $status   Which ID type. Either 'product_id', 'customer_id', or 'id'.
 	 *
 	 * @return array
 	 */
-	private function filter_dataset_by_id( $dataset = array(), $id = 0, $type = '' ) {
+	private function filter_dataset_by_status( $dataset = array(), $status = '' ) {
 
-		// Bail without a dataset, ID, or type.
-		if ( empty( $dataset ) || empty( $id ) || empty( $type ) ) {
+		// Bail without a dataset or status.
+		if ( empty( $dataset ) || empty( $status ) ) {
 			return;
 		}
 
@@ -322,7 +607,7 @@ class WooBetterReviews_ListReviews extends WP_List_Table {
 		foreach ( $dataset as $index => $values ) {
 
 			// If we do not have a match, unset it and go about our day.
-			if ( absint( $id ) !== absint( $values[ $type ] ) ) {
+			if ( empty( $values['review_status'] ) || esc_attr( $status ) !== esc_attr( $values['review_status'] ) ) {
 				unset( $dataset[ $index ] );
 			}
 		}
@@ -332,7 +617,7 @@ class WooBetterReviews_ListReviews extends WP_List_Table {
 	}
 
 	/**
-	 * Define what data to show on each column of the table
+	 * Define what data to show on each column of the table.
 	 *
 	 * @param  array  $dataset      Our entire dataset.
 	 * @param  string $column_name  Current column name
@@ -345,7 +630,9 @@ class WooBetterReviews_ListReviews extends WP_List_Table {
 		switch ( $column_name ) {
 
 			case 'review_title' :
+			case 'review_product' :
 			case 'review_date' :
+			case 'review_status' :
 				return ! empty( $dataset[ $column_name ] ) ? $dataset[ $column_name ] : '';
 
 			default :

@@ -25,8 +25,14 @@ add_action( 'admin_enqueue_scripts', __NAMESPACE__ . '\load_attribute_assets' );
  */
 function load_attribute_assets( $hook ) {
 
-	// Confirm we are on the correct hook.
-	if ( 'reviews_page_woo-better-reviews-product-attributes' !== esc_attr( $hook ) ) {
+	// Set an array of allowed hooks.
+	$allowed_hooks  = array(
+		'reviews_page_woo-better-reviews-product-attributes',
+		'toplevel_page_woo-better-reviews',
+	);
+
+	// Confirm we are on an allowed hook.
+	if ( ! in_array( $hook, $allowed_hooks ) ) {
 		return;
 	}
 

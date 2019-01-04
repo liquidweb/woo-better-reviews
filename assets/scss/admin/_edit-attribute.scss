@@ -3,6 +3,23 @@ form#woo-better-reviews-admin-edit-attribute-form {
 	max-width: 800px;
 }
 
+.edit-attribute-actions {
+
+	.cancel-edit-link-wrap {
+
+		line-height: 28px;
+		vertical-align: middle;
+		text-align: left;
+		margin-left: 8px;
+
+		.cancel-edit-link {
+			color: #a00;
+			text-decoration: none;
+		}
+
+	}
+}
+
 @media only screen and (max-width: 782px) {}
 
 

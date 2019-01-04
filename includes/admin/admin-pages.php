@@ -17,11 +17,11 @@ use LiquidWeb\WooBetterReviews\Queries as Queries;
 use WP_Error;
 
 /**
- * Load our primary settings page.
+ * Create and return the table of reviews.
  *
  * @return void
  */
-function display_primary_settings_page() {
+function display_reviews_list_page() {
 
 	// Wrap the entire thing.
 	echo '<div class="wrap woo-better-reviews-admin-wrap woo-better-reviews-admin-reviews-wrap">';
@@ -29,39 +29,20 @@ function display_primary_settings_page() {
 		// Handle the title.
 		echo '<h1 class="wp-heading-inline woo-better-reviews-admin-title">' . esc_html( get_admin_page_title() ) . '</h1>';
 
-		// Handle the table.
-		load_review_list_table(); // WPCS: XSS ok.
+		// Cut off the header.
+		echo '<hr class="wp-header-end">';
+
+		// Call our table class.
+		$table  = new \WooBetterReviews_ListReviews();
+
+		// And output the table.
+		$table->prepare_items();
+
+		// The actual table itself.
+		$table->display();
 
 	// Close the entire thing.
 	echo '</div>';
-}
-
-/**
- * Create and return the table of reviews.
- *
- * @param  array $requests  The existing requests.
- *
- * @return HTML
- */
-function load_review_list_table() {
-
-	// Fetch the action link.
-	// $action = Helpers\get_admin_menu_link();
-
-	// Call our table class.
-	$table  = new \WooBetterReviews_ListReviews();
-
-	// And output the table.
-	$table->prepare_items();
-
-	// And handle the display
-	// echo '<form class="woo-better-reviews-admin-form" id="woo-better-reviews-admin-reviews-form" action="' . esc_url( $action ) . '" method="post">';
-
-	// The actual table itself.
-	$table->display();
-
-	// And close it up.
-	// echo '</form>';
 }
 
 /**
@@ -92,7 +73,7 @@ function display_product_attributes_page() {
 		}
 
 		// Load the proper page.
-		echo ! $isedit ? load_attributes_primary_display( $action ) : load_edit_single_attribute_form( $action );
+		echo ! $isedit ? load_primary_attributes_display( $action ) : load_edit_single_attribute_form( $action );
 
 	// Close the wrapper.
 	echo '</div>';
@@ -105,7 +86,7 @@ function display_product_attributes_page() {
  *
  * @return void
  */
-function load_attributes_primary_display( $action = '' ) {
+function load_primary_attributes_display( $action = '' ) {
 
 	// Bail if we shouldn't be here.
 	if ( ! current_user_can( 'manage_options' ) ) {
@@ -183,7 +164,7 @@ function load_add_new_attribute_form( $action = '' ) {
 				$build .= '<input name="new-attribute[name]" id="attribute-name" value="" size="40" aria-required="true" type="text">';
 
 				// Include some explain text.
-				$build .= '<p>' . esc_html__( 'Eventual description text', 'woo-better-reviews' ) . '</p>';
+				$build .= '<p>' . esc_html__( 'The name is how it appears on your site.', 'woo-better-reviews' ) . '</p>';
 
 			// Close the name field.
 			$build .= '</div>';
@@ -196,7 +177,7 @@ function load_add_new_attribute_form( $action = '' ) {
 				$build .= '<textarea name="new-attribute[desc]" id="attribute-desc" rows="5" cols="40"></textarea>';
 
 				// Include some explain text.
-				$build .= '<p>' . esc_html__( 'Eventual description text', 'woo-better-reviews' ) . '</p>';
+				$build .= '<p>' . esc_html__( 'The description is optional and may not be displayed based on your theme.', 'woo-better-reviews' ) . '</p>';
 
 			// Close the description field.
 			$build .= '</div>';
@@ -310,7 +291,7 @@ function load_edit_single_attribute_form( $action ) {
 						$build .= '<input name="attribute-args[name]" id="attribute-name" value="' . esc_attr( $attribute_data['attribute_name'] ) . '" size="40" aria-required="true" type="text">';
 
 						// Include some explain text.
-						$build .= '<p class="description">' . esc_html__( 'Eventual description text', 'woo-better-reviews' ) . '</p>';
+						$build .= '<p class="description">' . esc_html__( 'The name is how it appears on your site.', 'woo-better-reviews' ) . '</p>';
 
 					$build .= '</td>';
 
@@ -332,7 +313,7 @@ function load_edit_single_attribute_form( $action ) {
 						$build .= '<textarea name="attribute-args[desc]" id="attribute-desc" rows="5" cols="40">' . esc_textarea( $attribute_data['attribute_desc'] ) . '</textarea>';
 
 						// Include some explain text.
-						$build .= '<p class="description">' . esc_html__( 'Eventual description text', 'woo-better-reviews' ) . '</p>';
+						$build .= '<p class="description">' . esc_html__( 'The description is optional and may not be displayed based on your theme.', 'woo-better-reviews' ) . '</p>';
 
 					$build .= '</td>';
 
@@ -362,9 +343,6 @@ function load_edit_single_attribute_form( $action ) {
 							$build .= '<label class="woo-better-reviews-form-split-label" for="attribute-label-max">' . esc_html__( 'Maximum', 'woo-better-reviews' ) . '</label>';
 						$build .= '</span>';
 
-						// Include some explain text.
-						$build .= '<p class="description">' . esc_html__( 'Eventual description text', 'woo-better-reviews' ) . '</p>';
-
 					$build .= '</td>';
 
 				// Close the description field.
@@ -377,8 +355,23 @@ function load_edit_single_attribute_form( $action ) {
 		$build .= '</table>';
 
 		// Output the submit button.
-		$build .= '<div class="edit-tag-actions">';
-			$build .= get_submit_button( __( 'Update Attribute', 'woo-better-reviews' ), 'primary', 'edit-existing-attribute' );
+		$build .= '<div class="edit-tag-actions edit-attribute-actions">';
+
+			// Wrap it in a paragraph.
+			$build .= '<p class="submit">';
+
+				// The actual submit button.
+				$build .= get_submit_button( __( 'Update Attribute', 'woo-better-reviews' ), 'primary', 'edit-existing-attribute', false );
+
+				// Our cancel link.
+				$build .= '<span class="cancel-edit-link-wrap">';
+					$build .= '<a class="cancel-edit-link" href="' . esc_url( $action ) . '">' . esc_html__( 'Cancel', 'woo-better-reviews' ) . '</a>';
+				$build .= '</span>';
+
+			// Close up the paragraph.
+			$build .= '</p>';
+
+		// And the div.
 		$build .= '</div>';
 
 	// Close up the form markup.

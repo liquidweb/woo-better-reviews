@@ -36,15 +36,15 @@ function load_admin_menus() {
 		get_menu_page_title( 'reviews' ),
 		__( 'Reviews', 'woo-better-reviews' ),
 		$user_menu_cap,
-		Core\SETTINGS_ANCHOR,
-		__NAMESPACE__ . '\load_primary_settings_page',
+		Core\REVIEWS_ANCHOR,
+		__NAMESPACE__ . '\load_reviews_list_page',
         'dashicons-feedback',
         '58.8'
     );
 
 	// Add the attributes page.
 	add_submenu_page(
-		Core\SETTINGS_ANCHOR,
+		Core\REVIEWS_ANCHOR,
 		get_menu_page_title( 'attributes' ),
 		__( 'Attributes','woo-better-reviews' ),
 		$user_menu_cap,
@@ -54,7 +54,7 @@ function load_admin_menus() {
 
 	// Add the characteristics page.
 	add_submenu_page(
-		Core\SETTINGS_ANCHOR,
+		Core\REVIEWS_ANCHOR,
 		get_menu_page_title( 'characteristics' ),
 		__( 'Characteristics', 'woo-better-reviews' ),
 		$user_menu_cap,
@@ -68,8 +68,8 @@ function load_admin_menus() {
  *
  * @return void
  */
-function load_primary_settings_page() {
-	AdminPages\display_primary_settings_page();
+function load_reviews_list_page() {
+	AdminPages\display_reviews_list_page();
 }
 
 /**

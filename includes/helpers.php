@@ -57,6 +57,25 @@ function maybe_valid_table( $table_name = '' ) {
 }
 
 /**
+ * Set and return the array of possible review statuses.
+ *
+ * @return array
+ */
+function get_review_statuses() {
+
+	// Set up the possible statuses.
+	$statuses   = array(
+		'approved' => __( 'Approved', 'woo-better-reviews' ),
+		'pending'  => __( 'Pending Approval', 'woo-better-reviews' ),
+		'rejected' => __( 'Rejected', 'woo-better-reviews' ),
+		'hidden'   => __( 'Hidden', 'woo-better-reviews' ),
+	);
+
+	// Return via filtered.
+	return apply_filters( Core\HOOK_PREFIX . 'reviews_statuses', $statuses );
+}
+
+/**
  * Check to see if there is a search term and return it.
  *
  * @param  string $return  The return type we wanna have. Boolean or string.
@@ -98,7 +117,7 @@ function get_admin_menu_link( $menu_slug = '' ) {
 	}
 
 	// Set my slug.
-	$menu_slug  = ! empty( $menu_slug ) ? trim( $menu_slug ) : trim( Core\SETTINGS_ANCHOR );
+	$menu_slug  = ! empty( $menu_slug ) ? trim( $menu_slug ) : trim( Core\REVIEWS_ANCHOR );
 
 	// Build out the link if we don't have our function.
 	if ( ! function_exists( 'menu_page_url' ) ) {
@@ -131,7 +150,7 @@ function admin_page_redirect( $custom_args = array(), $menu_slug = '', $response
 	}
 
 	// Set my slug.
-	$redirect_slug  = ! empty( $menu_slug ) ? trim( $menu_slug ) : trim( Core\SETTINGS_ANCHOR );
+	$redirect_slug  = ! empty( $menu_slug ) ? trim( $menu_slug ) : trim( Core\REVIEWS_ANCHOR );
 
 	// Handle the setup.
 	$redirect_base  = get_admin_menu_link( $redirect_slug );
@@ -145,6 +164,28 @@ function admin_page_redirect( $custom_args = array(), $menu_slug = '', $response
 	// Do the redirect.
 	wp_safe_redirect( $redirect_link );
 	exit;
+}
+
+/**
+ * Get the various parts of a product for the reviews list.
+ *
+ * @param  integer $product_id  The product ID we want.
+ *
+ * @return array
+ */
+function get_admin_product_data( $product_id = 0 ) {
+
+	// Make sure we have valid ID.
+	if ( empty( $product_id ) || 'product' !== get_post_type( $product_id ) ) {
+		return false;
+	}
+
+	// Set up and return the data.
+	return array(
+		'title'     => get_the_title( $product_id ),
+		'permalink' => get_permalink( $product_id ),
+		'edit-link' => get_edit_post_link( $product_id, 'raw' ),
+	);
 }
 
 /**

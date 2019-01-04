@@ -44,8 +44,8 @@ define( __NAMESPACE__ . '\HOOK_PREFIX', 'wc_better_reviews_' );
 // Set our custom table prefix.
 define( __NAMESPACE__ . '\TABLE_PREFIX', 'woocommerce_better_reviews_' );
 
-// Set the name for our various settings anchors.
-define( __NAMESPACE__ . '\SETTINGS_ANCHOR', 'woo-better-reviews' );
+// Set the name for our various menu page anchors.
+define( __NAMESPACE__ . '\REVIEWS_ANCHOR', 'woo-better-reviews' );
 define( __NAMESPACE__ . '\ATTRIBUTES_ANCHOR', 'woo-better-reviews-product-attributes' );
 define( __NAMESPACE__ . '\CHARACTERISTICS_ANCHOR', 'woo-better-reviews-author-characteristics' );
 
