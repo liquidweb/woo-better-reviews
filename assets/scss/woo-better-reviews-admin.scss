@@ -1,7 +1,9 @@
-// All the admin parts will be pulled in.
-@import "admin/list-attributes";
-@import "admin/edit-attribute";
+
+// Load screen parts.
+@import "admin/list-primary-display";
+@import "admin/edit-single-item";
 
 
+// Load review parts.
 @import "admin/list-reviews";
 

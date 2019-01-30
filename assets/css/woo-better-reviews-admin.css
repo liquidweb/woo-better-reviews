@@ -1,15 +1,18 @@
-.col-attributes-left .col-wrap {
+.col-primary-display-left .col-wrap {
   margin-top: 40px; }
+  .col-primary-display-left .col-wrap .woo-better-reviews-add-new-submit-wrap {
+    margin: 0 0 10px;
+    padding: 10px 0; }
 
-form#woo-better-reviews-admin-edit-attribute-form {
+form.woo-better-reviews-admin-edit-single-item-form {
   max-width: 800px; }
 
-.edit-attribute-actions .cancel-edit-link-wrap {
+.edit-single-item-actions .cancel-edit-link-wrap {
   line-height: 28px;
   vertical-align: middle;
   text-align: left;
   margin-left: 8px; }
-  .edit-attribute-actions .cancel-edit-link-wrap .cancel-edit-link {
+  .edit-single-item-actions .cancel-edit-link-wrap .cancel-edit-link {
     color: #a00;
     text-decoration: none; }
 
