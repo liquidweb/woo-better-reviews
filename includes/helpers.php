@@ -76,6 +76,20 @@ function get_review_statuses() {
 }
 
 /**
+ * Check to see if reviews are enabled.
+ *
+ * @return boolean
+ */
+function maybe_reviews_enabled() {
+
+	// Check the Woo setting.
+	$woo_enable = get_option( 'woocommerce_enable_reviews', 0 );
+
+	// Return a basic boolean.
+	return ! empty( $woo_enable ) && 'yes' === sanitize_text_field( $woo_enable ) ? true : false;
+}
+
+/**
  * Check to see if there is a search term and return it.
  *
  * @param  string $return  The return type we wanna have. Boolean or string.

@@ -72,6 +72,7 @@ require_once __DIR__ . '/includes/queries.php';
 
 // Load the admin specific files.
 if ( is_admin() ) {
+	require_once __DIR__ . '/includes/admin/woo-settings.php';
 	require_once __DIR__ . '/includes/admin/menu-items.php';
 	require_once __DIR__ . '/includes/admin/admin-assets.php';
 	require_once __DIR__ . '/includes/admin/admin-notices.php';
