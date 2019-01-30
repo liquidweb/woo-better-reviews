@@ -1,6 +1,6 @@
 <?php
 /**
- * Our table setup for the handling the attributes pieces.
+ * Our table setup for the handling the characteristics pieces.
  *
  * @package WooBetterReviews
  */
@@ -8,6 +8,7 @@
 // Set our aliases.
 use LiquidWeb\WooBetterReviews as Core;
 use LiquidWeb\WooBetterReviews\Helpers as Helpers;
+use LiquidWeb\WooBetterReviews\Utilities as Utilities;
 use LiquidWeb\WooBetterReviews\Database as Database;
 use LiquidWeb\WooBetterReviews\Queries as Queries;
 
@@ -22,7 +23,7 @@ if ( ! class_exists( 'WP_List_Table' ) ) {
 /**
  * Create a new table class that will extend the WP_List_Table.
  */
-class WooBetterReviews_ListAttributes extends WP_List_Table {
+class WooBetterReviews_ListCharstcs extends WP_List_Table {
 
 	/**
 	 * WooBetterReviews_ListReviews constructor.
@@ -34,8 +35,8 @@ class WooBetterReviews_ListAttributes extends WP_List_Table {
 
 		// Set parent defaults.
 		parent::__construct( array(
-			'singular' => __( 'Product Attribute', 'woo-better-reviews' ),
-			'plural'   => __( 'Product Attributes', 'woo-better-reviews' ),
+			'singular' => __( 'Product Characteristic', 'woo-better-reviews' ),
+			'plural'   => __( 'Product Characteristics', 'woo-better-reviews' ),
 			'ajax'     => false,
 		) );
 	}
@@ -98,16 +99,16 @@ class WooBetterReviews_ListAttributes extends WP_List_Table {
 
 		// Build our array of column setups.
 		$setup  = array(
-			'cb'             => '<input type="checkbox" />',
-			'attribute_name' => __( 'Name', 'woo-better-reviews' ),
-			'attribute_slug' => __( 'Slug', 'woo-better-reviews' ),
-			'attribute_desc' => __( 'Description', 'woo-better-reviews' ),
-			'min_label'      => __( 'Min Label', 'woo-better-reviews' ),
-			'max_label'      => __( 'Max Label', 'woo-better-reviews' ),
+			'cb'              => '<input type="checkbox" />',
+			'charstcs_name'   => __( 'Name', 'woo-better-reviews' ),
+			'charstcs_slug'   => __( 'Slug', 'woo-better-reviews' ),
+			'charstcs_desc'   => __( 'Description', 'woo-better-reviews' ),
+			'charstcs_values' => __( 'Values', 'woo-better-reviews' ),
+			'charstcs_type'   => __( 'Type', 'woo-better-reviews' ),
 		);
 
 		// Return filtered.
-		return apply_filters( Core\HOOK_PREFIX . 'attributes_table_column_items', $setup );
+		return apply_filters( Core\HOOK_PREFIX . 'charstcs_table_column_items', $setup );
 	}
 
 	/**
@@ -124,7 +125,7 @@ class WooBetterReviews_ListAttributes extends WP_List_Table {
 		echo '<form class="woo-better-reviews-admin-form" id="woo-better-reviews-admin-attributes-form" method="post">';
 
 			// Add a nonce for the bulk action.
-			wp_nonce_field( 'wbr_bulk_attributes_action', 'wbr_bulk_attributes_nonce' );
+			wp_nonce_field( 'wbr_bulk_charstcs_action', 'wbr_bulk_charstcs_nonce' );
 
 			// And the parent display (which is most of it).
 			parent::display();
@@ -147,7 +148,7 @@ class WooBetterReviews_ListAttributes extends WP_List_Table {
 		}
 
 		// Fetch the action link.
-		$search_action  = Helpers\get_admin_menu_link( Core\ATTRIBUTES_ANCHOR );
+		$search_action  = Helpers\get_admin_menu_link( Core\CHARSTCS_ANCHOR );
 
 		// Set our actual input IDs.
 		$input_field_id = $input_id . '-search-input';
@@ -223,7 +224,7 @@ class WooBetterReviews_ListAttributes extends WP_List_Table {
 	 * @return HTML
 	 */
 	protected function extra_tablenav( $which ) {
-		return apply_filters( Core\HOOK_PREFIX . 'attributes_table_extra_tablenav', '', $which );
+		return apply_filters( Core\HOOK_PREFIX . 'charstcs_table_extra_tablenav', '', $which );
 	}
 
 	/**
@@ -236,7 +237,7 @@ class WooBetterReviews_ListAttributes extends WP_List_Table {
 	 * @return null
 	 */
 	protected function handle_row_actions( $item, $column_name, $primary ) {
-		return apply_filters( Core\HOOK_PREFIX . 'attributes_table_row_actions', '', $item, $column_name, $primary );
+		return apply_filters( Core\HOOK_PREFIX . 'charstcs_table_row_actions', '', $item, $column_name, $primary );
 	}
 
 	/**
@@ -248,11 +249,11 @@ class WooBetterReviews_ListAttributes extends WP_List_Table {
 
 		// Build our array of sortable columns.
 		$setup  = array(
-			'attribute_name' => array( 'attribute_name', true ),
+			'charstcs_name' => array( 'charstcs_name', true ),
 		);
 
 		// Return it, filtered.
-		return apply_filters( Core\HOOK_PREFIX . 'attributes_table_sortable_columns', $setup );
+		return apply_filters( Core\HOOK_PREFIX . 'charstcs_table_sortable_columns', $setup );
 	}
 
 	/**
@@ -264,11 +265,11 @@ class WooBetterReviews_ListAttributes extends WP_List_Table {
 
 		// Build our array of hidden columns.
 		$setup  = array(
-			'attribute_slug',
+			'charstcs_slug',
 		);
 
 		// Return a blank array, filtered.
-		return apply_filters( Core\HOOK_PREFIX . 'attributes_table_hidden_columns', $setup );
+		return apply_filters( Core\HOOK_PREFIX . 'charstcs_table_hidden_columns', $setup );
 	}
 
 	/**
@@ -280,11 +281,11 @@ class WooBetterReviews_ListAttributes extends WP_List_Table {
 
 		// Make a basic array of the actions we wanna include.
 		$setup  = array(
-			'wbr_bulk_delete' => __( 'Delete Attributes', 'woo-better-reviews' ),
+			'wbr_bulk_delete' => __( 'Delete Characteristics', 'woo-better-reviews' ),
 		);
 
 		// Return it filtered.
-		return apply_filters( Core\HOOK_PREFIX . 'attributes_table_bulk_actions', $setup );
+		return apply_filters( Core\HOOK_PREFIX . 'charstcs_table_bulk_actions', $setup );
 	}
 
 	/**
@@ -295,7 +296,7 @@ class WooBetterReviews_ListAttributes extends WP_List_Table {
 	protected function process_bulk_action() {
 
 		// Make sure we have the page we want.
-		if ( empty( $_GET['page'] ) || Core\ATTRIBUTES_ANCHOR !== sanitize_text_field( $_GET['page'] ) ) {
+		if ( empty( $_GET['page'] ) || Core\CHARSTCS_ANCHOR !== sanitize_text_field( $_GET['page'] ) ) {
 			return;
 		}
 
@@ -305,32 +306,32 @@ class WooBetterReviews_ListAttributes extends WP_List_Table {
 		}
 
 		// Handle the nonce check.
-		if ( empty( $_POST['wbr_bulk_attributes_nonce'] ) || ! wp_verify_nonce( $_POST['wbr_bulk_attributes_nonce'], 'wbr_bulk_attributes_action' ) ) {
+		if ( empty( $_POST['wbr_bulk_charstcs_nonce'] ) || ! wp_verify_nonce( $_POST['wbr_bulk_charstcs_nonce'], 'wbr_bulk_charstcs_action' ) ) {
 			wp_die( __( 'Your security nonce failed.', 'woo-better-reviews' ) );
 		}
 
-		// Check for the array of attribute IDs being passed.
-		if ( empty( $_POST['attribute-ids'] ) ) {
+		// Check for the array of charstcs IDs being passed.
+		if ( empty( $_POST['charstcs-ids'] ) ) {
 
 			// Set my error return args.
 			$redirect_args  = array(
 				'success'           => false,
 				'wbr-action-result' => 'failed',
-				'wbr-error-code'    => 'missing-attribute-ids',
+				'wbr-error-code'    => 'missing-charstcs-ids',
 			);
 
 			// And redirect.
-			Helpers\admin_page_redirect( $redirect_args, Core\ATTRIBUTES_ANCHOR );
+			Helpers\admin_page_redirect( $redirect_args, Core\CHARSTCS_ANCHOR );
 		}
 
-		// Set my attribute IDs.
-		$attribute_ids  = array_map( 'absint', $_POST['attribute-ids'] );
+		// Set my charstcs IDs.
+		$charstcs_ids   = array_map( 'absint', $_POST['charstcs-ids'] );
 
 		// Now loop my IDs and attempt to delete each one.
-		foreach ( $attribute_ids as $attribute_id ) {
+		foreach ( $charstcs_ids as $charstcs_id ) {
 
 			// Attempt to delete the attribute.
-			$maybe_deleted  = Database\delete( 'attributes', $attribute_id );
+			$maybe_deleted  = Database\delete( 'charstcs', $charstcs_id );
 
 			// Check for the boolean true result.
 			if ( false !== $maybe_deleted ) {
@@ -341,7 +342,7 @@ class WooBetterReviews_ListAttributes extends WP_List_Table {
 			if ( empty( $maybe_deleted ) || false === $maybe_deleted || is_wp_error( $maybe_deleted ) ) {
 
 				// Determine the error code.
-				$get_error_code = is_wp_error( $maybe_deleted ) ? $maybe_deleted->get_error_code() : 'attribute-delete-failed';
+				$get_error_code = is_wp_error( $maybe_deleted ) ? $maybe_deleted->get_error_code() : 'charstcs-delete-failed';
 
 				// Set my error return args.
 				$redirect_args  = array(
@@ -351,7 +352,7 @@ class WooBetterReviews_ListAttributes extends WP_List_Table {
 				);
 
 				// And redirect.
-				Helpers\admin_page_redirect( $redirect_args, Core\ATTRIBUTES_ANCHOR );
+				Helpers\admin_page_redirect( $redirect_args, Core\CHARSTCS_ANCHOR );
 			}
 
 			// Nothing left in the loop to do.
@@ -360,11 +361,11 @@ class WooBetterReviews_ListAttributes extends WP_List_Table {
 		// Set my success args.
 		$redirect_args  = array(
 			'success'           => 1,
-			'wbr-action-result' => 'attribute-deleted-bulk',
+			'wbr-action-result' => 'charstcs-deleted-bulk',
 		);
 
 		// And redirect.
-		Helpers\admin_page_redirect( $redirect_args, Core\ATTRIBUTES_ANCHOR );
+		Helpers\admin_page_redirect( $redirect_args, Core\CHARSTCS_ANCHOR );
 	}
 
 	/**
@@ -380,7 +381,7 @@ class WooBetterReviews_ListAttributes extends WP_List_Table {
 		$id = absint( $item['id'] );
 
 		// Return my checkbox.
-		return '<input type="checkbox" name="attribute-ids[]" class="woo-better-reviews-admin-checkbox" id="cb-' . $id . '" value="' . $id . '" /><label for="cb-' . $id . '" class="screen-reader-text">' . __( 'Select attribute', 'woo-better-reviews' ) . '</label>';
+		return '<input type="checkbox" name="charstcs-ids[]" class="woo-better-reviews-admin-checkbox" id="cb-' . $id . '" value="' . $id . '" /><label for="cb-' . $id . '" class="screen-reader-text">' . __( 'Select characteristic', 'woo-better-reviews' ) . '</label>';
 	}
 
 	/**
@@ -390,13 +391,13 @@ class WooBetterReviews_ListAttributes extends WP_List_Table {
 	 *
 	 * @return string
 	 */
-	protected function column_attribute_name( $item ) {
+	protected function column_charstcs_name( $item ) {
 
 		// Get my edit link.
-		$edit_link  = $this->get_single_attribute_action_link( absint( $item['id'] ), 'edit' );
+		$edit_link  = $this->get_single_charstcs_action_link( absint( $item['id'] ), 'edit' );
 
 		// Set up my ARIA label.
-		$aria_label = sprintf( __( '"%s" (Edit)', 'woo-better-reviews' ), $item['attribute_name'] );
+		$aria_label = sprintf( __( '"%s" (Edit)', 'woo-better-reviews' ), $item['charstcs_name'] );
 
 		// Set my empty.
 		$build  = '';
@@ -405,13 +406,13 @@ class WooBetterReviews_ListAttributes extends WP_List_Table {
 		$build .= '<strong>';
 
 			// Set the link markup.
-			$build .= '<a class="row-title" href="' . esc_url( $edit_link ) . '" aria-label="' . esc_attr( $aria_label ) . '">' . esc_html( $item['attribute_name'] ) . '</a>';
+			$build .= '<a class="row-title" href="' . esc_url( $edit_link ) . '" aria-label="' . esc_attr( $aria_label ) . '">' . esc_html( $item['charstcs_name'] ) . '</a>';
 
 		// Close the strong tag.
 		$build .= '</strong>';
 
 		// Create my formatted date.
-		$setup  = apply_filters( Core\HOOK_PREFIX . 'attributes_table_column_attribute_name', $build, $item );
+		$setup  = apply_filters( Core\HOOK_PREFIX . 'charstcs_table_column_charstcs_name', $build, $item );
 
 		// Return, along with our row actions.
 		return $setup . $this->row_actions( $this->setup_row_action_items( $item ) );
@@ -424,13 +425,45 @@ class WooBetterReviews_ListAttributes extends WP_List_Table {
 	 *
 	 * @return string
 	 */
-	protected function column_attribute_desc( $item ) {
+	protected function column_charstcs_desc( $item ) {
 
 		// Handle the setup based on a description being there.
-		$setup  = ! empty( $item['attribute_desc'] ) ? esc_html( $item['attribute_desc'] ) : $this->empty_column_text( __( 'No description', 'woo-better-reviews' ) );
+		$setup  = ! empty( $item['charstcs_desc'] ) ? esc_html( $item['charstcs_desc'] ) : $this->empty_column_text( __( 'No description', 'woo-better-reviews' ) );
 
 		// Return my formatted product name.
-		return apply_filters( Core\HOOK_PREFIX . 'attributes_table_column_attribute_desc', $setup, $item );
+		return apply_filters( Core\HOOK_PREFIX . 'charstcs_table_column_charstcs_desc', $setup, $item );
+	}
+
+	/**
+	 * The visible values column.
+	 *
+	 * @param  array  $item  The item from the data array.
+	 *
+	 * @return string
+	 */
+	protected function column_charstcs_values( $item ) {
+
+		// Handle the setup based on values being there.
+		$setup  = ! empty( $item['charstcs_values'] ) ? Utilities\format_array_values_display( $item['charstcs_values'] ) : $this->empty_column_text( __( 'No values', 'woo-better-reviews' ) );
+
+		// Return my formatted product name.
+		return apply_filters( Core\HOOK_PREFIX . 'charstcs_table_column_charstcs_values', $setup, $item );
+	}
+
+	/**
+	 * The visible type column.
+	 *
+	 * @param  array  $item  The item from the data array.
+	 *
+	 * @return string
+	 */
+	protected function column_charstcs_type( $item ) {
+
+		// Handle the setup based on a type being there.
+		$setup  = ! empty( $item['charstcs_type'] ) ? esc_html( $item['charstcs_type'] ) : $this->empty_column_text( __( 'No type', 'woo-better-reviews' ) );
+
+		// Return my formatted product name.
+		return apply_filters( Core\HOOK_PREFIX . 'charstcs_table_column_charstcs_type', $setup, $item );
 	}
 
 	/**
@@ -441,11 +474,11 @@ class WooBetterReviews_ListAttributes extends WP_List_Table {
 	private function table_data() {
 
 		// Get all the attribute data.
-		$attribute_objects  = Queries\get_all_attributes();
-		//preprint( $attribute_objects, true );
+		$charstcs_objects   = Queries\get_all_charstcs();
+		//preprint( $charstcs_objects, true );
 
 		// Bail with no data.
-		if ( ! $attribute_objects ) {
+		if ( ! $charstcs_objects ) {
 			return array();
 		}
 
@@ -453,24 +486,24 @@ class WooBetterReviews_ListAttributes extends WP_List_Table {
 		$data   = array();
 
 		// Now loop each customer info.
-		foreach ( $attribute_objects as $attribute_object ) {
+		foreach ( $charstcs_objects as $charstcs_object ) {
 
 			// Set the array of the data we want.
 			$setup  = array(
-				'id'             => absint( $attribute_object->attribute_id ),
-				'attribute_name' => esc_attr( $attribute_object->attribute_name ),
-				'attribute_slug' => esc_attr( $attribute_object->attribute_slug ),
-				'attribute_desc' => esc_textarea( $attribute_object->attribute_desc ),
-				'min_label'      => esc_attr( $attribute_object->min_label ),
-				'max_label'      => esc_attr( $attribute_object->max_label ),
+				'id'              => absint( $charstcs_object->charstcs_id ),
+				'charstcs_name'   => esc_attr( $charstcs_object->charstcs_name ),
+				'charstcs_slug'   => esc_attr( $charstcs_object->charstcs_slug ),
+				'charstcs_desc'   => esc_textarea( $charstcs_object->charstcs_desc ),
+				'charstcs_values' => $charstcs_object->charstcs_values, // this is not sanitized on purpose because it's an array
+				'charstcs_type'   => esc_attr( $charstcs_object->charstcs_type ),
 			);
 
 			// Run it through a filter.
-			$data[] = apply_filters( Core\HOOK_PREFIX . 'attributes_table_data_item', $setup, $attribute_object );
+			$data[] = apply_filters( Core\HOOK_PREFIX . 'charstcs_table_data_item', $setup, $charstcs_object );
 		}
 
 		// Return our data.
-		return apply_filters( Core\HOOK_PREFIX . 'attributes_table_data_array', $data, $attribute_objects );
+		return apply_filters( Core\HOOK_PREFIX . 'charstcs_table_data_array', $data, $charstcs_objects );
 	}
 
 	/**
@@ -505,14 +538,12 @@ class WooBetterReviews_ListAttributes extends WP_List_Table {
 
 		// Set our array of search fields.
 		$fields = array(
-			'attribute_name',
-			'attribute_desc',
-			'min_label',
-			'max_label',
+			'charstcs_name',
+			'charstcs_desc',
 		);
 
 		// Return the fields, filtered.
-		return apply_filters( Core\HOOK_PREFIX . 'attributes_table_search_fields', $fields );
+		return apply_filters( Core\HOOK_PREFIX . 'charstcs_table_search_fields', $fields );
 	}
 
 	/**
@@ -591,16 +622,16 @@ class WooBetterReviews_ListAttributes extends WP_List_Table {
 		// Run our column switch.
 		switch ( $column_name ) {
 
-			case 'attribute_name' :
-			case 'attribute_slug' :
-			case 'attribute_desc' :
-			case 'min_label' :
-			case 'max_label' :
+			case 'charstcs_name' :
+			case 'charstcs_slug' :
+			case 'charstcs_desc' :
+			case 'charstcs_values' :
+			case 'charstcs_type' :
 				return ! empty( $dataset[ $column_name ] ) ? $dataset[ $column_name ] : '';
 				break;
 
 			default :
-				return apply_filters( Core\HOOK_PREFIX . 'attributes_table_column_default', '', $dataset, $column_name );
+				return apply_filters( Core\HOOK_PREFIX . 'charstcs_table_column_default', '', $dataset, $column_name );
 		}
 	}
 
@@ -623,13 +654,13 @@ class WooBetterReviews_ListAttributes extends WP_List_Table {
 	private function setup_row_action_items( $item ) {
 
 		// Grab our settings page admin link.
-		$settings_link  = Helpers\get_admin_menu_link( Core\ATTRIBUTES_ANCHOR );
+		$settings_link  = Helpers\get_admin_menu_link( Core\CHARSTCS_ANCHOR );
 
-		// Set my attribute ID.
-		$attribute_id   = absint( $item['id'] );
+		// Set my charstcs ID.
+		$charstcs_id    = absint( $item['id'] );
 
 		// Create the array of action items.
-		$action_dataset = $this->get_row_action_dataset( $attribute_id );
+		$action_dataset = $this->get_row_action_dataset( $charstcs_id );
 
 		// Set an empty array.
 		$setup  = array();
@@ -638,10 +669,10 @@ class WooBetterReviews_ListAttributes extends WP_List_Table {
 		foreach ( $action_dataset as $action_name => $args ) {
 
 			// Make my action link.
-			$action_link    = $this->get_single_attribute_action_link( $attribute_id, $action_name );
+			$action_link    = $this->get_single_charstcs_action_link( $charstcs_id, $action_name );
 
 			// Set the classes.
-			$action_class   = 'woo-better-reviews-action-link woo-better-reviews-attribute-action-link woo-better-reviews-attribute-' . esc_attr( $action_name ) . '-action-link';
+			$action_class   = 'woo-better-reviews-action-link woo-better-reviews-charstcs-action-link woo-better-reviews-charstcs-' . esc_attr( $action_name ) . '-action-link';
 
 			// Set an empty.
 			$build  = '';
@@ -673,32 +704,32 @@ class WooBetterReviews_ListAttributes extends WP_List_Table {
 		}
 
 		// Return our row actions.
-		return apply_filters( Core\HOOK_PREFIX . 'attributes_table_row_actions', $setup, $item );
+		return apply_filters( Core\HOOK_PREFIX . 'charstcs_table_row_actions', $setup, $item );
 	}
 
 	/**
 	 * Get the dataset for the action links.
 	 *
-	 * @param  integer $attribute_id   The individual attribute we are making links for.
+	 * @param  integer $charstcs_id    The individual charstcs we are making links for.
 	 * @param  string  $single_action  Request one action from the entire array.
 	 *
 	 * @return array
 	 */
-	protected function get_row_action_dataset( $attribute_id = 0, $single_action = '' ) {
+	protected function get_row_action_dataset( $charstcs_id = 0, $single_action = '' ) {
 
 		// Create the two nonces.
-		$edit_nonce     = wp_create_nonce( 'lw_woo_edit_single_' . $attribute_id );
-		$delete_nonce   = wp_create_nonce( 'lw_woo_delete_single_' . $attribute_id );
+		$edit_nonce     = wp_create_nonce( 'lw_woo_edit_single_' . $charstcs_id );
+		$delete_nonce   = wp_create_nonce( 'lw_woo_delete_single_' . $charstcs_id );
 
 		// Create the array of action items.
 		$action_dataset = array(
 			'edit' => array(
 				'nonce'  => $edit_nonce,
 				'label'  => __( 'Edit', 'woo-better-reviews' ),
-				'title'  => __( 'Edit Attribute', 'woo-better-reviews' ),
+				'title'  => __( 'Edit Characteristic', 'woo-better-reviews' ),
 				'data'   => array(
-					'item-id'   => $attribute_id,
-					'item-type' => 'attribute',
+					'item-id'   => $charstcs_id,
+					'item-type' => 'charstcs',
 					'nonce'     => $edit_nonce,
 				),
 			),
@@ -706,10 +737,10 @@ class WooBetterReviews_ListAttributes extends WP_List_Table {
 			'delete' => array(
 				'nonce'  => $delete_nonce,
 				'label'  => __( 'Delete', 'woo-better-reviews' ),
-				'title'  => __( 'Delete Attribute', 'woo-better-reviews' ),
+				'title'  => __( 'Delete Characteristic', 'woo-better-reviews' ),
 				'data'   => array(
-					'item-id'   => $attribute_id,
-					'item-type' => 'attribute',
+					'item-id'   => $charstcs_id,
+					'item-type' => 'charstcs',
 					'nonce'     => $delete_nonce,
 				),
 			),
@@ -725,22 +756,22 @@ class WooBetterReviews_ListAttributes extends WP_List_Table {
 	}
 
 	/**
-	 * Create the raw URL for a single attribute action.
+	 * Create the raw URL for a single charstcs action.
 	 *
-	 * @param  integer $attribute_id  The individual attribute we are making links for.
-	 * @param  string  $action_name   The name of the action we want.
+	 * @param  integer $charstcs_id  The individual charstcs we are making links for.
+	 * @param  string  $action_name  The name of the action we want.
 	 *
 	 * @return string
 	 */
-	protected function get_single_attribute_action_link( $attribute_id = 0, $action_name = '' ) {
+	protected function get_single_charstcs_action_link( $charstcs_id = 0, $action_name = '' ) {
 
 		// Bail without the attribute ID or action name.
-		if ( empty( $attribute_id ) || empty( $action_name ) ) {
+		if ( empty( $charstcs_id ) || empty( $action_name ) ) {
 			return;
 		}
 
 		// Fetch the dataset for an edit link.
-		$action_dataset = $this->get_row_action_dataset( $attribute_id, $action_name );
+		$action_dataset = $this->get_row_action_dataset( $charstcs_id, $action_name );
 		// preprint( $action_dataset, true );
 
 		// Bail without the action dataset.
@@ -749,13 +780,13 @@ class WooBetterReviews_ListAttributes extends WP_List_Table {
 		}
 
 		// Get our primary settings link.
-		$settings_link  = Helpers\get_admin_menu_link( Core\ATTRIBUTES_ANCHOR );
+		$settings_link  = Helpers\get_admin_menu_link( Core\CHARSTCS_ANCHOR );
 
 		// Set the action link args.
 		$action_linkset = array(
 			'wbr-action-name' => $action_name,
-			'wbr-item-id'     => absint( $attribute_id ),
-			'wbr-item-type'   => 'attribute',
+			'wbr-item-id'     => absint( $charstcs_id ),
+			'wbr-item-type'   => 'charstcs',
 			'wbr-nonce'       => $action_dataset['nonce'],
 		);
 
@@ -769,7 +800,7 @@ class WooBetterReviews_ListAttributes extends WP_List_Table {
 	 * @return string
 	 */
 	public function no_items() {
-		_e( 'No attributes found.', 'woo-better-reviews' );
+		_e( 'No characteristics found.', 'woo-better-reviews' );
 	}
 
 	/**
@@ -791,7 +822,7 @@ class WooBetterReviews_ListAttributes extends WP_List_Table {
 	private function sort_data( $a, $b ) {
 
 		// Set defaults and check for query strings.
-		$ordby  = ! empty( $_GET['orderby'] ) ? $_GET['orderby'] : 'attribute_name';
+		$ordby  = ! empty( $_GET['orderby'] ) ? $_GET['orderby'] : 'charstcs_name';
 		$order  = ! empty( $_GET['order'] ) ? $_GET['order'] : 'asc';
 
 		// Set my result up.

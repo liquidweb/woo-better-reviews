@@ -771,3 +771,155 @@ function get_single_attribute( $attribute_id = 0, $purge = false ) {
 	// Return the dataset.
 	return $cached_dataset;
 }
+
+/**
+ * Get all the charstcs.
+ *
+ * @param  string  $return_type  What type of return we want. Accepts "counts", "objects", or fields.
+ * @param  boolean $purge        Optional to purge the cache'd version before looking up.
+ *
+ * @return mixed
+ */
+function get_all_charstcs( $return_type = 'objects', $purge = false ) {
+
+	// Set the key to use in our transient.
+	$ky = Core\HOOK_PREFIX . 'all_charstcs';
+
+	// If we don't want the cache'd version, delete the transient first.
+	if ( defined( 'WP_DEBUG' ) && WP_DEBUG || ! empty( $purge ) ) {
+		delete_transient( $ky );
+	}
+
+	// Attempt to get the reviews from the cache.
+	$cached_dataset = get_transient( $ky );
+
+	// If we have none, do the things.
+	if ( false === $cached_dataset ) {
+
+		// Call the global database.
+		global $wpdb;
+
+		// Set our table name.
+		$table_name = $wpdb->prefix . Core\TABLE_PREFIX .  'charstcs';
+
+		// Set up our query.
+		$query_run  = $wpdb->get_results("
+			SELECT   *
+			FROM     $table_name
+			ORDER BY charstcs_name ASC
+		" );
+
+		// Bail without any reviews.
+		if ( empty( $query_run ) ) {
+			return false;
+		}
+
+		// Set our transient with our data.
+		set_transient( $ky, $query_run, HOUR_IN_SECONDS );
+
+		// And change the variable to do the things.
+		$cached_dataset = $query_run;
+	}
+
+	// Now switch between my return types.
+	switch ( sanitize_text_field( $return_type ) ) {
+
+		case 'counts' :
+			return count( $cached_dataset );
+			break;
+
+		case 'objects' :
+			return $cached_dataset;
+			break;
+
+		case 'ids' :
+
+			// Set and return my query list.
+			return wp_list_pluck( $cached_dataset, 'charstcs_id', null );
+			break;
+
+		case 'slugs' :
+
+			// Set and return my query list.
+			return wp_list_pluck( $cached_dataset, 'charstcs_slug', 'charstcs_id' );
+			break;
+
+		case 'titles' :
+
+			// Set and return my query list.
+			return wp_list_pluck( $cached_dataset, 'charstcs_name', 'charstcs_id' );
+			break;
+
+		case 'descriptions' :
+
+			// Set and return my query list.
+			return wp_list_pluck( $cached_dataset, 'charstcs_desc', 'charstcs_id' );
+			break;
+
+		// No more case breaks, no more return types.
+	}
+
+	// No reason we should get down this far but here we go.
+	return false;
+}
+
+/**
+ * Get the data for a single charstc.
+ *
+ * @param  integer $charstc_id  The ID we are checking for.
+ * @param  boolean $purge       Optional to purge the cache'd version before looking up.
+ *
+ * @return mixed
+ */
+function get_single_charstcs( $charstcs_id = 0, $purge = false ) {
+
+	// Make sure we have an charstc ID.
+	if ( empty( $charstcs_id ) ) {
+		return new WP_Error( 'missing_charstcs_id', __( 'The required characteristic ID is missing.', 'woo-better-reviews' ) );
+	}
+
+	// Set the key to use in our transient.
+	$ky = Core\HOOK_PREFIX . 'single_charstcs_' . absint( $charstcs_id );
+
+	// If we don't want the cache'd version, delete the transient first.
+	if ( defined( 'WP_DEBUG' ) && WP_DEBUG || ! empty( $purge ) ) {
+		delete_transient( $ky );
+	}
+
+	// Attempt to get the reviews from the cache.
+	$cached_dataset = get_transient( $ky );
+
+	// If we have none, do the things.
+	if ( false === $cached_dataset ) {
+
+		// Call the global database.
+		global $wpdb;
+
+		// Set our table name.
+		$table_name = $wpdb->prefix . Core\TABLE_PREFIX .  'charstcs';
+
+		// Set up our query.
+		$query_args = $wpdb->prepare("
+			SELECT   *
+			FROM     $table_name
+			WHERE    charstcs_id = '%d'
+		", absint( $charstcs_id ) );
+
+		// Process the query.
+		$query_run  = $wpdb->get_row( $query_args, ARRAY_A );
+
+		// Bail without any reviews.
+		if ( empty( $query_run ) ) {
+			return false;
+		}
+
+		// Set our transient with our data.
+		set_transient( $ky, $query_run, HOUR_IN_SECONDS );
+
+		// And change the variable to do the things.
+		$cached_dataset = $query_run;
+	}
+
+	// Return the dataset.
+	return $cached_dataset;
+}

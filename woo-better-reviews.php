@@ -47,7 +47,7 @@ define( __NAMESPACE__ . '\TABLE_PREFIX', 'woocommerce_better_reviews_' );
 // Set the name for our various menu page anchors.
 define( __NAMESPACE__ . '\REVIEWS_ANCHOR', 'woo-better-reviews' );
 define( __NAMESPACE__ . '\ATTRIBUTES_ANCHOR', 'woo-better-reviews-product-attributes' );
-define( __NAMESPACE__ . '\CHARACTERISTICS_ANCHOR', 'woo-better-reviews-author-characteristics' );
+define( __NAMESPACE__ . '\CHARSTCS_ANCHOR', 'woo-better-reviews-author-characteristics' );
 
 // Set the option key and DB versions used to store the schemas.
 define( __NAMESPACE__ . '\DB_VERS', '1' );
@@ -55,6 +55,7 @@ define( __NAMESPACE__ . '\SCHEMA_KEY', HOOK_PREFIX . 'db_version' );
 
 // Load the multi-use files first.
 require_once __DIR__ . '/includes/helpers.php';
+require_once __DIR__ . '/includes/utilities.php';
 
 // Load the database and custom table items.
 require_once __DIR__ . '/includes/database.php';
@@ -78,6 +79,7 @@ if ( is_admin() ) {
 	require_once __DIR__ . '/includes/admin/admin-process.php';
 	require_once __DIR__ . '/includes/admin/list-reviews.php';
 	require_once __DIR__ . '/includes/admin/list-attributes.php';
+	require_once __DIR__ . '/includes/admin/list-charstcs.php';
 }
 
 // Load the front-end specific files.

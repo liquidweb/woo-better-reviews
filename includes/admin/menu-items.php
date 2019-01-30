@@ -58,7 +58,7 @@ function load_admin_menus() {
 		get_menu_page_title( 'characteristics' ),
 		__( 'Characteristics', 'woo-better-reviews' ),
 		$user_menu_cap,
-		Core\CHARACTERISTICS_ANCHOR,
+		Core\CHARSTCS_ANCHOR,
 		__NAMESPACE__ . '\load_author_characteristics_page'
 	);
 }
@@ -99,24 +99,28 @@ function load_author_characteristics_page() {
  */
 function get_menu_page_title( $menu = '' ) {
 
+	// Check to see if we are editing something or not.
+	$isedit = ! empty( $_GET['wbr-action-name'] ) && 'edit' === sanitize_text_field( $_GET['wbr-action-name'] ) ? 1 : 0;
+
 	// Handle our title creation based on the menu.
 	switch ( sanitize_text_field( $menu ) ) {
 
 		case 'reviews' :
+
+			// Make and return my label.
 			return __( 'Reviews','woo-better-reviews' );
 			break;
 
 		case 'attributes' :
-
-			// Check to see if we are editing an attribute or not.
-			$isedit = ! empty( $_GET['wbr-action-name'] ) && 'edit' === sanitize_text_field( $_GET['wbr-action-name'] ) ? 1 : 0;
 
 			// Make and return my label.
 			return ! $isedit ? __( 'Product Attributes', 'woo-better-reviews' ) : __( 'Edit Attribute', 'woo-better-reviews' );
 			break;
 
 		case 'characteristics' :
-			return __( 'Characteristics','woo-better-reviews' );
+
+			// Make and return my label.
+			return ! $isedit ? __( 'Review Author Characteristics', 'woo-better-reviews' ) : __( 'Edit Characteristic', 'woo-better-reviews' );
 			break;
 
 		// No more case breaks, no more menues.

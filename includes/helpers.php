@@ -189,6 +189,24 @@ function get_admin_product_data( $product_id = 0 ) {
 }
 
 /**
+ * Create and return the available field type array.
+ *
+ * @return array
+ */
+function get_available_field_types() {
+
+	// Build our array of column setups.
+	$field_args = array(
+		'dropdown' => __( 'Dropdown', 'woo-better-reviews' ),
+		'radio'    => __( 'Radio', 'woo-better-reviews' ),
+		'boolean'  => __( 'Boolean (Yes / No)', 'woo-better-reviews' ),
+	);
+
+	// Return filtered.
+	return apply_filters( Core\HOOK_PREFIX . 'charstcs_field_types', $field_args );
+}
+
+/**
  * Check an code and (usually an error) return the appropriate text.
  *
  * @param  string $return_code  The code provided.
@@ -216,20 +234,56 @@ function get_admin_notice_text( $return_code = '' ) {
 			return __( 'The selected attributes have been deleted.', 'woo-better-reviews' );
 			break;
 
-		case 'missing-posted-args' :
-			return __( 'The required attribute arguments were not posted.', 'woo-better-reviews' );
-			break;
-
 		case 'missing-attribute-args' :
 			return __( 'The required attribute arguments were not provided.', 'woo-better-reviews' );
 			break;
 
-		case 'missing-formatted-args' :
-			return __( 'The attribute arguments could not be formatted.', 'woo-better-reviews' );
-			break;
-
 		case 'attribute-update-failed' :
 			return __( 'The attribute could not be updated at this time.', 'woo-better-reviews' );
+			break;
+
+		case 'attribute-delete-failed' :
+			return __( 'The selected attribute could not be deleted at this time.', 'woo-better-reviews' );
+			break;
+
+		case 'charstcs-added' :
+			return __( 'The new characteristic has been added.', 'woo-better-reviews' );
+			break;
+
+		case 'charstcs-updated' :
+			return __( 'The selected characteristic has been updated.', 'woo-better-reviews' );
+			break;
+
+		case 'charstcs-deleted' :
+			return __( 'The selected characteristic has been deleted.', 'woo-better-reviews' );
+			break;
+
+		case 'charstcs-deleted-bulk' :
+			return __( 'The selected characteristics have been deleted.', 'woo-better-reviews' );
+			break;
+
+		case 'missing-charstcs-args' :
+			return __( 'The required characteristic arguments were not provided.', 'woo-better-reviews' );
+			break;
+
+		case 'charstcs-update-failed' :
+			return __( 'The characteristic could not be updated at this time.', 'woo-better-reviews' );
+			break;
+
+		case 'charstcs-delete-failed' :
+			return __( 'The selected characteristic could not be deleted at this time.', 'woo-better-reviews' );
+			break;
+
+		case 'missing-item-id' :
+			return __( 'The required ID was not posted.', 'woo-better-reviews' );
+			break;
+
+		case 'missing-posted-args' :
+			return __( 'The required arguments were not posted.', 'woo-better-reviews' );
+			break;
+
+		case 'missing-formatted-args' :
+			return __( 'The required arguments could not be formatted.', 'woo-better-reviews' );
 			break;
 
 		case 'unknown' :

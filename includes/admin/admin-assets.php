@@ -14,21 +14,22 @@ use LiquidWeb\WooBetterReviews as Core;
 /**
  * Start our engines.
  */
-add_action( 'admin_enqueue_scripts', __NAMESPACE__ . '\load_attribute_assets' );
+add_action( 'admin_enqueue_scripts', __NAMESPACE__ . '\load_admin_stylesheet' );
 
 /**
- * Load our admin side JS and CSS.
+ * Load our admin side CSS.
  *
  * @param $hook  Admin page hook we are current on.
  *
  * @return void
  */
-function load_attribute_assets( $hook ) {
+function load_admin_stylesheet( $hook ) {
 
 	// Set an array of allowed hooks.
 	$allowed_hooks  = array(
-		'reviews_page_woo-better-reviews-product-attributes',
-		'toplevel_page_woo-better-reviews',
+		'toplevel_page_' . Core\REVIEWS_ANCHOR,
+		'reviews_page_' . Core\ATTRIBUTES_ANCHOR,
+		'reviews_page_' . Core\CHARSTCS_ANCHOR,
 	);
 
 	// Confirm we are on an allowed hook.
