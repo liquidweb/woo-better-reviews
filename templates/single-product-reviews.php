@@ -28,7 +28,7 @@ if ( ! comments_open() ) {
 
 	</div>
 
-	<?php \LiquidWeb\WooBetterReviews\Display\new_review_form( $product->get_id() ); ?>
+	<?php \LiquidWeb\WooBetterReviews\Display\display_new_review_form( $product->get_id() ); ?>
 
 	<div class="clear"></div>
 </div>

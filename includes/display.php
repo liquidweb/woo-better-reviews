@@ -58,7 +58,7 @@ function display_review_template_header( $product_id = 0, $echo = true ) {
 	}
 
 	// Get the total count of reviews we have.
-	$review_count   = Queries\get_reviews_for_product( $product_id, 'counts' );
+	$review_count   = Queries\get_consolidated_reviews_for_product( $product_id, 'counts' );
 
 	// Set our empty.
 	$build  = '';
@@ -97,7 +97,7 @@ function display_existing_reviews( $product_id = 0, $echo = true ) {
 	}
 
 	// Fetch any existing reviews we may have.
-	$fetch_reviews  = Queries\get_reviews_for_product( $product_id );
+	$fetch_reviews  = Queries\get_consolidated_reviews_for_product( $product_id );
 
 	// Set my content.
 	if ( empty( $fetch_reviews ) ) {
@@ -114,6 +114,9 @@ function display_existing_reviews( $product_id = 0, $echo = true ) {
 		return $notext;
 	}
 
+	// Set a simple counter.
+	$i  = 0;
+
 	// Set our empty.
 	$build  = '';
 
@@ -123,8 +126,29 @@ function display_existing_reviews( $product_id = 0, $echo = true ) {
 	// Now begin to loop the reviews and do the thing.
 	foreach ( $fetch_reviews as $review ) {
 		// preprint( $review, true );
+		// Skip the non-approved ones for now.
+		if ( empty( $review->review_status ) || 'approved' !== sanitize_text_field( $review->review_status ) ) {
+			continue;
+		}
+		// preprint( $review, true );
 
-		// And now we display some reviews.
+		// Get my div class.
+		$class  = Helpers\get_review_div_class( $review, $i );
+
+		// Now open a div for the individual review.
+		$build .= '<div id="' . sanitize_html_class( 'woo-better-reviews-single-' . absint( $review->con_id ) ) . '" class="' . esc_attr( $class ) . '">';
+
+			// Output the title.
+			$build .= '<h4 class="woo-better-reviews-single-title">' . esc_html( $review->review_title ) . '</h4>';
+
+			// Put out the summary.
+			$build .= '<p class="woo-better-reviews-single-summary">' . wptexturize( $review->review_summary ) . '</p>';
+
+		// Close the single review div.
+		$build .= '</div>';
+
+		// And increment the counter.
+		$i++;
 	}
 
 	// Close the large div wrapper.
@@ -147,7 +171,7 @@ function display_existing_reviews( $product_id = 0, $echo = true ) {
  *
  * @return HTML
  */
-function new_review_form( $product_id = 0, $echo = true ) {
+function display_new_review_form( $product_id = 0, $echo = true ) {
 
 	// Bail without a product ID.
 	if ( empty( $product_id ) ) {

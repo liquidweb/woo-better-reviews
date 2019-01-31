@@ -117,6 +117,53 @@ function maybe_search_term( $return = 'string' ) {
 }
 
 /**
+ * Set a div class for each of our displayed reviews.
+ *
+ * @param  object  $review  The entire consolidated review object.
+ * @param  integer $index   What index order (count) we are in the list.
+ *
+ * @return string
+ */
+function get_review_div_class( $review, $index = 0 ) {
+
+	// Return the default if no review object exists.
+	if ( empty( $review ) ) {
+		return 'woo-better-reviews-single-review';
+	}
+
+	// Start by setting our default class and classes based on static items in the object.
+	$classes    = array(
+		'woo-better-reviews-single-review',
+		'woo-better-reviews-single-review-author-' . absint( $review->author_id ),
+		'woo-better-reviews-single-review-product-' . absint( $review->product_id ),
+		'woo-better-reviews-single-review-rating-' . absint( $review->rating_total_score ),
+		'woo-better-reviews-single-review-status-' . esc_attr( $review->review_status ),
+	);
+
+	// Check for verified.
+	if ( ! empty( $review->is_verified ) ) {
+		$classes[]  = 'woo-better-reviews-single-review-verified';
+	}
+
+    // Check the index for even / odd.
+	$classes[]  = absint( $index ) & 1 ? 'woo-better-reviews-single-review-odd' : 'woo-better-reviews-single-review-even';
+
+	// Now pass them through a filter before we implode.
+	$array_args = apply_filters( Core\HOOK_PREFIX . 'review_div_classes', $classes, $review, $index );
+
+	// If they are an idiot and blanked it out, return the original.
+	if ( empty( $array_args ) ) {
+		return 'woo-better-reviews-single-review';
+	}
+
+	// Now sanitize each piece.
+	$array_args = array_map( 'sanitize_html_class', $array_args );
+
+	// Return, imploded.
+	return implode( ' ', $array_args );
+}
+
+/**
  * Return our base link, with function fallbacks.
  *
  * @param  string $menu_slug  Which menu slug to use. Defaults to the primary.
