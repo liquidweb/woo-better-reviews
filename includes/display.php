@@ -30,6 +30,11 @@ add_action( 'comments_template', __NAMESPACE__ . '\load_review_template', 99 );
  */
 function load_review_template( $default_template ) {
 
+	// Bail if this isn't a product.
+	if ( ! is_singular( 'product' ) ) {
+		return $default_template;
+	}
+
 	// Set our template file.
 	$custom_template    = apply_filters( Core\HOOK_PREFIX . 'review_template_file', Core\TEMPLATE_PATH . 'single-product-reviews.php' );
 
