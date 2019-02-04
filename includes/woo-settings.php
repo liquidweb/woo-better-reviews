@@ -19,9 +19,40 @@ use WP_Error;
 /**
  * Start our engines.
  */
+add_action( 'load-post.php', __NAMESPACE__ . '\update_product_review_count_meta', 88 );
 add_action( 'add_meta_boxes_product', __NAMESPACE__ . '\filter_default_review_metaboxes', 11 );
-add_action( 'save_post_product', __NAMESPACE__ . '\update_product_review_count_meta', 88, 3 );
 add_filter( 'woocommerce_products_general_settings', __NAMESPACE__ . '\filter_woo_admin_review_settings', 99 );
+
+/**
+ * Make sure the review count stored in the post meta key is up to date.
+ *
+ * @return void
+ */
+function update_product_review_count_meta() {
+
+	// Make sure we have the product ID and it exists.
+	if ( empty( $_GET['post'] ) || 'product' !== get_post_type( $_GET['post'] ) ) {
+		return;
+	}
+
+	// Set my product ID.
+	$product_id = absint( $_GET['post'] );
+
+	// Get the total count of reviews we have, making sure to purge.
+	$total_num  = Queries\get_review_count_for_product( $product_id, true );
+
+	// Set the count with some error checking.
+	$count_num  = ! empty( $total_num ) && ! is_wp_error( $total_num ) ? absint( $total_num ) : 0;
+
+	// Update the Woo postmeta key.
+	update_post_meta( $product_id, '_wc_review_count', $count_num );
+
+	// Update our own post meta key as well.
+	update_post_meta( $product_id, Core\META_PREFIX . 'review_count', $count_num );
+
+	// And return.
+	return;
+}
 
 /**
  * Removes the default reviews metabox in leiu of our own.
@@ -36,37 +67,6 @@ function filter_default_review_metaboxes( $post ) {
 	remove_meta_box( 'commentsdiv', 'product', 'normal' );
 
 	// @@todo this will eventually load ours.
-}
-
-/**
- * Make sure the review count stored in the post meta key is up to date.
- *
- * @param integer  $post_id  The product ID being saved.
- * @param object   $post     The entire WP_Post object.
- * @param boolean  $update   Whether this is an existing post being updated or not.
- *
- * @return null
- */
-function update_product_review_count_meta( $post_id, $post, $update ) {
-
-	// Make sure we have the product ID and it exists.
-	if ( empty( $post_id ) || 'product' !== get_post_type( $post_id ) ) {
-		return;
-	}
-
-	// Get the total count of reviews we have.
-	$total  = Queries\get_review_count_for_product( $post_id );
-
-	// Set the count with some error checking.
-	$count  = ! empty( $total ) && ! is_wp_error( $total ) ? absint( $total ) : 0;
-
-	// Update the Woo postmeta key.
-	update_post_meta( $post_id, '_wc_review_count', $count );
-
-	// @@todo include our own key as well?
-
-	// And return.
-	return;
 }
 
 /**
