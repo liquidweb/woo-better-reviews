@@ -19,7 +19,51 @@ use WP_Error;
 /**
  * Start our engines.
  */
+add_filter( 'plugin_action_links', __NAMESPACE__ . '\add_quick_link', 10, 2 );
 add_action( 'admin_menu', __NAMESPACE__ . '\load_admin_menus', 43 );
+
+/**
+ * Add our "reviews" links to the plugins page.
+ *
+ * @param  array  $links  The existing array of links.
+ * @param  string $file   The file we are actually loading from.
+ *
+ * @return array  $links  The updated array of links.
+ */
+function add_quick_link( $links, $file ) {
+
+	// Bail without caps.
+	if ( ! current_user_can( 'manage_options' ) ) {
+		return $links;
+	}
+
+	// Set the static var.
+	static $this_plugin;
+
+	// Check the base if we aren't paired up.
+	if ( ! $this_plugin ) {
+		$this_plugin = Core\BASE;
+	}
+
+	// Check to make sure we are on the correct plugin.
+	if ( $file != $this_plugin ) {
+		return $links;
+	}
+
+	// Fetch our setting links.
+	$settings_page  = add_query_arg( array( 'tab' => 'products' ), Helpers\get_admin_menu_link( 'wc-settings' ) );;
+	$reviews_page   = Helpers\get_admin_menu_link( Core\REVIEWS_ANCHOR );
+
+	// Now create the link markup.
+	$settings_link  = '<a href="' . esc_url( $settings_page ) . ' ">' . esc_html__( 'Settings', 'woo-better-reviews' ) . '</a>';
+	$reviews_link   = '<a href="' . esc_url( $reviews_page ) . ' ">' . esc_html__( 'Reviews', 'woo-better-reviews' ) . '</a>';
+
+	// Add it to the array.
+	array_push( $links, $settings_link, $reviews_link );
+
+	// Return the resulting array.
+	return $links;
+}
 
 /**
  * Load our admin menu items.
