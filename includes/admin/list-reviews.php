@@ -250,14 +250,25 @@ class WooBetterReviews_ListReviews extends WP_List_Table {
 			);
 
 			// Determine the link class.
-			$link_class = empty( $_GET['wbr-review-status'] ) && 'all' === $status_key ? 'current' : '';
-			$link_class = ! empty( $_GET['wbr-review-status'] ) && sanitize_text_field( $_GET['wbr-review-status'] ) === $status_key ? 'current' : $link_class;
+			$link_class = $this->get_current_status_class( $status_key );
 
 			// Now set up the link args.
-			$link_args  = array(
-				'wbr-review-filter' => 1,
-				'wbr-review-status' => esc_attr( $status_key )
-			);
+			if ( ! empty( $status_data['setup'] ) && 'single' === sanitize_text_field( $status_data['setup'] ) ) {
+
+				// Our phandom single link args.
+				$link_args  = array(
+					'wbr-review-filter' => 1,
+					'wbr-product-id'    => absint( $_GET['wbr-product-id'] ),
+				);
+
+			} else {
+
+				// Our standard link args.
+				$link_args  = array(
+					'wbr-review-filter' => 1,
+					'wbr-review-status' => esc_attr( $status_key ),
+				);
+			}
 
 			// And finally make the actual link.
 			$link_href  = add_query_arg( $link_args, $reviews_link );
@@ -291,7 +302,8 @@ class WooBetterReviews_ListReviews extends WP_List_Table {
 		// Set up the return structure.
 		$setup['all'] = array(
 			'label' => __( 'All', 'woo-better-reviews' ),
-			'count' => count( $status_ids )
+			'count' => count( $status_ids ),
+			'setup' => 'status',
 		);
 
 		// Get my statuses.
@@ -309,11 +321,60 @@ class WooBetterReviews_ListReviews extends WP_List_Table {
 			$setup[ $status_key ] = array(
 				'label' => $status_label,
 				'count' => count( array_keys( $status_ids, $status_key ) ),
+				'setup' => 'status',
+			);
+		}
+
+		// If we have a single product, show that.
+		if ( ! empty( $_GET['wbr-review-filter'] ) && ! empty( $_GET['wbr-product-id'] ) ) {
+
+			// Set my product ID.
+			$product_id = absint( $_GET['wbr-product-id'] );
+
+			// Handle the individual count by using the array keys and status.
+			$setup['filtered'] = array(
+				'label' => get_the_title( $product_id ),
+				'count' => Queries\get_review_count_for_product( $product_id ),
+				'setup' => 'single',
 			);
 		}
 
 		// Return it, filtered.
 		return apply_filters( Core\HOOK_PREFIX . 'status_counts_data', $setup );
+	}
+
+	/**
+	 * Determine the proper class item.
+	 *
+	 * @param  string $status_key  The specific status key.
+	 *
+	 * @return string
+	 */
+	private function get_current_status_class( $status_key = '' ) {
+
+		// Check for a current.
+		$now_status = ! empty( $_GET['wbr-review-status'] ) ? sanitize_text_field( $_GET['wbr-review-status'] ) : '';
+
+		// Set the initial (empty) class.
+		$link_class = '';
+
+		// First check for the "all" class.
+		if ( empty( $_GET['wbr-product-id'] ) && empty( $now_status ) && 'all' === $status_key ) {
+			return 'current';
+		}
+
+		// Check for the single product ID.
+		if ( ! empty( $_GET['wbr-review-filter'] ) && ! empty( $_GET['wbr-product-id'] ) && 'filtered' === $status_key ) {
+			return 'current';
+		}
+
+		// Check for the status matching.
+		if ( ! empty( $_GET['wbr-review-filter'] ) && ! empty( $now_status ) && $now_status === $status_key ) {
+			return 'current';
+		}
+
+		// Return what we have.
+		return $link_class;
 	}
 
 	/**
@@ -574,7 +635,7 @@ class WooBetterReviews_ListReviews extends WP_List_Table {
 			return $dataset;
 		}
 
-		// Check for the filter query.
+		// Check for the status filter query.
 		if ( ! empty( $_GET['wbr-review-status'] ) ) {
 
 			// Get my status.
@@ -582,6 +643,16 @@ class WooBetterReviews_ListReviews extends WP_List_Table {
 
 			// And return the dataset.
 			return $this->filter_dataset_by_status( $dataset, $status );
+		}
+
+		// Check for the product ID filter query.
+		if ( ! empty( $_GET['wbr-product-id'] ) ) {
+
+			// Get my ID.
+			$product_id = absint( $_GET['wbr-product-id'] );
+
+			// And return the dataset.
+			return $this->filter_dataset_by_id( $dataset, $product_id );
 		}
 
 		// And return the dataset, however we have it.
@@ -600,7 +671,7 @@ class WooBetterReviews_ListReviews extends WP_List_Table {
 
 		// Bail without a dataset or status.
 		if ( empty( $dataset ) || empty( $status ) ) {
-			return;
+			return $dataset;
 		}
 
 		// Loop the dataset.
@@ -608,6 +679,34 @@ class WooBetterReviews_ListReviews extends WP_List_Table {
 
 			// If we do not have a match, unset it and go about our day.
 			if ( empty( $values['review_status'] ) || esc_attr( $status ) !== esc_attr( $values['review_status'] ) ) {
+				unset( $dataset[ $index ] );
+			}
+		}
+
+		// Return thge dataset, with the array keys reset.
+		return ! empty( $dataset ) ? array_values( $dataset ) : array();
+	}
+
+	/**
+	 * Filter out the dataset by ID.
+	 *
+	 * @param  array   $dataset     The dataset we wanna filter.
+	 * @param  integer $product_id  The product ID we are checking for.
+	 *
+	 * @return array
+	 */
+	private function filter_dataset_by_id( $dataset = array(), $product_id = 0 ) {
+
+		// Bail without a dataset or product ID.
+		if ( empty( $dataset ) || empty( $product_id ) ) {
+			return $dataset;
+		}
+
+		// Loop the dataset.
+		foreach ( $dataset as $index => $values ) {
+
+			// If we do not have a match, unset it and go about our day.
+			if ( empty( $values['product_id'] ) || absint( $product_id ) !== absint( $values['product_id'] ) ) {
 				unset( $dataset[ $index ] );
 			}
 		}

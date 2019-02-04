@@ -35,7 +35,7 @@ function load_review_template( $default_template ) {
 		return $default_template;
 	}
 
-	// Set our template file.
+	// Set our template file, allowing themes and plugins to set their own.
 	$custom_template    = apply_filters( Core\HOOK_PREFIX . 'review_template_file', Core\TEMPLATE_PATH . 'single-product-reviews.php' );
 
 	// Return ours (if it exists) or whatever we had originally.

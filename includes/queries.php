@@ -51,15 +51,16 @@ function get_reviews_for_product( $product_id = 0, $return_type = 'objects', $da
 		global $wpdb;
 
 		// Set our table name.
-		$table_name = $wpdb->prefix . Core\TABLE_PREFIX .  'content';
+		$table_name = $wpdb->prefix . Core\TABLE_PREFIX . 'content';
 
 		// Set up our query.
 		$query_args = $wpdb->prepare("
 			SELECT   *
 			FROM     $table_name
 			WHERE    product_id = '%d'
+			AND      review_status NOT LIKE '%s'
 			ORDER BY review_date DESC
-		", absint( $product_id ) );
+		", absint( $product_id ), esc_attr( 'rejected' ) );
 
 		// Process the query.
 		$query_run  = $wpdb->get_results( $query_args );
@@ -199,15 +200,16 @@ function get_reviews_for_author( $author_id = 0, $return_type = 'objects', $date
 		global $wpdb;
 
 		// Set our table name.
-		$table_name = $wpdb->prefix . Core\TABLE_PREFIX .  'content';
+		$table_name = $wpdb->prefix . Core\TABLE_PREFIX . 'content';
 
 		// Set up our query.
 		$query_args = $wpdb->prepare("
 			SELECT   *
 			FROM     $table_name
 			WHERE    author_id = '%d'
+			AND      review_status NOT LIKE '%s'
 			ORDER BY review_date DESC
-		", absint( $author_id ) );
+		", absint( $author_id ), esc_attr( 'rejected' ) );
 
 		// Process the query.
 		$query_run  = $wpdb->get_results( $query_args );
@@ -341,15 +343,16 @@ function get_verified_reviews( $return_type = 'objects', $date_order = true, $pu
 		global $wpdb;
 
 		// Set our table name.
-		$table_name = $wpdb->prefix . Core\TABLE_PREFIX .  'content';
+		$table_name = $wpdb->prefix . Core\TABLE_PREFIX . 'content';
 
 		// Set up our query.
 		$query_args = $wpdb->prepare("
 			SELECT   *
 			FROM     $table_name
 			WHERE    is_verified = '%d'
+			AND      review_status NOT LIKE '%s'
 			ORDER BY review_date DESC
-		", absint( 1 ) );
+		", absint( 1 ), esc_attr( 'rejected' ) );
 
 		// Process the query.
 		$query_run  = $wpdb->get_results( $query_args );
@@ -497,14 +500,18 @@ function get_consolidated_reviews( $return_type = 'objects', $date_order = true,
 		global $wpdb;
 
 		// Set our table name.
-		$table_name = $wpdb->prefix . Core\TABLE_PREFIX .  'consolidated';
+		$table_name = $wpdb->prefix . Core\TABLE_PREFIX . 'consolidated';
 
 		// Set up our query.
-		$query_run  = $wpdb->get_results("
+		$query_args = $wpdb->prepare("
 			SELECT   *
 			FROM     $table_name
+			WHERE    review_status NOT LIKE '%s'
 			ORDER BY review_date DESC
-		" );
+		", esc_attr( 'rejected' ) );
+
+		// Process the query.
+		$query_run  = $wpdb->get_results( $query_args );
 
 		// Bail without any reviews.
 		if ( empty( $query_run ) ) {
@@ -655,15 +662,16 @@ function get_consolidated_reviews_for_product( $product_id = 0, $return_type = '
 		global $wpdb;
 
 		// Set our table name.
-		$table_name = $wpdb->prefix . Core\TABLE_PREFIX .  'consolidated';
+		$table_name = $wpdb->prefix . Core\TABLE_PREFIX . 'consolidated';
 
 		// Set up our query.
 		$query_args = $wpdb->prepare("
 			SELECT   *
 			FROM     $table_name
 			WHERE    product_id = '%d'
+			AND      review_status NOT LIKE '%s'
 			ORDER BY review_date DESC
-		", absint( $product_id ) );
+		", absint( $product_id ), esc_attr( 'rejected' ) );
 
 		// Process the query.
 		$query_run  = $wpdb->get_results( $query_args );
@@ -797,6 +805,73 @@ function get_consolidated_reviews_for_product( $product_id = 0, $return_type = '
 }
 
 /**
+ * Get just the review count for a given product ID.
+ *
+ * @param  integer $product_id  Which product ID we are looking up.
+ * @param  boolean $purge       Optional to purge the cache'd version before looking up.
+ *
+ * @return mixed
+ */
+function get_review_count_for_product( $product_id = 0, $purge = false ) {
+
+	// Bail without a product ID.
+	if ( empty( $product_id ) ) {
+		return new WP_Error( 'missing_product_id', __( 'A product ID is required.', 'woo-better-reviews' ) );
+	}
+
+	// Set the key to use in our transient.
+	$ky = Core\HOOK_PREFIX . 'review_count_product' . absint( $product_id );
+
+	// If we don't want the cache'd version, delete the transient first.
+	if ( defined( 'WP_DEBUG' ) && WP_DEBUG || ! empty( $purge ) ) {
+		delete_transient( $ky );
+	}
+
+	// Attempt to get the review count from the cache.
+	$cached_count   = get_transient( $ky );
+
+	// If we have none, do the things.
+	if ( false === $cached_count ) {
+
+		// Call the global database.
+		global $wpdb;
+
+		// Set our table name.
+		$table_name = $wpdb->prefix . Core\TABLE_PREFIX . 'consolidated';
+
+		// Set up our query.
+		$query_args = $wpdb->prepare("
+			SELECT   COUNT(*)
+			FROM     $table_name
+			WHERE    product_id = '%d'
+			AND      review_status NOT LIKE '%s'
+		", absint( $product_id ), esc_attr( 'rejected' ) );
+
+		// Process the query.
+		$query_run  = $wpdb->get_var( $query_args );
+
+		// Bail without any reviews.
+		if ( empty( $query_run ) ) {
+			return false;
+		}
+
+		// Bail without any reviews.
+		if ( empty( $query_run ) ) {
+			return false;
+		}
+
+		// Set our transient with our data.
+		set_transient( $ky, $query_run, HOUR_IN_SECONDS );
+
+		// And change the variable to do the things.
+		$cached_count = $query_run;
+	}
+
+	// And return the overall count.
+	return $cached_count;
+}
+
+/**
  * Get all the attributes.
  *
  * @param  string  $return_type  What type of return we want. Accepts "counts", "objects", or fields.
@@ -824,7 +899,7 @@ function get_all_attributes( $return_type = 'objects', $purge = false ) {
 		global $wpdb;
 
 		// Set our table name.
-		$table_name = $wpdb->prefix . Core\TABLE_PREFIX .  'attributes';
+		$table_name = $wpdb->prefix . Core\TABLE_PREFIX . 'attributes';
 
 		// Set up our query.
 		$query_run  = $wpdb->get_results("
@@ -920,7 +995,7 @@ function get_single_attribute( $attribute_id = 0, $purge = false ) {
 		global $wpdb;
 
 		// Set our table name.
-		$table_name = $wpdb->prefix . Core\TABLE_PREFIX .  'attributes';
+		$table_name = $wpdb->prefix . Core\TABLE_PREFIX . 'attributes';
 
 		// Set up our query.
 		$query_args = $wpdb->prepare("
@@ -976,7 +1051,7 @@ function get_all_charstcs( $return_type = 'objects', $purge = false ) {
 		global $wpdb;
 
 		// Set our table name.
-		$table_name = $wpdb->prefix . Core\TABLE_PREFIX .  'charstcs';
+		$table_name = $wpdb->prefix . Core\TABLE_PREFIX . 'charstcs';
 
 		// Set up our query.
 		$query_run  = $wpdb->get_results("
@@ -1072,7 +1147,7 @@ function get_single_charstcs( $charstcs_id = 0, $purge = false ) {
 		global $wpdb;
 
 		// Set our table name.
-		$table_name = $wpdb->prefix . Core\TABLE_PREFIX .  'charstcs';
+		$table_name = $wpdb->prefix . Core\TABLE_PREFIX . 'charstcs';
 
 		// Set up our query.
 		$query_args = $wpdb->prepare("

@@ -19,8 +19,55 @@ use WP_Error;
 /**
  * Start our engines.
  */
+add_action( 'add_meta_boxes_product', __NAMESPACE__ . '\filter_default_review_metaboxes', 11 );
+add_action( 'save_post_product', __NAMESPACE__ . '\update_product_review_count_meta', 88, 3 );
 add_filter( 'woocommerce_products_general_settings', __NAMESPACE__ . '\filter_woo_admin_review_settings', 99 );
-add_filter( 'woocommerce_product_reviews_tab_title', __NAMESPACE__ . '\filter_woo_review_tab_title', 88, 2 );
+
+/**
+ * Removes the default reviews metabox in leiu of our own.
+ *
+ * @param object $post  The entire WP_Post object.
+ *
+ * @return void
+ */
+function filter_default_review_metaboxes( $post ) {
+
+	// This is the box being removed.
+	remove_meta_box( 'commentsdiv', 'product', 'normal' );
+
+	// @@todo this will eventually load ours.
+}
+
+/**
+ * Make sure the review count stored in the post meta key is up to date.
+ *
+ * @param integer  $post_id  The product ID being saved.
+ * @param object   $post     The entire WP_Post object.
+ * @param boolean  $update   Whether this is an existing post being updated or not.
+ *
+ * @return null
+ */
+function update_product_review_count_meta( $post_id, $post, $update ) {
+
+	// Make sure we have the product ID and it exists.
+	if ( empty( $post_id ) || 'product' !== get_post_type( $post_id ) ) {
+		return;
+	}
+
+	// Get the total count of reviews we have.
+	$total  = Queries\get_review_count_for_product( $post_id );
+
+	// Set the count with some error checking.
+	$count  = ! empty( $total ) && ! is_wp_error( $total ) ? absint( $total ) : 0;
+
+	// Update the Woo postmeta key.
+	update_post_meta( $post_id, '_wc_review_count', $count );
+
+	// @@todo include our own key as well?
+
+	// And return.
+	return;
+}
 
 /**
  * Remove the default review settings to use our own.
@@ -59,28 +106,4 @@ function filter_woo_admin_review_settings( $settings ) {
 
 	// Return our settings, resetting the indexes.
 	return array_values( $settings );
-}
-
-/**
- * Filter the tab navigation for the reviews.
- *
- * @see    woocommerce_default_product_tabs
- *
- * @param  string $title  The existing title.
- * @param  string $key    The key tied to the tab being edited.
- *
- * @return string
- */
-function filter_woo_review_tab_title( $title, $key ) {
-
-	// Double check we are on the 'reviews' key.
-	if ( empty( $key ) || 'reviews' !== sanitize_text_field( $key ) ) {
-		return $title;
-	}
-
-	// Get the total count of reviews we have.
-	$review_count   = Queries\get_reviews_for_product( get_the_ID(), 'counts' );
-
-	// Return the updated title using our count.
-	return sprintf( __( 'Reviews (%d)', 'woo-better-reviews' ), absint( $review_count ) );
 }
