@@ -855,20 +855,74 @@ function get_review_count_for_product( $product_id = 0, $purge = false ) {
 			return false;
 		}
 
+		// Set our transient with our data.
+		set_transient( $ky, absint( $query_run ), HOUR_IN_SECONDS );
+
+		// And change the variable to do the things.
+		$cached_count = absint( $query_run );
+	}
+
+	// And return the overall count.
+	return $cached_count;
+}
+
+/**
+ * Get just the legacy review count for a given product ID.
+ *
+ * @param  integer $product_id  Which product ID we are looking up.
+ * @param  boolean $purge       Optional to purge the cache'd version before looking up.
+ *
+ * @return mixed
+ */
+function get_legacy_review_counts( $purge = false ) {
+
+	// Set the key to use in our transient.
+	$ky = Core\HOOK_PREFIX . 'legacy_review_counts';
+
+	// If we don't want the cache'd version, delete the transient first.
+	if ( defined( 'WP_DEBUG' ) && WP_DEBUG || ! empty( $purge ) ) {
+		delete_transient( $ky );
+	}
+
+	// Attempt to get the review count from the cache.
+	$cached_dataset = get_transient( $ky );
+
+	// If we have none, do the things.
+	if ( false === $cached_dataset ) {
+
+		// Call the global database.
+		global $wpdb;
+
+		// Set our table name.
+		$table_name = $wpdb->prefix . 'postmeta';
+
+		// Set up our query.
+		$query_args = $wpdb->prepare("
+			SELECT   post_id, meta_value
+			FROM     $table_name
+			WHERE    meta_key = '%s'
+		", esc_attr( '_wc_review_count' ) );
+
+		// Process the query.
+		$query_run  = $wpdb->get_results( $query_args );
+
 		// Bail without any reviews.
 		if ( empty( $query_run ) ) {
 			return false;
 		}
 
+		// Set the list we want.
+		$query_list = wp_list_pluck( $query_run, 'meta_value', 'post_id' );
+
 		// Set our transient with our data.
-		set_transient( $ky, $query_run, HOUR_IN_SECONDS );
+		set_transient( $ky, $query_list, HOUR_IN_SECONDS );
 
 		// And change the variable to do the things.
-		$cached_count = $query_run;
+		$cached_dataset = $query_list;
 	}
 
 	// And return the overall count.
-	return $cached_count;
+	return $cached_dataset;
 }
 
 /**
