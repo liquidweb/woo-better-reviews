@@ -27,6 +27,7 @@ function load_admin_stylesheet( $hook ) {
 
 	// Set an array of allowed hooks.
 	$allowed_hooks  = array(
+		'edit.php',
 		'toplevel_page_' . Core\REVIEWS_ANCHOR,
 		'reviews_page_' . Core\ATTRIBUTES_ANCHOR,
 		'reviews_page_' . Core\CHARSTCS_ANCHOR,

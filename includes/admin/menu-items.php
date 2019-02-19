@@ -170,4 +170,6 @@ function get_menu_page_title( $menu = '' ) {
 		// No more case breaks, no more menues.
 	}
 
+	// Return nothing.
+	return '';
 }

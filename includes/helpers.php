@@ -164,6 +164,36 @@ function get_review_div_class( $review, $index = 0 ) {
 }
 
 /**
+ * Get the review count from post meta, and optionally set 0.
+ *
+ * @param  integer $product_id  The product ID we are checking review counts for.
+ * @param  boolean $set_zero    Whether to set the zero for meta.
+ *
+ * @return integer
+ */
+function get_admin_review_count( $product_id = 0, $set_zero = true ) {
+
+	// Get the count.
+	$review_count   = get_post_meta( $product_id, Core\META_PREFIX . 'review_count', true );
+
+	// If we have the count, return it and be done.
+	if ( ! empty( $review_count ) ) {
+		return $review_count;
+	}
+
+	// Set my zero count.
+	$review_count   = 0;
+
+	// Set the zero value.
+	if ( ! empty( $set_zero ) ) {
+		update_post_meta( $product_id, Core\META_PREFIX . 'review_count', $review_count );
+	}
+
+	// And return the count.
+	return $review_count;
+}
+
+/**
  * Return our base link, with function fallbacks.
  *
  * @param  string $menu_slug  Which menu slug to use. Defaults to the primary.

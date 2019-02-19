@@ -76,10 +76,12 @@ require_once __DIR__ . '/includes/tables/query-consolidated.php';
 // Load the files loaded plugin-wide.
 require_once __DIR__ . '/includes/queries.php';
 require_once __DIR__ . '/includes/woo-settings.php';
+require_once __DIR__ . '/includes/woo-class.php';
 
 // Load the admin specific files.
 if ( is_admin() ) {
 	require_once __DIR__ . '/includes/admin/menu-items.php';
+	require_once __DIR__ . '/includes/admin/post-columns.php';
 	require_once __DIR__ . '/includes/admin/admin-assets.php';
 	require_once __DIR__ . '/includes/admin/admin-notices.php';
 	require_once __DIR__ . '/includes/admin/admin-pages.php';

@@ -19,7 +19,7 @@ use WP_Error;
 /**
  * Start our engines.
  */
-add_action( 'load-post.php', __NAMESPACE__ . '\update_product_review_count_meta', 88 );
+//add_action( 'load-post.php', __NAMESPACE__ . '\update_product_review_count_meta', 88 );
 add_action( 'add_meta_boxes_product', __NAMESPACE__ . '\filter_default_review_metaboxes', 11 );
 add_filter( 'woocommerce_products_general_settings', __NAMESPACE__ . '\filter_woo_admin_review_settings', 99 );
 

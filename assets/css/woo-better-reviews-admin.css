@@ -16,6 +16,10 @@ form.woo-better-reviews-admin-edit-single-item-form {
     color: #a00;
     text-decoration: none; }
 
+.column-wbr-count .wbr-review-col-count {
+  padding: 1px 3px;
+  font-size: 16px; }
+
 .woo-better-reviews-admin-table-display.woo-better-reviews-admin-table-review-product .woo-better-reviews-admin-table-product-name {
   margin-right: 5px; }
 .woo-better-reviews-admin-table-display.woo-better-reviews-admin-table-review-product .woo-better-reviews-admin-table-product-links {
