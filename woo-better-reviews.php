@@ -93,7 +93,10 @@ if ( is_admin() ) {
 
 // Load the front-end specific files.
 if ( ! is_admin() ) {
-	require_once __DIR__ . '/includes/display.php';
+	require_once __DIR__ . '/includes/front-end.php';
+	require_once __DIR__ . '/includes/display/form-fields.php';
+	require_once __DIR__ . '/includes/display/layout-items.php';
+	require_once __DIR__ . '/includes/display/view-output.php';
 }
 
 // Load the triggered file loads.

@@ -11,6 +11,7 @@ namespace LiquidWeb\WooBetterReviews\Queries;
 // Set our aliases.
 use LiquidWeb\WooBetterReviews as Core;
 use LiquidWeb\WooBetterReviews\Helpers as Helpers;
+use LiquidWeb\WooBetterReviews\Utilities as Utilities;
 use LiquidWeb\WooBetterReviews\Database as Database;
 
 // And pull in any other namespaces.
@@ -699,6 +700,10 @@ function get_consolidated_reviews_for_product( $product_id = 0, $return_type = '
 			return $cached_dataset;
 			break;
 
+		case 'display' :
+			return Utilities\merge_review_object_taxonomies( $cached_dataset );
+			break;
+
 		case 'ids' :
 
 			// Set my query list.
@@ -1007,6 +1012,141 @@ function get_all_attributes( $return_type = 'objects', $purge = false ) {
 
 			// Set and return my query list.
 			return wp_list_pluck( $cached_dataset, 'attribute_desc', 'attribute_id' );
+			break;
+
+		// No more case breaks, no more return types.
+	}
+
+	// No reason we should get down this far but here we go.
+	return false;
+}
+
+/**
+ * Get just the attributes assigned to the product.
+ *
+ * @param  integer $product_id   Which product ID we are looking up.
+ * @param  string  $return_type  What type of return we want. Accepts "counts", "objects", "display", or single fields.
+ * @param  boolean $purge        Optional to purge the cache'd version before looking up.
+ *
+ * @return mixed
+ */
+function get_attributes_for_product( $product_id = 0, $return_type = 'objects', $purge = false ) {
+
+	// Bail without a product ID.
+	if ( empty( $product_id ) ) {
+		return new WP_Error( 'missing_product_id', __( 'A product ID is required.', 'woo-better-reviews' ) );
+	}
+
+	// Set the key to use in our transient.
+	$ky = Core\HOOK_PREFIX . 'attributes_product' . absint( $product_id );
+
+	// If we don't want the cache'd version, delete the transient first.
+	if ( defined( 'WP_DEBUG' ) && WP_DEBUG || ! empty( $purge ) ) {
+		delete_transient( $ky );
+	}
+
+	// Attempt to get the reviews from the cache.
+	$cached_dataset = get_transient( $ky );
+
+	// If we have none, do the things.
+	if ( false === $cached_dataset ) {
+
+		// Call the global database.
+		global $wpdb;
+
+		// Set our table name.
+		$table_name = $wpdb->prefix . Core\TABLE_PREFIX . 'productsetup';
+
+		// Set up our query.
+		$query_args = $wpdb->prepare("
+			SELECT   attribute_id
+			FROM     $table_name
+			WHERE    product_id = '%d'
+		", absint( $product_id ) );
+
+		// Process the query.
+		$query_run  = $wpdb->get_results( $query_args );
+
+		// Bail without any reviews.
+		if ( empty( $query_run ) ) {
+			return false;
+		}
+
+		// Set my empty.
+		$query_list = array();
+
+		// Loop the attribute IDs.
+		foreach ( $query_run as $single_arg ) {
+
+			// Pull out my ID.
+			$attribute_id   = absint( $single_arg->attribute_id );
+
+			// Get the single attribute data.
+			$attribute_data = get_single_attribute( $attribute_id );
+
+			// Skip the empty data.
+			if ( empty( $attribute_data ) ) {
+				continue;
+			}
+
+			// Add the data to the list.
+			$query_list[] = $attribute_data;
+		}
+
+		// Set our transient with our data.
+		set_transient( $ky, absint( $query_list ), HOUR_IN_SECONDS );
+
+		// And change the variable to do the things.
+		$cached_dataset = $query_list;
+	}
+
+	// Now switch between my return types.
+	switch ( sanitize_text_field( $return_type ) ) {
+
+		case 'counts' :
+			return count( $cached_dataset );
+			break;
+
+		case 'objects' :
+			return $cached_dataset;
+			break;
+
+		case 'display' :
+			return Utilities\format_attribute_display_data( $cached_dataset );
+			break;
+
+		case 'ids' :
+
+			// Return my list, plucked.
+			return wp_list_pluck( $cached_dataset, 'attribute_id', null );
+			break;
+
+		case 'names' :
+
+			// Return my list, plucked.
+			return wp_list_pluck( $cached_dataset, 'attribute_name', 'attribute_id' );
+			break;
+
+		case 'slugs' :
+
+			// Return my list, plucked.
+			return wp_list_pluck( $cached_dataset, 'attribute_slug', 'attribute_id' );
+			break;
+
+		case 'descriptions' :
+
+			// Return my list, plucked.
+			return wp_list_pluck( $cached_dataset, 'attribute_desc', 'attribute_id' );
+			break;
+
+		case 'labels' :
+
+			// Get each set of labels.
+			$min_labels = wp_list_pluck( $cached_dataset, 'min_label' );
+			$max_labels = wp_list_pluck( $cached_dataset, 'max_label' );
+
+			// Return my list, plucked.
+			return array_merge( $min_labels, $max_labels );
 			break;
 
 		// No more case breaks, no more return types.

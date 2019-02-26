@@ -22,13 +22,13 @@ if ( ! comments_open() ) {
 
 	<div id="comments" class="woo-better-reviews-display-block woo-better-reviews-existing-block">
 
-		<?php \LiquidWeb\WooBetterReviews\Display\display_review_template_header( $product->get_id() ); ?>
+		<?php \LiquidWeb\WooBetterReviews\Display\ViewOutput\display_review_template_header( $product->get_id() ); ?>
 
-		<?php \LiquidWeb\WooBetterReviews\Display\display_existing_reviews( $product->get_id() ); ?>
+		<?php \LiquidWeb\WooBetterReviews\Display\ViewOutput\display_existing_reviews( $product->get_id() ); ?>
 
 	</div>
 
-	<?php \LiquidWeb\WooBetterReviews\Display\display_new_review_form( $product->get_id() ); ?>
+	<?php \LiquidWeb\WooBetterReviews\Display\ViewOutput\display_new_review_form( $product->get_id() ); ?>
 
 	<div class="clear"></div>
 </div>

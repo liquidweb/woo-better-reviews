@@ -1,0 +1,27 @@
+
+
+.woo-better-reviews-single-content-wrap {
+
+	margin: 7px 0;
+	padding: 7px;
+	border-top: 1px dotted rgba( 0, 0, 0, .05 );
+	border-bottom: 1px dotted rgba( 0, 0, 0, .05 );
+
+	p {
+		font-size: 16px;
+		line-height: 22px;
+		margin: 0 0 4px;
+
+		&:last-child {
+			margin-bottom: 0;
+		}
+	}
+}
+
+
+
+@media only screen and (max-width: 782px) {}
+
+
+@media only screen and (max-width: 600px) {}
+

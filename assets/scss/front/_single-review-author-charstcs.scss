@@ -1,0 +1,45 @@
+
+.woo-better-reviews-author-charstcs {
+
+	margin: 0;
+	padding: 0;
+	list-style: none;
+
+	.woo-better-reviews-single-author-charstc {
+		display: inline-block;
+		vertical-align: middle;
+		width: auto;
+		margin: 0;
+		padding: 2px 10px 2px 0;
+
+		&:after {
+			content: "|";
+			margin-left: 10px;
+		}
+
+		&:last-child {
+
+			&:after {
+				content: "";
+				margin-left: 0;
+			}
+		}
+
+		.woo-better-reviews-author-charstc-item {
+
+			&.woo-better-reviews-author-charstc-label {
+				font-weight: 300;
+			}
+
+			&.woo-better-reviews-author-charstc-value {}
+		}
+	}
+
+}
+
+
+@media only screen and (max-width: 782px) {}
+
+
+@media only screen and (max-width: 600px) {}
+
