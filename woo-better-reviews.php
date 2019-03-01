@@ -95,7 +95,8 @@ if ( is_admin() ) {
 if ( ! is_admin() ) {
 	require_once __DIR__ . '/includes/front-end.php';
 	require_once __DIR__ . '/includes/display/form-fields.php';
-	require_once __DIR__ . '/includes/display/layout-items.php';
+	require_once __DIR__ . '/includes/display/layout-form.php';
+	require_once __DIR__ . '/includes/display/layout-reviews.php';
 	require_once __DIR__ . '/includes/display/view-output.php';
 }
 

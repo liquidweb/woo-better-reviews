@@ -1,0 +1,61 @@
+
+.woo-better-reviews-rating-content-fields {}
+
+.woo-better-reviews-rating-content-field-wrap {
+
+	margin-bottom: 15px;
+
+	.woo-better-reviews-rating-field-label {
+		display: block;
+		width: 100%;
+		color: #000;
+	}
+
+	.woo-better-reviews-rating-input-field {
+
+		display: block;
+		width: 100%;
+
+		&.woo-better-reviews-rating-text-field {}
+	}
+
+	.woo-better-reviews-rating-field-description {
+		display: block;
+		width: 100%;
+		font-size: 12px;
+		line-height: 16px;
+		font-style: italic;
+		margin-top: 3px;
+	}
+
+
+	&.woo-better-reviews-rating-text-field-wrap {}
+
+
+	&.woo-better-reviews-rating-textarea-field-wrap {}
+
+
+	&.woo-better-reviews-rating-editor-minimal-field-wrap {}
+
+
+	&.woo-better-reviews-rating-dropdown-field-wrap {
+
+		.woo-better-reviews-rating-field-label,
+		.woo-better-reviews-rating-input-field {
+			width: auto;
+			display: inline-block;
+			vertical-align: middle;
+		}
+
+	}
+
+
+}
+
+
+
+@media only screen and (max-width: 782px) {}
+
+
+@media only screen and (max-width: 600px) {}
+

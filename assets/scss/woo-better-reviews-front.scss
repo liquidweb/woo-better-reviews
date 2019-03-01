@@ -1,17 +1,20 @@
 // All the front-end parts will be pulled in.
 
-// Our block setup. Not Guetenburg blocks because i don't care.
-@import "front/display-blocks";
-
 // The pieces tied to the general list setup.
-@import "front/review-list-header";
-@import "front/review-list-wrapper";
+@import "review-list/header";
+@import "review-list/wrapper";
 
 // Our single review parts.
-@import "front/single-review-header";
-@import "front/single-review-author-charstcs";
-@import "front/single-review-ratings";
-@import "front/single-review-content";
+@import "single-review/display-wrap";
+@import "single-review/header";
+@import "single-review/author-charstcs";
+@import "single-review/ratings";
+@import "single-review/content";
 
 // The new review form.
-@import "front/review-form-rating-scoring";
+@import "new-review/display-wrap";
+@import "new-review/stars";
+@import "new-review/attributes";
+@import "new-review/content";
+@import "new-review/author";
+@import "new-review/submit-meta";

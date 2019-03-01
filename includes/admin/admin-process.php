@@ -77,12 +77,12 @@ function add_new_attribute() {
 
 	// Check for the item type.
 	if ( empty( $_POST['item-type'] ) || 'attribute' !== sanitize_text_field( $_POST['item-type'] ) ) {
-		redirect_item_action_result( $base_redirect, 'missing-required-args' );
+		redirect_admin_action_result( $base_redirect, 'missing-required-args' );
 	}
 
 	// Bail if we don't have a name to check.
 	if ( empty( $_POST['new-attribute'] ) ) {
-		redirect_item_action_result( $base_redirect, 'missing-attribute-args' );
+		redirect_admin_action_result( $base_redirect, 'missing-attribute-args' );
 	}
 
 	// Format the arguments passed for updating.
@@ -90,7 +90,7 @@ function add_new_attribute() {
 
 	// Bail without the args coming back.
 	if ( empty( $formatted_args ) ) {
-		redirect_item_action_result( $base_redirect, 'missing-formatted-args' );
+		redirect_admin_action_result( $base_redirect, 'missing-formatted-args' );
 	}
 
 	// Run the update.
@@ -98,16 +98,16 @@ function add_new_attribute() {
 
 	// Check for the boolean true result.
 	if ( empty( $maybe_inserted ) || false === $maybe_inserted ) {
-		redirect_item_action_result( $base_redirect, 'attribute-insert-failed' );
+		redirect_admin_action_result( $base_redirect, 'attribute-insert-failed' );
 	}
 
 	// Check the result for a WP_Error instance.
 	if ( is_wp_error( $maybe_inserted ) ) {
-		redirect_item_action_result( $base_redirect, $maybe_inserted->get_error_code() );
+		redirect_admin_action_result( $base_redirect, $maybe_inserted->get_error_code() );
 	}
 
 	// Redirect a happy one.
-	redirect_item_action_result( $base_redirect, false, 'attribute-added', true );
+	redirect_admin_action_result( $base_redirect, false, 'attribute-added', true );
 }
 
 /**
@@ -132,12 +132,12 @@ function add_new_charstcs() {
 
 	// Check for the item type.
 	if ( empty( $_POST['item-type'] ) || 'charstc' !== sanitize_text_field( $_POST['item-type'] ) ) {
-		redirect_item_action_result( $base_redirect, 'missing-required-args' );
+		redirect_admin_action_result( $base_redirect, 'missing-required-args' );
 	}
 
 	// Bail if we don't have a name to check.
 	if ( empty( $_POST['new-charstc'] ) ) {
-		redirect_item_action_result( $base_redirect, 'missing-charstcs-args' );
+		redirect_admin_action_result( $base_redirect, 'missing-charstcs-args' );
 	}
 
 	// Format the arguments passed for updating.
@@ -145,7 +145,7 @@ function add_new_charstcs() {
 
 	// Bail without the args coming back.
 	if ( empty( $formatted_args ) ) {
-		redirect_item_action_result( $base_redirect, 'missing-formatted-args' );
+		redirect_admin_action_result( $base_redirect, 'missing-formatted-args' );
 	}
 
 	// Run the update.
@@ -153,16 +153,16 @@ function add_new_charstcs() {
 
 	// Check for the boolean true result.
 	if ( empty( $maybe_inserted ) || false === $maybe_inserted ) {
-		redirect_item_action_result( $base_redirect, 'charstcs-insert-failed' );
+		redirect_admin_action_result( $base_redirect, 'charstcs-insert-failed' );
 	}
 
 	// Check the result for a WP_Error instance.
 	if ( is_wp_error( $maybe_inserted ) ) {
-		redirect_item_action_result( $base_redirect, $maybe_inserted->get_error_code() );
+		redirect_admin_action_result( $base_redirect, $maybe_inserted->get_error_code() );
 	}
 
 	// Redirect a happy one.
-	redirect_item_action_result( $base_redirect, false, 'charstcs-added', true );
+	redirect_admin_action_result( $base_redirect, false, 'charstcs-added', true );
 }
 
 /**
@@ -184,7 +184,7 @@ function update_existing_attribute() {
 
 	// Confirm we have an ID, which is sorta critical.
 	if ( empty( $_POST['item-id'] ) ) {
-		redirect_item_action_result( Core\ATTRIBUTES_ANCHOR, 'missing-item-id' );
+		redirect_admin_action_result( Core\ATTRIBUTES_ANCHOR, 'missing-item-id' );
 	}
 
 	// Make my edit link.
@@ -192,12 +192,12 @@ function update_existing_attribute() {
 
 	// Check for the remainder of items.
 	if ( empty( $_POST['item-type'] ) || 'attribute' !== sanitize_text_field( $_POST['item-type'] ) ) {
-		redirect_item_action_result( $edit_redirect, 'missing-posted-args' );
+		redirect_admin_action_result( $edit_redirect, 'missing-posted-args' );
 	}
 
 	// Bail if we don't have a name to check.
 	if ( empty( $_POST['attribute-args'] ) ) {
-		redirect_item_action_result( $edit_redirect, 'missing-attribute-args' );
+		redirect_admin_action_result( $edit_redirect, 'missing-attribute-args' );
 	}
 
 	// Format the arguments passed for updating.
@@ -205,7 +205,7 @@ function update_existing_attribute() {
 
 	// Bail without the args coming back.
 	if ( empty( $formatted_args ) ) {
-		redirect_item_action_result( $edit_redirect, 'missing-formatted-args' );
+		redirect_admin_action_result( $edit_redirect, 'missing-formatted-args' );
 	}
 
 	// Run the update.
@@ -213,16 +213,16 @@ function update_existing_attribute() {
 
 	// Check for the boolean true result.
 	if ( empty( $maybe_updated ) || false === $maybe_updated ) {
-		redirect_item_action_result( $edit_redirect, 'attribute-update-failed' );
+		redirect_admin_action_result( $edit_redirect, 'attribute-update-failed' );
 	}
 
 	// Check the result for a WP_Error instance.
 	if ( is_wp_error( $maybe_updated ) ) {
-		redirect_item_action_result( $edit_redirect, $maybe_updated->get_error_code() );
+		redirect_admin_action_result( $edit_redirect, $maybe_updated->get_error_code() );
 	}
 
 	// Redirect a happy one.
-	redirect_item_action_result( $edit_redirect, false, 'attribute-updated', true, Core\ATTRIBUTES_ANCHOR );
+	redirect_admin_action_result( $edit_redirect, false, 'attribute-updated', true, Core\ATTRIBUTES_ANCHOR );
 }
 
 /**
@@ -244,7 +244,7 @@ function update_existing_charstcs() {
 
 	// Confirm we have an ID, which is sorta critical.
 	if ( empty( $_POST['item-id'] ) ) {
-		redirect_item_action_result( Core\CHARSTCS_ANCHOR, 'missing-item-id' );
+		redirect_admin_action_result( Core\CHARSTCS_ANCHOR, 'missing-item-id' );
 	}
 
 	// Make my edit link.
@@ -252,12 +252,12 @@ function update_existing_charstcs() {
 
 	// Check for the remainder of items.
 	if ( empty( $_POST['item-type'] ) || 'charstcs' !== sanitize_text_field( $_POST['item-type'] ) ) {
-		redirect_item_action_result( $edit_redirect, 'missing-posted-args' );
+		redirect_admin_action_result( $edit_redirect, 'missing-posted-args' );
 	}
 
 	// Bail if we don't have a name to check.
 	if ( empty( $_POST['charstcs-args'] ) ) {
-		redirect_item_action_result( $edit_redirect, 'missing-charstcs-args' );
+		redirect_admin_action_result( $edit_redirect, 'missing-charstcs-args' );
 	}
 
 	// Format the arguments passed for updating.
@@ -265,7 +265,7 @@ function update_existing_charstcs() {
 
 	// Bail without the args coming back.
 	if ( empty( $formatted_args ) ) {
-		redirect_item_action_result( $edit_redirect, 'missing-formatted-args' );
+		redirect_admin_action_result( $edit_redirect, 'missing-formatted-args' );
 	}
 
 	// Run the update.
@@ -273,16 +273,16 @@ function update_existing_charstcs() {
 
 	// Check for the boolean true result.
 	if ( empty( $maybe_updated ) || false === $maybe_updated ) {
-		redirect_item_action_result( $edit_redirect, 'charstcs-update-failed' );
+		redirect_admin_action_result( $edit_redirect, 'charstcs-update-failed' );
 	}
 
 	// Check the result for a WP_Error instance.
 	if ( is_wp_error( $maybe_updated ) ) {
-		redirect_item_action_result( $edit_redirect, $maybe_updated->get_error_code() );
+		redirect_admin_action_result( $edit_redirect, $maybe_updated->get_error_code() );
 	}
 
 	// Redirect a happy one.
-	redirect_item_action_result( $edit_redirect, false, 'charstcs-updated', true, Core\CHARSTCS_ANCHOR );
+	redirect_admin_action_result( $edit_redirect, false, 'charstcs-updated', true, Core\CHARSTCS_ANCHOR );
 }
 
 /**
@@ -302,7 +302,7 @@ function delete_existing_attribute() {
 
 	// Confirm we have an ID, which is sorta critical.
 	if ( empty( $_GET['wbr-item-id'] ) || empty( $_GET['wbr-item-type'] ) || 'attribute' !== sanitize_text_field( $_GET['wbr-item-type'] ) ) {
-		redirect_item_action_result( $base_redirect, 'missing-item-id' );
+		redirect_admin_action_result( $base_redirect, 'missing-item-id' );
 	}
 
 	// Set my attribute item ID.
@@ -318,16 +318,16 @@ function delete_existing_attribute() {
 
 	// Check for the boolean true result.
 	if ( empty( $maybe_deleted ) || false === $maybe_deleted ) {
-		redirect_item_action_result( $base_redirect, 'attribute-delete-failed' );
+		redirect_admin_action_result( $base_redirect, 'attribute-delete-failed' );
 	}
 
 	// Check the result for a WP_Error instance.
 	if ( is_wp_error( $maybe_deleted ) ) {
-		redirect_item_action_result( $base_redirect, $maybe_deleted->get_error_code() );
+		redirect_admin_action_result( $base_redirect, $maybe_deleted->get_error_code() );
 	}
 
 	// Redirect a happy one.
-	redirect_item_action_result( $base_redirect, false, 'attribute-deleted', true );
+	redirect_admin_action_result( $base_redirect, false, 'attribute-deleted', true );
 }
 
 /**
@@ -347,7 +347,7 @@ function delete_existing_charstcs() {
 
 	// Confirm we have an ID, which is sorta critical.
 	if ( empty( $_GET['wbr-item-id'] ) || empty( $_GET['wbr-item-type'] ) || 'charstcs' !== sanitize_text_field( $_GET['wbr-item-type'] ) ) {
-		redirect_item_action_result( $base_redirect, 'missing-item-id' );
+		redirect_admin_action_result( $base_redirect, 'missing-item-id' );
 	}
 
 	// Set my charstc item ID.
@@ -363,16 +363,16 @@ function delete_existing_charstcs() {
 
 	// Check for the boolean true result.
 	if ( empty( $maybe_deleted ) || false === $maybe_deleted ) {
-		redirect_item_action_result( $base_redirect, 'charstcs-delete-failed' );
+		redirect_admin_action_result( $base_redirect, 'charstcs-delete-failed' );
 	}
 
 	// Check the result for a WP_Error instance.
 	if ( is_wp_error( $maybe_deleted ) ) {
-		redirect_item_action_result( $base_redirect, $maybe_deleted->get_error_code() );
+		redirect_admin_action_result( $base_redirect, $maybe_deleted->get_error_code() );
 	}
 
 	// Redirect a happy one.
-	redirect_item_action_result( $base_redirect, false, 'charstcs-deleted', true );
+	redirect_admin_action_result( $base_redirect, false, 'charstcs-deleted', true );
 }
 
 /**
@@ -509,7 +509,7 @@ function create_item_action_link( $item_id = 0, $type = 'attribute', $action = '
  *
  * @return void
  */
-function redirect_item_action_result( $redirect = '', $error = '', $result = 'failed', $success = false, $return = '' ) {
+function redirect_admin_action_result( $redirect = '', $error = '', $result = 'failed', $success = false, $return = '' ) {
 
 	// Set up my redirect args.
 	$redirect_args  = array(

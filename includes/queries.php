@@ -1277,6 +1277,10 @@ function get_all_charstcs( $return_type = 'objects', $purge = false ) {
 			return $cached_dataset;
 			break;
 
+		case 'display' :
+			return Utilities\format_charstcs_display_data( $cached_dataset );
+			break;
+
 		case 'ids' :
 
 			// Set and return my query list.

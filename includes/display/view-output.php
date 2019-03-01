@@ -13,7 +13,8 @@ use LiquidWeb\WooBetterReviews as Core;
 use LiquidWeb\WooBetterReviews\Helpers as Helpers;
 use LiquidWeb\WooBetterReviews\Utilities as Utilities;
 use LiquidWeb\WooBetterReviews\Queries as Queries;
-use LiquidWeb\WooBetterReviews\Display\LayoutItems as LayoutItems;
+use LiquidWeb\WooBetterReviews\Display\LayoutForm as LayoutForm;
+use LiquidWeb\WooBetterReviews\Display\LayoutReviews as LayoutReviews;
 
 // And pull in any other namespaces.
 use WP_Error;
@@ -51,23 +52,44 @@ function display_new_review_form( $product_id = 0, $echo = true ) {
 		return;
 	}
 
+	// Set my action link.
+	$action_link    = get_permalink( $product_id );
+
 	// Set our empty.
 	$build  = '';
 
 	// Wrap the entire thing in our div.
 	$build .= '<div id="review_form_wrapper" class="woo-better-reviews-display-block woo-better-reviews-form-block">';
 
-		// Add the title.
-		$build .= LayoutItems\set_review_form_rating_title_view( $product_id );
+		// Set our form wrapper.
+		$build .= '<form class="woo-better-reviews-form-container" name="woo-better-reviews-rating-form" action="' . esc_url( $action_link ) . '" method="post">';
 
-		// Output the rating input.
-		$build .= LayoutItems\set_review_form_rating_stars_view( $product_id );
+			// Add filterable fields.
+			$build .= apply_filters( Core\HOOK_PREFIX . 'before_display_new_review_form', null, $product_id );
 
-		// Set the attributes.
-		$build .= LayoutItems\set_review_form_rating_attributes_view( $product_id );
+			// Add the title.
+			$build .= LayoutForm\set_review_form_rating_title_view( $product_id );
 
-		// Handle the inputs themselves.
-		$build .= LayoutItems\set_review_form_content_fields_view( $product_id );
+			// Output the rating input.
+			$build .= LayoutForm\set_review_form_rating_stars_view( $product_id );
+
+			// Set the attributes.
+			$build .= LayoutForm\set_review_form_rating_attributes_view( $product_id );
+
+			// Handle the inputs themselves.
+			$build .= LayoutForm\set_review_form_content_fields_view( $product_id );
+
+			// Now get the author fields.
+			$build .= LayoutForm\set_review_form_author_fields_view( get_current_user_id() );
+
+			// Output the submit and hiddens.
+			$build .= LayoutForm\set_review_form_submit_meta_fields_view( $product_id );
+
+			// Add filterable fields.
+			$build .= apply_filters( Core\HOOK_PREFIX . 'after_new_review_form_after', null, $product_id );
+
+		// Close out the form.
+		$build .= '</form>';
 
 	// Close up the div.
 	$build .= '</div>';
@@ -202,7 +224,7 @@ function display_existing_reviews( $product_id = 0, $echo = true ) {
 		}
 
 		// Just echo it.
-		echo $build;
+		echo $notext;
 
 		// And be done.
 		return;
@@ -234,19 +256,19 @@ function display_existing_reviews( $product_id = 0, $echo = true ) {
 		$build .= '<div id="' . sanitize_html_class( 'woo-better-reviews-single-' . absint( $single_review['review-id'] ) ) . '" class="' . esc_attr( $class ) . '">';
 
 			// Output the title.
-			$build .= LayoutItems\set_single_review_title_summary_view( $single_review );
+			$build .= LayoutReviews\set_single_review_title_summary_view( $single_review );
 
 			// Output our date and author view.
-			$build .= LayoutItems\set_single_review_date_author_view( $single_review );
+			$build .= LayoutReviews\set_single_review_date_author_view( $single_review );
 
 			// Output the actual content of the review.
-			$build .= LayoutItems\set_single_review_content_view( $single_review );
+			$build .= LayoutReviews\set_single_review_content_view( $single_review );
 
 			// Do the scoring output.
-			$build .= LayoutItems\set_single_review_ratings_view( $single_review );
+			$build .= LayoutReviews\set_single_review_ratings_view( $single_review );
 
 			// Output the author characteristics.
-			$build .= LayoutItems\set_single_review_author_charstcs_view( $single_review );
+			$build .= LayoutReviews\set_single_review_author_charstcs_view( $single_review );
 
 		// Close the single review div.
 		$build .= '</div>';

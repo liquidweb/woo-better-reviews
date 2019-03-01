@@ -222,55 +222,41 @@ function format_attribute_display_data( $attribute_array ) {
 }
 
 /**
- * Make the labeled key/value pair.
+ * Pull out the data inside an charstcs and make it nice.
  *
- * @param  array $attribute_args  The arguments for single attributes.
+ * @param  array $charstcs_array  The attributes from the query.
  *
  * @return array
  */
-function format_attribute_dropdown_data( $attribute_args = array() ) {
+function format_charstcs_display_data( $charstcs_array ) {
 
 	// Make sure we have args.
-	if ( empty( $attribute_args ) ) {
+	if ( empty( $charstcs_array ) ) {
 		return;
 	}
 
-	// Set our empty array.
-	$field_options  = array();
+	// Set the empty.
+	$setup  = array();
 
-	// Make the one-seven check.
-	for ( $i = 1; $i <= 7; $i++ ) {
+	// Loop and check.
+	foreach ( $charstcs_array as $index => $charstcs_args ) {
+		// preprint( $charstcs_args, true );
 
-		// Create the label.
-		switch ( $i ) {
+		// Now we loop each attribute.
+		foreach ( $charstcs_args as $charstcs_key => $charstcs_value ) {
 
-			case 1 :
+			// Set my new array key.
+			$array_key  = str_replace( 'charstcs_', '', $charstcs_key );
 
-				// Return them, imploded with a line break.
-				$display_label  = ! empty( $attribute_args['min_label'] ) ? $i . ' (' . esc_attr( $attribute_args['min_label'] ) . ')' : $i;
-				break;
-
-			case 7 :
-
-				// Set the label if we have a max-label.
-				$display_label  = ! empty( $attribute_args['max_label'] ) ? $i . ' (' . esc_attr( $attribute_args['max_label'] ) . ')' : $i;
-				break;
-
-			default :
-
-				// Set the basic label.
-				$display_label  = $i;
-				break;
-
-			// End all case breaks.
+			// Now set our array.
+			$setup[ $index ][ $array_key ] = maybe_unserialize( $charstcs_value );
 		}
 
-		// Make the option.
-		$field_options[ $i ] = $display_label;
+		// Nothing else (I think?) inside this array.
 	}
 
-	// And return it.
-	return $field_options;
+	// Return the array.
+	return $setup;
 }
 
 /**
@@ -543,4 +529,49 @@ function set_single_review_div_class( $review = array(), $index = 0 ) {
 
 	// Return, imploded.
 	return implode( ' ', $array_args );
+}
+
+/**
+ * Set a buffered editor output.
+ *
+ * @param string  $editor_id     The ID of the editor form.
+ * @param string  $editor_name   The field name for the editor.
+ * @param string  $editor_class  Optional class to include.
+ * @param array   $custom_args   Any other custom args.
+ *
+ * @return HTML
+ */
+function set_review_form_editor( $editor_id = '', $editor_name = '', $editor_class = '', $custom_args = array() ) {
+
+	// Bail if we're missing anything.
+	if ( empty( $editor_id ) || empty( $editor_name ) ) {
+		return;
+	}
+
+	// Set the editor args.
+	$setup_args = array(
+		'wpautop'          => false,
+		'media_buttons'    => false,
+		'tinymce'          => false,
+		'teeny'            => true,
+		'textarea_rows'    => 10,
+		'textarea_name'    => $editor_name,
+		'editor_class'     => $editor_class,
+		'drag_drop_upload' => false,
+		'quicktags'        => array(
+			'buttons' => 'strong,em,ul,ol,li'
+		),
+	);
+
+	// Pass our custom args if we have them.
+	$setup_args = ! empty( $custom_args ) ? wp_parse_args( $custom_args, $setup_args ) : $setup_args;
+
+	// We have to buffer the editor output.
+	ob_start();
+
+	// Now handle the editor getting buffered.
+	wp_editor( '', $editor_id, $setup_args );
+
+	// Now just return it.
+	return ob_get_clean();
 }
