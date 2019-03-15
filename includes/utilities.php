@@ -12,6 +12,33 @@ namespace LiquidWeb\WooBetterReviews\Utilities;
 use LiquidWeb\WooBetterReviews as Core;
 
 /**
+ * Increment the review count by 1.
+ *
+ * @param  integer $product_id  The product ID we are adding.
+ *
+ * @return void
+ */
+function increment_product_review_count( $product_id = 0 ) {
+
+	// Bail without a product ID.
+	if ( empty( $product_id ) ) {
+		return;
+	}
+
+	// Get the count.
+	$current_count  = get_post_meta( $product_id, Core\META_PREFIX . 'review_count', true );
+
+	// Do the increment.
+	$update_count   = ! empty( $current_count ) ? absint( $current_count ) + 1 : 1;
+
+	// Update the Woo postmeta key.
+	update_post_meta( $product_id, '_wc_review_count', $update_count );
+
+	// Update our own post meta key as well.
+	update_post_meta( $product_id, Core\META_PREFIX . 'review_count', $update_count );
+}
+
+/**
  * Take the review object array and merge the taxonomies.
  *
  * @param  array $reviews  The review objects from the query.

@@ -94,7 +94,9 @@ if ( is_admin() ) {
 // Load the front-end specific files.
 if ( ! is_admin() ) {
 	require_once __DIR__ . '/includes/front-end.php';
+	require_once __DIR__ . '/includes/display/form-data.php';
 	require_once __DIR__ . '/includes/display/form-fields.php';
+	require_once __DIR__ . '/includes/display/form-process.php';
 	require_once __DIR__ . '/includes/display/layout-form.php';
 	require_once __DIR__ . '/includes/display/layout-reviews.php';
 	require_once __DIR__ . '/includes/display/view-output.php';

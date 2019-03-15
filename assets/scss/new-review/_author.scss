@@ -1,8 +1,26 @@
 
+.woo-better-reviews-rating-content-field-wrap {
+
+	&.woo-better-reviews-rating-charstcs-field-wrap {
+
+
+		.woo-better-reviews-rating-field-label {
+			min-width: 140px;
+		}
+
+		.woo-better-reviews-rating-dropdown-field {
+			width: 200px;
+		}
+
+	}
+
+}
+
+
+
 
 
 @media only screen and (max-width: 782px) {}
 
 
 @media only screen and (max-width: 600px) {}
-

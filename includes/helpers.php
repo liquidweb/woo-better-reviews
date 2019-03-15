@@ -29,6 +29,7 @@ function get_table_args( $keys = false ) {
 		'charstcs'     => __( 'Author Characteristics', 'woo-better-reviews' ),
 		'authorsetup'  => __( 'Author Setup', 'woo-better-reviews' ),
 		'productsetup' => __( 'Product Setup', 'woo-better-reviews' ),
+		'consolidated' => __( 'Consolidated Reviews', 'woo-better-reviews' ),
 	);
 
 	// Either return the full array, or just the keys if requested.

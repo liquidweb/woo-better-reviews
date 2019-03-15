@@ -1313,6 +1313,115 @@ function get_all_charstcs( $return_type = 'objects', $purge = false ) {
 }
 
 /**
+ * Get just the charstcs assigned to the author.
+ *
+ * @param  integer $author_id    Which author ID we are looking up.
+ * @param  string  $return_type  What type of return we want. Accepts "counts", "objects", "display", or single fields.
+ * @param  boolean $purge        Optional to purge the cache'd version before looking up.
+ *
+ * @return mixed
+ */
+function get_charstcs_for_author( $author_id = 0, $return_type = 'objects', $purge = false ) {
+
+	// Bail without a author ID.
+	if ( empty( $author_id ) ) {
+		return new WP_Error( 'missing_author_id', __( 'An author ID is required.', 'woo-better-reviews' ) );
+	}
+
+	// Set the key to use in our transient.
+	$ky = Core\HOOK_PREFIX . 'charstcs_author' . absint( $author_id );
+
+	// If we don't want the cache'd version, delete the transient first.
+	if ( defined( 'WP_DEBUG' ) && WP_DEBUG || ! empty( $purge ) ) {
+		delete_transient( $ky );
+	}
+
+	// Attempt to get the reviews from the cache.
+	$cached_dataset = get_transient( $ky );
+
+	// If we have none, do the things.
+	if ( false === $cached_dataset ) {
+
+		// Call the global database.
+		global $wpdb;
+
+		// Set our table name.
+		$table_name = $wpdb->prefix . Core\TABLE_PREFIX . 'authormeta';
+
+		// Set up our query.
+		$query_args = $wpdb->prepare("
+			SELECT   charstcs_id
+			FROM     $table_name
+			WHERE    author_id = '%d'
+		", absint( $author_id ) );
+
+		// Process the query.
+		$query_run  = $wpdb->get_results( $query_args );
+
+		// Bail without any reviews.
+		if ( empty( $query_run ) ) {
+			return false;
+		}
+
+		// Set my empty.
+		$query_list = array();
+
+		// Loop the attribute IDs.
+		foreach ( $query_run as $single_arg ) {
+
+			// Pull out my ID.
+			$charstcs_id    = absint( $single_arg->charstcs_id );
+
+			// Get the single attribute data.
+			$charstcs_data  = get_single_charstcs( $charstcs_id );
+
+			// Skip the empty data.
+			if ( empty( $charstcs_data ) ) {
+				continue;
+			}
+
+			// Add the data to the list.
+			$query_list[] = $charstcs_data;
+		}
+
+		// Set our transient with our data.
+		set_transient( $ky, absint( $query_list ), HOUR_IN_SECONDS );
+
+		// And change the variable to do the things.
+		$cached_dataset = $query_list;
+	}
+
+	// Now switch between my return types.
+	switch ( sanitize_text_field( $return_type ) ) {
+
+		case 'counts' :
+			return count( $cached_dataset );
+			break;
+
+		case 'objects' :
+			return $cached_dataset;
+			break;
+
+		case 'ids' :
+
+			// Return my list, plucked.
+			return wp_list_pluck( $cached_dataset, 'charstcs_id', null );
+			break;
+
+		case 'values' :
+
+			// Return my list, plucked.
+			return wp_list_pluck( $cached_dataset, 'charstcs_value', 'charstcs_id' );
+			break;
+
+		// No more case breaks, no more return types.
+	}
+
+	// No reason we should get down this far but here we go.
+	return false;
+}
+
+/**
  * Get the data for a single charstc.
  *
  * @param  integer $charstc_id  The ID we are checking for.

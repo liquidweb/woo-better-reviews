@@ -79,7 +79,7 @@ function required_args( $format_args = false ) {
 		'author_id'    => '%d',
 		'product_id'   => '%d',
 		'attribute_id' => '%d',
-		'rating_score' => '%f',
+		'rating_score' => '%d',
 	);
 
 	// Return based on the formatting arg request.

@@ -26,150 +26,6 @@ function set_review_editor_required( $editor_markup ) {
 }
 
 /**
- * Set and return the array of content fields.
- *
- * @param  boolean $keys  Whether to return just the keys.
- *
- * @return array
- */
-function get_review_content_form_fields( $keys = false ) {
-
-	// Set up our array.
-	$setup  = array(
-
-		'review-title' => array(
-			'label'       => __( 'Review Title', 'woo-better-reviews' ),
-			'type'        => 'text',
-			'required'    => true,
-			'description' => __( 'Example: This product has great features!', 'woo-better-reviews' ),
-		),
-
-		'review-summary' => array(
-			'label'       => __( 'Review Summary', 'woo-better-reviews' ),
-			'type'        => 'textarea',
-			'required'    => true,
-			'min-count'   => 50,
-			'max-count'   => 300,
-			'description' => '',
-		),
-
-		'review-content' => array(
-			'label'       => __( 'Full Review', 'woo-better-reviews' ),
-			'type'        => 'editor-minimal',
-			'required'    => true,
-			'description' => '',
-		),
-
-	);
-
-	// Set the fields filtered.
-	$fields = apply_filters( Core\HOOK_PREFIX . 'review_form_content_fields', $setup );
-
-	// Either return the full array, or just the keys if requested.
-	return ! $keys ? $fields : array_keys( $fields );
-}
-
-/**
- * Set and return the array of author entry fields.
- *
- * @param  boolean $keys  Whether to return just the keys.
- *
- * @return array
- */
-function get_review_author_form_fields( $keys = false ) {
-
-	// Set up our initial array.
-	$setup  = array(
-
-		'author-name' => array(
-			'label'    => __( 'Your Name', 'woo-better-reviews' ),
-			'type'     => 'text',
-			'required' => true,
-		),
-
-		'author-email' => array(
-			'label'    => __( 'Your Email', 'woo-better-reviews' ),
-			'type'     => 'email',
-			'required' => true,
-		),
-
-	);
-
-	// Get all my characteristics.
-	$fetch_charstcs = Queries\get_all_charstcs( 'display' );
-	// preprint( $fetch_charstcs, true );
-
-	// If we have the characteristics, add them.
-	if ( ! empty( $fetch_charstcs ) ) {
-
-		// Loop and add each one to the array.
-		foreach ( $fetch_charstcs as $charstcs ) {
-
-			// Skip if no values exist.
-			if ( empty( $charstcs['values'] ) ) {
-				continue;
-			}
-
-			// Set our array key.
-			$array_key  = 'charstcs-' . sanitize_html_class( $charstcs['slug'] );
-
-			// And add it.
-			$setup[ $array_key ] = array(
-				'label'         => esc_html( $charstcs['name'] ),
-				'type'          => 'dropdown',
-				'required'      => false,
-				'include-empty' => true,
-				'is-charstcs'   => true,
-				'options'       => $charstcs['values'],
-			);
-		}
-
-		// Nothing left for characteristics.
-	}
-
-	// Set the fields filtered.
-	$fields = apply_filters( Core\HOOK_PREFIX . 'review_author_form_fields', $setup );
-
-	// Either return the full array, or just the keys if requested.
-	return ! $keys ? $fields : array_keys( $fields );
-}
-
-/**
- * Set and return the array of action buttons.
- *
- * @param  boolean $keys  Whether to return just the keys.
- *
- * @return array
- */
-function get_review_action_buttons_fields( $keys = false ) {
-
-	// Set my button array.
-	$setup  = array(
-
-		// Set up the submit button items.
-		'submit-review' => array(
-			'label' => __( 'Submit Review', 'woo-better-reviews' ),
-			'class' => 'woo-better-reviews-rating-submit-button',
-			'type'  => 'submit',
-			'value' => true,
-		),
-
-		// Set up the reset button items.
-		'reset-fields'  => array(
-			'label' => __( 'Reset', 'woo-better-reviews' ),
-			'class' => 'woo-better-reviews-rating-reset-button',
-			'type'  => 'reset',
-		),
-	);
-
-	// Set the fields filtered.
-	$fields = apply_filters( Core\HOOK_PREFIX . 'review_form_action_buttons_fields', $setup );
-
-	// Either return the full array, or just the keys if requested.
-	return ! $keys ? $fields : array_keys( $fields );
-}
-
-/**
  * Build and return a text field.
  *
  * @param  array  $field_args  The field args array.
@@ -194,12 +50,16 @@ function get_review_form_input_field( $field_args = array(), $field_key = '', $f
 	$set_field_id       = ! empty( $field_id ) ? $field_id : 'woo-better-reviews-rating-field-' . sanitize_html_class( $field_key );
 	$set_field_name     = ! empty( $field_name ) ? $field_name : 'woo-better-reviews-rating[' . sanitize_html_class( $field_key ) . ']';
 
+	// Check for a value.
+	$set_field_value    = ! empty( $field_args['value'] ) ? $field_args['value'] : '';
+
 	// Set the parts of the input field.
 	$input_args_array   = array(
 		'type'  => esc_attr( $field_args['type'] ),
 		'name'  => esc_attr( $set_field_name ),
 		'id'    => esc_attr( $set_field_id ),
 		'class' => esc_attr( $set_field_class ),
+		'value' => esc_attr( $set_field_value ),
 	);
 
 	// Add items to the array if we have them.
@@ -226,18 +86,18 @@ function get_review_form_input_field( $field_args = array(), $field_key = '', $f
 	// Now begin the actual field input.
 	$field .= '<input';
 
-	// Loop the field parts.
-	foreach ( $input_args_array as $input_key => $input_val ) {
-		$field .= ' ' . esc_attr( $input_key ) . '="' . esc_attr( $input_val ) . '"';
-	}
-
 	// Include the required portion.
 	if ( ! empty( $field_args['required'] ) ) {
 		$field .= ' required="required"';
 	}
 
-	// Now add the empty value field and close it.
-	$field .= ' value="" />';
+	// Loop the field parts.
+	foreach ( $input_args_array as $input_key => $input_val ) {
+		$field .= ' ' . esc_attr( $input_key ) . '="' . esc_attr( $input_val ) . '"';
+	}
+
+	// And close the field.
+	$field .= '/>';
 
 	// Check for the description before we finish.
 	if ( ! empty( $field_args['description'] ) ) {
@@ -246,6 +106,75 @@ function get_review_form_input_field( $field_args = array(), $field_key = '', $f
 
 	// Return the field, filtered.
 	return apply_filters( Core\HOOK_PREFIX . 'review_form_input_field', $field, $field_args, $field_key, $field_id, $field_name );
+}
+
+/**
+ * Build and return a radio field specific to ratings.
+ *
+ * @param  array  $field_args  The field args array.
+ * @param  string $field_key   The specific key used in the field.
+ * @param  string $field_id    Optional field ID, otherwise one is generated from the key.
+ * @param  string $field_name  Optional field name, otherwise one is generated from the key.
+ *
+ * @return HTML
+ */
+function get_review_form_scoring_field( $field_args = array(), $field_key = '', $field_id = '', $field_name = '' ) {
+	// preprint( $field_args, true );
+
+	// Bail if we don't have the args or the key.
+	if ( empty( $field_args ) || empty( $field_key ) ) {
+		return;
+	}
+
+	// Set my field class, name, and ID.
+	$set_field_class    = 'woo-better-reviews-rating-input-field woo-better-reviews-rating-scoring-field';
+	$set_field_class   .= ! empty( $field_args['class'] ) ? ' ' . sanitize_html_class( $field_args['class'] ) : '';
+
+	$set_field_id       = ! empty( $field_id ) ? $field_id : 'woo-better-reviews-rating-field-' . sanitize_html_class( $field_key );
+	$set_field_name     = ! empty( $field_name ) ? $field_name : 'woo-better-reviews-rating[' . sanitize_html_class( $field_key ) . ']';
+
+	// Set my field label text and title with an optional blank.
+	$set_label_text     = ! empty( $field_args['label'] ) ? $field_args['label'] : '';
+	$set_label_title    = ! empty( $field_args['title'] ) ? $field_args['title'] : '';
+
+	// Set the parts of the input field.
+	$input_args_array   = array(
+		'name'  => esc_attr( $set_field_name ),
+		'id'    => esc_attr( $set_field_id ),
+		'class' => esc_attr( $set_field_class ),
+		'value' => esc_attr( $field_key ),
+	);
+
+	// Add items to the array if we have them.
+	$input_args_array   = ! empty( $field_args['custom'] ) ? wp_parse_args( $field_args['custom'], $input_args_array ) : $input_args_array;
+
+	// Set my empty.
+	$field  = '';
+
+	// Now begin the actual field input.
+	$field .= '<input type="radio"';
+
+	// Include the required portion.
+	if ( ! empty( $field_args['required'] ) ) {
+		$field .= ' required="required"';
+	}
+
+	// Loop the field parts.
+	foreach ( $input_args_array as $input_key => $input_val ) {
+		$field .= ' ' . esc_attr( $input_key ) . '="' . esc_attr( $input_val ) . '"';
+	}
+
+	// And close the field.
+	$field .= '>';
+
+	// Check for a label.
+	$field .= '<label for="' . esc_attr( $set_field_id ) . '" class="woo-better-reviews-rating-field-label" title="' . esc_attr( $set_label_title ) . '">' . esc_html( $set_label_text ) . '</label>';
+
+	// Check for the span wrap.
+	$setup  = ! empty( $field_args['wrap'] ) ? '<span class="woo-better-reviews-rating-score-wrap">' . $field . '</span>' : $field;
+
+	// Return the field, filtered.
+	return apply_filters( Core\HOOK_PREFIX . 'review_form_scoring_field', $setup, $field_args, $field_key, $field_id, $field_name );
 }
 
 /**
@@ -401,7 +330,7 @@ function get_review_form_radio_field( $field_args = array(), $field_key = '', $f
 	// Set my empty.
 	$field  = '';
 
-	// Check for the label first.
+	// Now run the label check.
 	if ( ! empty( $field_args['label'] ) ) {
 
 		// Open the label.
@@ -496,7 +425,6 @@ function get_review_form_editor_minimal_field( $field_args = array(), $field_key
 	return apply_filters( Core\HOOK_PREFIX . 'review_form_editor_minimal_field', $field, $field_args, $field_key, $field_id, $field_name );
 }
 
-
 /**
  * Build and return a button field.
  *
@@ -508,7 +436,7 @@ function get_review_form_editor_minimal_field( $field_args = array(), $field_key
  * @return HTML
  */
 function get_review_form_button_field( $field_args = array(), $field_key = '', $field_id = '', $field_name = '' ) {
-	//  preprint( $field_args, true );
+	// preprint( $field_args, true );
 
 	// Bail if we don't have the args or the key.
 	if ( empty( $field_args ) || empty( $field_key ) ) {
@@ -528,12 +456,35 @@ function get_review_form_button_field( $field_args = array(), $field_key = '', $
 	$set_button_value   = ! empty( $field_args['value'] ) ? $field_args['value'] : $field_key;
 	$set_button_label   = ! empty( $field_args['label'] ) ? $field_args['label'] : __( 'Click Here', 'woo-better-reviews' );
 
+	// Set the parts of the input field.
+	$button_args_array  = array(
+		'type'  => esc_attr( $set_button_type ),
+		'name'  => esc_attr( $set_field_name ),
+		'id'    => esc_attr( $set_field_id ),
+		'class' => esc_attr( $set_field_class ),
+		'value' => esc_attr( $set_button_value ),
+	);
+
+	// Add items to the array if we have them.
+	$button_args_array  = ! empty( $field_args['custom'] ) ? wp_parse_args( $field_args['custom'], $button_args_array ) : $button_args_array;
+
 	// Set my empty.
 	$field  = '';
 
-	// Do the actual field.
-	$field .= '<button type="' . esc_attr( $set_button_type ) . '" id="' . esc_attr( $set_field_id ) . '" class="' . esc_attr( $set_field_class ) . '" name="' . esc_attr( $set_field_name ) . '" value="' . esc_attr( $set_button_value ) . '">' . esc_html( $set_button_label ) . '</button>';
+	// Now begin the actual field input.
+	$field .= '<button';
+
+	// Loop the field parts.
+	foreach ( $button_args_array as $button_key => $button_val ) {
+		$field .= ' ' . esc_attr( $button_key ) . '="' . esc_attr( $button_val ) . '"';
+	}
+
+	// Now add the closing tag and our label.
+	$field .= '>' . esc_html( $set_button_label ) . '</button>';
+
+	// Check if need to wrap the span.
+	$setup  = ! empty( $field_args['span'] ) ? '<span class="' . esc_attr( $field_args['span'] ) . '">' . $field . '</span>' : $field;
 
 	// Return the field, filtered.
-	return apply_filters( Core\HOOK_PREFIX . 'review_form_button_field', $field, $field_args, $field_key, $field_id, $field_name );
+	return apply_filters( Core\HOOK_PREFIX . 'review_form_button_field', $setup, $field_args, $field_key, $field_id, $field_name );
 }

@@ -1,69 +1,61 @@
 
-.woo-better-reviews-rating-stars-fields {
+/**
+ * Star CSS originally sourced here: https://codepen.io/jamesbarnett/pen/vlpkh?editors=1100#0
+ */
 
-	margin-bottom: 10px;
+.woo-better-reviews-rating-stars-fields {
+	margin-bottom: 20px;
 
 	.woo-better-reviews-rating-form-stars-intro {
 		margin: 0 0 5px;
 	}
 
 	.woo-better-reviews-rating-form-stars-row {
+		width: 100%;
+		display: block;
+		overflow: hidden;
+	}
 
+	.woo-better-reviews-rating-form-stars-fieldset {
+
+		border: none;
+		float: left;
 		margin: 0;
 		padding: 0;
-		list-style: none;
-		text-align: left;
 
-		display: inline-block;
-		vertical-align: middle;
-		width: 100%;
-		line-height: 1;
-
-		.woo-better-reviews-rating-form-star {
-			display: inline-block;
-			vertical-align: middle;
-			width: auto;
-			margin: 0;
-			padding: 0 10px 0 0;
-			font-size: 30px;
-			line-height: 1;
-
-
-			.woo-better-reviews-rating-field-label {
-				display: inline-block;
-				vertical-align: middle;
-				width: 100%;
-				text-align: center;
-
-				.woo-better-reviews-field-required {
-					display: none;
-				}
-
-				&:hover {
-					color: #ffa500;
-					cursor: pointer;
-				}
-
-			}
-
-			.woo-better-reviews-single-star-radio {
-				display: inline-block;
-				vertical-align: middle;
-				width: 100%;
-			}
-
-			.woo-better-reviews-rating-field-description {
-				display: inline-block;
-				vertical-align: middle;
-				width: 100%;
-				text-align: center;
-			}
-
-			&.woo-better-reviews-rating-form-star-active {
-				color: #ffa500;
-			}
-
+		& > input {
+			display: none;
 		}
+
+		& > label:before {
+			margin: 5px;
+			font-size: 36px;
+			line-height: 1;
+			font-family: dashicons;
+			display: inline-block;
+			content: "\f155";
+		}
+
+		/* removing the half scoring for now.
+		& > .woo-better-reviews-single-star-half:before {
+			content: "\f459";
+			position: absolute;
+		}
+		*/
+
+		& > label {
+			color: #ddd;
+			float: right;
+		}
+
+		& > input:checked ~ label, // show gold star when clicked
+		&:not(:checked) > label:hover, // hover current star
+		&:not(:checked) > label:hover ~ label { color: #FFD700; cursor: pointer; } // hover previous stars in list
+
+		& > input:checked + label:hover, // hover current star when changing rating
+		& > input:checked ~ label:hover,
+		& > label:hover ~ input:checked ~ label, // lighten current selection
+		& > input:checked ~ label:hover ~ label { color: #FFED85; cursor: pointer; }
 
 	}
 

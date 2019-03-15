@@ -47,6 +47,8 @@ function install_table() {
 			con_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
 			review_id BIGINT UNSIGNED NOT NULL DEFAULT 0,
 			author_id BIGINT UNSIGNED NOT NULL DEFAULT 0,
+			author_name varchar(250) NOT NULL DEFAULT '',
+			author_email varchar(100) NOT NULL DEFAULT '',
 			product_id BIGINT UNSIGNED NOT NULL DEFAULT 0,
 			review_date datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
 			review_title text NOT NULL,
@@ -56,20 +58,8 @@ function install_table() {
 			review_status varchar(20) NOT NULL DEFAULT 'pending',
 			is_verified int(1) NOT NULL DEFAULT 0,
 			rating_total_score varchar(8) NOT NULL DEFAULT '',
-			rating_1_attrib varchar(200) NOT NULL DEFAULT '',
-			rating_2_attrib varchar(200) NOT NULL DEFAULT '',
-			rating_3_attrib varchar(200) NOT NULL DEFAULT '',
-			rating_1_score varchar(8) NOT NULL DEFAULT '',
-			rating_2_score varchar(8) NOT NULL DEFAULT '',
-			rating_3_score varchar(8) NOT NULL DEFAULT '',
-			author_char_1_label varchar(200) NOT NULL DEFAULT '',
-			author_char_2_label varchar(200) NOT NULL DEFAULT '',
-			author_char_3_label varchar(200) NOT NULL DEFAULT '',
-			author_char_4_label varchar(200) NOT NULL DEFAULT '',
-			author_char_1_value varchar(200) NOT NULL DEFAULT '',
-			author_char_2_value varchar(200) NOT NULL DEFAULT '',
-			author_char_3_value varchar(200) NOT NULL DEFAULT '',
-			author_char_4_value varchar(200) NOT NULL DEFAULT '',
+			rating_attributes longtext NOT NULL DEFAULT '',
+			author_charstcs longtext NOT NULL DEFAULT '',
 		PRIMARY KEY  (con_id),
 		KEY `review_id` (`review_id`),
 		KEY `author_id` (`author_id`),
@@ -97,6 +87,8 @@ function required_args( $format_args = false ) {
 	$insert_setup   = array(
 		'review_id'           => '%d',
 		'author_id'           => '%d',
+		'author_name'         => '%s',
+		'author_email'        => '%s',
 		'product_id'          => '%d',
 		'review_date'         => '%s',
 		'review_title'        => '%s',
@@ -105,21 +97,9 @@ function required_args( $format_args = false ) {
 		'review_content'      => '%s',
 		'review_status'       => '%s',
 		'is_verified'         => '%d',
-		'rating_total_score'  => '%f',
-		'rating_1_attrib'     => '%s',
-		'rating_2_attrib'     => '%s',
-		'rating_3_attrib'     => '%s',
-		'rating_1_score'      => '%f',
-		'rating_2_score'      => '%f',
-		'rating_3_score'      => '%f',
-		'author_char_1_label' => '%s',
-		'author_char_2_label' => '%s',
-		'author_char_3_label' => '%s',
-		'author_char_4_label' => '%s',
-		'author_char_1_value' => '%s',
-		'author_char_2_value' => '%s',
-		'author_char_3_value' => '%s',
-		'author_char_4_value' => '%s',
+		'rating_total_score'  => '%d',
+		'rating_attributes'   => '%s',
+		'author_charstcs'     => '%s',
 	);
 
 	// Return based on the formatting arg request.
@@ -150,7 +130,7 @@ function insert_row( $insert_args = array() ) {
 	$table_format   = required_args( 'formats' );
 
 	// Run my insert function.
-	$wpdb->insert( $wpdb->wc_better_rvs_consolidated, $insert_args, $table_format );
+	$run_insert     = $wpdb->insert( $wpdb->wc_better_rvs_consolidated, $insert_args, $table_format );
 
 	// Check for the ID and throw an error if we don't have it.
 	if ( ! $wpdb->insert_id ) {

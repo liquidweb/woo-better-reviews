@@ -1,88 +1,112 @@
 
-.woo-better-reviews-rating-attributes-fields {}
+.woo-better-reviews-rating-attributes-fields {
+	margin: 0 0 20px;
+}
+
+.woo-better-reviews-rating-attribute-field-block {
+	margin: 0 0 20px 0;
+
+	&:last-of-type {
+		margin-bottom: 0;
+	}
+}
 
 .woo-better-reviews-rating-attribute-single {
 
-	width: 350px;
-	margin-bottom: 20px;
+	width: 330px;
+	margin: 0;
+	display: block;
+	overflow: hidden;
 
-	.woo-better-reviews-rating-attribute-intro {
+	.woo-better-reviews-rating-form-single-attribute-intro {
 		margin: 0 0 5px;
 	}
 
-	.woo-better-reviews-rating-attribute-row {
 
-		margin: 0;
-		padding: 0;
-		list-style: none;
-		text-align: center;
 
-		display: inline-block;
-		vertical-align: middle;
-		width: 100%;
-		line-height: 1;
-
-		.woo-better-reviews-rating-form-attribute {
-
-			display: inline-block;
-			vertical-align: middle;
-			width: 50px;
-			margin: 0;
-			padding: 0;
-			font-size: 30px;
-			line-height: 1;
-
-			.woo-better-reviews-rating-field-label {
-				display: inline-block;
-				vertical-align: middle;
-				width: 100%;
-				text-align: center;
-
-				.woo-better-reviews-field-required {
-					display: none;
-				}
-
-			}
-
-			.woo-better-reviews-single-attribute-radio {
-				display: inline-block;
-				vertical-align: middle;
-				width: 100%;
-			}
-
-			.woo-better-reviews-rating-field-description {
-				display: inline-block;
-				vertical-align: middle;
-				width: 100%;
-				text-align: center;
-			}
-
-		}
+	.woo-better-reviews-rating-attribute-single {
+	//	width: 100%;
 
 	}
 
-	.woo-better-reviews-rating-attribute-label-group {
+	.woo-better-reviews-rating-form-single-attribute-fieldset {
 
+		border: none;
+		float: left;
 		margin: 0;
-		font-size: 12px;
-		line-height: 14px;
+		padding: 0;
+		// width: 100%;
+		// overflow: hidden;
 
-		.woo-better-reviews-rating-attribute-label {
+		& > input {
+			display: none;
+		}
 
+		& > label:before {
+			margin: 0;
+			padding: 0;
+			font-size: 40px;
+			height: 20px;
+			line-height: 1;
 			display: inline-block;
-			vertical-align: middle;
-			width: 50%;
-			padding: 0 5%;
+			content: "\2588";
 
-			&.woo-better-reviews-rating-attribute-label-min {
-				text-align: left;
-			}
+		}
 
-			&.woo-better-reviews-rating-attribute-label-max {
-				text-align: right;
+		& > label {
+			color: #d5edf0;
+			float: right;
+			height: 20px;
+			margin: 0 7px 0 0;
+
+			&:first-of-type {
+				margin-right: 0;
 			}
 		}
 
+		& > input:checked ~ label, // show dark blue when clicked
+		&:not(:checked) > label:hover, // hover current block
+		&:not(:checked) > label:hover ~ label { color: #62d5e5; cursor: pointer; } // hover previous blocks in list
+
+		& > input:checked + label:hover, // hover current block when changing rating
+		& > input:checked ~ label:hover,
+		& > label:hover ~ input:checked ~ label, // lighten current selection
+		& > input:checked ~ label:hover ~ label { color: #5bc4d2; cursor: pointer; }
+
+	}
+
+}
+
+.woo-better-reviews-rating-attribute-label-group {
+
+	margin: 0;
+	padding: 0;
+	width: 330px;
+
+	p {
+		margin: 0;
+		padding: 3px 0 0;
+		font-size: 12px;
+		line-height: 14px;
+	}
+
+	.woo-better-reviews-rating-attribute-label {
+
+		display: inline-block;
+		vertical-align: middle;
+		width: 50%;
+		padding: 0;
+		font-style: italic;
+
+		&.woo-better-reviews-rating-attribute-label-min {
+			text-align: left;
+			padding-left: 1%;
+		}
+
+		&.woo-better-reviews-rating-attribute-label-max {
+			text-align: right;
+			padding-right: 1%;
+		}
 	}
 
 }

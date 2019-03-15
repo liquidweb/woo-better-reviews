@@ -4,7 +4,15 @@
 
 	.woo-better-reviews-rating-button-wrap {
 
-		.woo-better-reviews-rating-single-button {}
+		.woo-better-reviews-rating-single-button-span {
+			display: inline-block;
+			vertical-align: middle;
+			width: auto;
+		}
+
+		.woo-better-reviews-rating-submit-review-span {
+			margin-right: 10px;
+		}
 
 	}
 

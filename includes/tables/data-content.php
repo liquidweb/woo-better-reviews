@@ -46,6 +46,8 @@ function install_table() {
 		CREATE TABLE {$table_name} (
 			review_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
 			author_id BIGINT UNSIGNED NOT NULL DEFAULT 0,
+			author_name varchar(250) NOT NULL DEFAULT '',
+			author_email varchar(100) NOT NULL DEFAULT '',
 			product_id BIGINT UNSIGNED NOT NULL DEFAULT 0,
 			review_date datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
 			review_title text NOT NULL,
@@ -56,6 +58,7 @@ function install_table() {
 			is_verified int(1) NOT NULL DEFAULT 0,
 		PRIMARY KEY  (review_id),
 		KEY `author_id` (`author_id`),
+		KEY `author_email` (`author_email`),
 		KEY `product_id` (`product_id`)
 		) $char_coll;
 	";
@@ -79,6 +82,8 @@ function required_args( $return_type = '' ) {
 	// Set up the basic array.
 	$insert_setup   = array(
 		'author_id'      => '%d',
+		'author_name'    => '%s',
+		'author_email'   => '%s',
 		'product_id'     => '%d',
 		'review_date'    => '%s',
 		'review_title'   => '%s',

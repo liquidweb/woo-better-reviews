@@ -82,8 +82,11 @@ function display_new_review_form( $product_id = 0, $echo = true ) {
 			// Now get the author fields.
 			$build .= LayoutForm\set_review_form_author_fields_view( get_current_user_id() );
 
-			// Output the submit and hiddens.
-			$build .= LayoutForm\set_review_form_submit_meta_fields_view( $product_id );
+			// Output the submit actions.
+			$build .= LayoutForm\set_review_form_submit_action_fields_view( $product_id );
+
+			// Output the hidden stuff.
+			$build .= LayoutForm\set_review_form_hidden_meta_fields_view( $product_id, get_current_user_id() );
 
 			// Add filterable fields.
 			$build .= apply_filters( Core\HOOK_PREFIX . 'after_new_review_form_after', null, $product_id );

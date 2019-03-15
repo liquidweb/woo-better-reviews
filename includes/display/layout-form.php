@@ -13,6 +13,7 @@ use LiquidWeb\WooBetterReviews as Core;
 use LiquidWeb\WooBetterReviews\Helpers as Helpers;
 use LiquidWeb\WooBetterReviews\Utilities as Utilities;
 use LiquidWeb\WooBetterReviews\Queries as Queries;
+use LiquidWeb\WooBetterReviews\Display\FormData as FormData;
 use LiquidWeb\WooBetterReviews\Display\FormFields as FormFields;
 
 /**
@@ -46,35 +47,43 @@ function set_review_form_rating_stars_view( $product_id = 0 ) {
 	// Wrap the attribute sets in a div.
 	$display_view  .= '<div class="woo-better-reviews-rating-new-review-fields woo-better-reviews-rating-stars-fields">';
 
-		// Output the title portion.
-		$display_view  .= '<p class="woo-better-reviews-rating-form-stars-intro">' . esc_html__( 'Overall Rating:', 'woo-better-reviews' ) . '</p>';
+		// Wrap all the stars in a div.
+		$display_view  .= '<div class="woo-better-reviews-rating-form-stars-row">';
 
-		// Wrap the 7 stars in an unordered list.
-		$display_view  .= '<ul class="woo-better-reviews-rating-form-stars-row">';
+			// Wrap the 7 stars in a fieldset.
+			$display_view  .= '<fieldset class="woo-better-reviews-rating-form-stars-fieldset">';
 
-		// Loop my stars.
-		for ( $i = 1; $i <= 7; $i++ ) {
+			// Add our legend title.
+			$display_view  .= '<legend class="woo-better-reviews-rating-fieldset-intro woo-better-reviews-rating-form-stars-intro">' . esc_html__( 'Overall Rating:', 'woo-better-reviews' ) . '</legend>';
 
-			// Set my star args.
-			$field_args = array(
-				'label'       => '&#9733;',
-				'description' => absint( $i ),
-				'required'    => true,
-				'class'       => 'woo-better-reviews-single-star-radio',
-			);
+			// Set (and reverse) my score range.
+			$initial_range  = range( 1, 7, 1 );
+			$setscore_range = array_reverse( $initial_range );
 
-			// Set the field ID and name.
-			$field_id   = 'woo-better-reviews-rating-content-score-' . absint( $i );
-			$field_name = 'woo-better-reviews-rating[score]';
+			// Loop my scoring range.
+			foreach ( $setscore_range as $setscore ) {
 
-			// Output the star.
-			$display_view  .= '<li class="woo-better-reviews-rating-form-star">';
-				$display_view  .= FormFields\get_review_form_radio_field( $field_args, 'rating-' . $i, $field_id, $field_name );
-			$display_view  .= '</li>';
-		}
+				// Set the field ID and name.
+				$field_id   = 'woo-better-reviews-rating-content-score-' . absint( $setscore );
+				$field_name = 'woo-better-reviews-rating[score]';
 
-		// Close the list.
-		$display_view  .= '</ul>';
+				// Set my field args.
+				$field_args = array(
+					'title'    => sprintf( __( 'Select a %d star rating', 'woo-better-reviews' ), absint( $setscore ) ),
+					'class'    => 'woo-better-reviews-single-star',
+					'required' => true,
+					'wrap'     => false,
+				);
+
+				// And output the field view.
+				$display_view  .= FormFields\get_review_form_scoring_field( $field_args, $setscore, $field_id, $field_name );
+			}
+
+			// Close the fieldset.
+			$display_view  .= '</fieldset>';
+
+		// Close the star wrapping div.
+		$display_view  .= '</div>';
 
 	// Close the div.
 	$display_view  .= '</div>';
@@ -112,68 +121,79 @@ function set_review_form_rating_attributes_view( $product_id = 0 ) {
 	// Wrap the attribute sets in a div.
 	$display_view  .= '<div class="woo-better-reviews-rating-new-review-fields woo-better-reviews-rating-attributes-fields">';
 
-	// Loop the attributes to break out each item.
-	foreach ( $attributes as $attribute_args ) {
-		// preprint( $attribute_args, true );
+		// Loop the attributes to break out each item.
+		foreach ( $attributes as $attribute_args ) {
+			// preprint( $attribute_args, true );
 
-		// Set my field wrapper class.
-		$wrapper_id     = 'woo-better-reviews-rating-attribute-' . sanitize_html_class( $attribute_args['slug'] );
-		$wrapper_class  = 'woo-better-reviews-rating-attribute-single woo-better-reviews-rating-attribute-' . sanitize_html_class( $attribute_args['slug'] ) . '-wrap';
+			// Set my field wrapper class.
+			$wrapper_id     = 'woo-better-reviews-rating-attribute-' . sanitize_html_class( $attribute_args['slug'] );
+			$wrapper_class  = 'woo-better-reviews-rating-attribute-single woo-better-reviews-rating-attribute-' . sanitize_html_class( $attribute_args['slug'] ) . '-wrap';
 
-		// Set my min and max labels.
-		$set_min_label  = ! empty( $attribute_args['min_label'] ) ? esc_attr( $attribute_args['min_label'] ) : __( 'Min.', 'woo-better-reviews' );
-		$set_max_label  = ! empty( $attribute_args['max_label'] ) ? esc_attr( $attribute_args['max_label'] ) : __( 'Max.', 'woo-better-reviews' );
-		$min_max_class  = 'woo-better-reviews-rating-attribute-label woo-better-reviews-rating-attribute-label-';
+			// Set my min and max labels.
+			$set_min_label  = ! empty( $attribute_args['min_label'] ) ? esc_attr( $attribute_args['min_label'] ) : __( 'Min.', 'woo-better-reviews' );
+			$set_max_label  = ! empty( $attribute_args['max_label'] ) ? esc_attr( $attribute_args['max_label'] ) : __( 'Max.', 'woo-better-reviews' );
+			$min_max_class  = 'woo-better-reviews-rating-attribute-label woo-better-reviews-rating-attribute-label-';
 
-		// Wrap the attribute set in it's own div.
-		$display_view  .= '<div id="' . esc_attr( $wrapper_id ) . '" class="' . esc_attr( $wrapper_class ) . '">';
+			// Set (and reverse) my score range.
+			$initial_range  = range( 1, 7, 1 );
+			$setscore_range = array_reverse( $initial_range );
 
-			// Output the title portion.
-			$display_view  .= '<p class="woo-better-reviews-rating-attribute-intro">' . esc_html( $attribute_args['name'] ) . '</p>';
+			// Wrap the whole thing in a big div. Yes, this is many divs.
+			$display_view  .= '<div class="woo-better-reviews-rating-attribute-field-block">';
 
-			// Wrap the attribute scale with an unordered list.
-			$display_view  .= '<ul class="woo-better-reviews-rating-attribute-row">';
+				// Wrap the attribute set in it's own div.
+				$display_view  .= '<div id="' . esc_attr( $wrapper_id ) . '" class="' . esc_attr( $wrapper_class ) . '">';
 
-			// Count on the scale.
-			for ( $i = 1; $i <= 7; $i++ ) {
+					// Wrap the attribute boxes in a fieldset.
+					$display_view  .= '<fieldset class="woo-better-reviews-rating-form-single-attribute-fieldset">';
 
-				// Set a list item class.
-				$list_class = 'woo-better-reviews-rating-form-attribute woo-better-reviews-rating-form-attribute-' . absint( $i );
+						// Add our legend title.
+						$display_view  .= '<legend class="woo-better-reviews-rating-fieldset-intro woo-better-reviews-rating-form-single-attribute-intro">' . esc_html( $attribute_args['name'] ) . '</legend>';
 
-				// Set my field args.
-				$field_args = array(
-					'label'       => absint( $i ),
-					'description' => '',
-					'class'       => 'woo-better-reviews-single-attribute-radio',
-					'required'    => true,
-				);
+						// Loop my scoring range.
+						foreach ( $setscore_range as $setscore ) {
 
-				// Set the field ID and name.
-				$field_id   = 'woo-better-reviews-rating-content-attributes-' . esc_attr( $attribute_args['slug'] ) . '-' . absint( $i );
-				$field_name = 'woo-better-reviews-rating[attributes][' . esc_attr( $attribute_args['slug'] ) . ']';
+							// Set the field ID and name.
+							$field_id   = 'woo-better-reviews-rating-content-attributes-' . esc_attr( $attribute_args['slug'] ) . '-' . absint( $setscore );
+							$field_name = 'woo-better-reviews-rating[attributes][' . absint( $attribute_args['id'] ) . ']';
 
-				// Output the star.
-				$display_view  .= '<li class="' . esc_attr( $list_class ) . '">';
-					$display_view  .= FormFields\get_review_form_radio_field( $field_args, $i, $field_id, $field_name );
-				$display_view  .= '</li>';
-			}
+							// Set my field args.
+							$field_args = array(
+								'title'    => sprintf( __( 'Select a %d rating for this attribute', 'woo-better-reviews' ), absint( $setscore ) ),
+								'class'    => 'woo-better-reviews-single-attribute',
+								'required' => true,
+								'wrap'     => false,
+							);
 
-			// Close the list.
-			$display_view  .= '</ul>';
+							// And output the field view.
+							$display_view  .= FormFields\get_review_form_scoring_field( $field_args, $setscore, $field_id, $field_name );
+						}
 
-			// Handle my min-max labeling.
-			$display_view  .= '<p class="woo-better-reviews-rating-attribute-label-group">';
+					// Close the fieldset.
+					$display_view  .= '</fieldset>';
 
-				// Set the min and max.
-				$display_view  .= '<span class="' . esc_attr( $min_max_class . 'min' ) . '">' . $set_min_label . '</span>';
-				$display_view  .= '<span class="' . esc_attr( $min_max_class . 'max' ) . '">' . $set_max_label . '</span>';
+				// Close the div for the individual attribute set.
+				$display_view  .= '</div>';
 
-			// Close the label group.
-			$display_view  .= '</p>';
+				// Handle my min-max labeling.
+				$display_view  .= '<div class="woo-better-reviews-rating-attribute-label-group">';
 
-		// Close the div for the individual attribute set.
-		$display_view  .= '</div>';
-	}
+					// Include a paragraph tag.
+					$display_view  .= '<p>';
+
+						// Set the min and max.
+						$display_view  .= '<span class="' . esc_attr( $min_max_class . 'min' ) . '">' . $set_min_label . '</span>';
+						$display_view  .= '<span class="' . esc_attr( $min_max_class . 'max' ) . '">' . $set_max_label . '</span>';
+
+					// Close the paragraph tag.
+					$display_view  .= '</p>';
+
+				// Close the label group.
+				$display_view  .= '</div>';
+
+			// Close up the grouping div.
+			$display_view  .= '</div>';
+		}
 
 	// Close the div.
 	$display_view  .= '</div>';
@@ -197,7 +217,7 @@ function set_review_form_content_fields_view( $product_id = 0 ) {
 	}
 
 	// Get my form fields.
-	$fieldset_data  = FormFields\get_review_content_form_fields();
+	$fieldset_data  = FormData\get_review_content_form_fields();
 	// preprint( $fieldset_data, true );
 
 	// Bail without the fields to display.
@@ -287,15 +307,9 @@ function set_review_form_content_fields_view( $product_id = 0 ) {
  */
 function set_review_form_author_fields_view( $author_id = 0 ) {
 
-	// Bail without the parts we want.
-	if ( empty( $author_id ) ) {
-		return;
-	}
-
 	// Get my form fields.
-	$fieldset_data  = FormFields\get_review_author_form_fields();
+	$fieldset_data  = FormData\get_review_author_form_fields( $author_id );
 	// preprint( $fieldset_data, true );
-
 	// Bail without the fields to display.
 	if ( empty( $fieldset_data ) ) {
 		return apply_filters( Core\HOOK_PREFIX . 'review_form_author_fields_view', '', null, $author_id );
@@ -356,7 +370,7 @@ function set_review_form_author_fields_view( $author_id = 0 ) {
 
 					// Set the field ID and name.
 					$field_id   = ! empty( $field_args['is-charstcs'] ) ? 'woo-better-reviews-rating-content-charstcs-' . esc_attr( $field_key ) : '';
-					$field_name = ! empty( $field_args['is-charstcs'] ) ? 'woo-better-reviews-rating[charstcs][' . esc_attr( $field_key ) . ']' : '';
+					$field_name = ! empty( $field_args['charstcs-id'] ) ? 'woo-better-reviews-rating[author-charstcs][' . absint( $field_args['charstcs-id'] ) . ']' : '';
 
 					// Render the field.
 					$display_view  .= FormFields\get_review_form_dropdown_field( $field_args, $field_key, $field_id, $field_name );
@@ -392,20 +406,19 @@ function set_review_form_author_fields_view( $author_id = 0 ) {
  *
  * @return HTML
  */
-function set_review_form_submit_meta_fields_view( $product_id = 0 ) {
+function set_review_form_submit_action_fields_view( $product_id = 0 ) {
 
 	// Bail without the parts we want.
 	if ( empty( $product_id ) ) {
 		return;
 	}
 
-	// Set my button array.
-	$fieldset_data  = FormFields\get_review_action_buttons_fields();
-	// preprint( $fieldset_data, true );
+	// Set my button field array.
+	$fieldset_data  = FormData\get_review_action_buttons_fields();
 
 	// Bail without buttons.
 	if ( empty( $fieldset_data ) ) {
-		return apply_filters( Core\HOOK_PREFIX . 'review_form_submit_meta_fields_view', '', null, $product_id );
+		return apply_filters( Core\HOOK_PREFIX . 'review_form_submit_actions_fields_view', '', null, $product_id );
 	}
 
 	// First set the empty.
@@ -427,47 +440,61 @@ function set_review_form_submit_meta_fields_view( $product_id = 0 ) {
 			$button_id      = 'woo-better-reviews-rating-' . sanitize_html_class( $button_key ) . '-button';
 			$button_name    = 'woo-better-reviews-' . sanitize_html_class( $button_key );
 
-			// And handle the button.
-			$display_view  .= '<span class="' . esc_attr( $wrapper_class ) . '">';
+			// Add the class to the button args.
+			$button_args    = wp_parse_args( array( 'span' => $wrapper_class ), $button_args );
 
-				// Output our button field.
-				$display_view  .= FormFields\get_review_form_button_field( $button_args, $button_key, $button_id, $button_name );
-
-			// Close up the span.
-			$display_view  .= '</span>';
+			// Output our button field.
+			$display_view  .= FormFields\get_review_form_button_field( $button_args, $button_key, $button_id, $button_name );
 		}
 
-			/*
-			// Handle the actual submit button.
-			$display_view  .= '<span class="woo-better-reviews-rating-single-button">';
-
-
-				$display_view  .= '<button class="woo-better-reviews-rating-button woo-better-reviews-rating-submit-button" type="submit">' . __( 'Submit Review', 'woo-better-reviews' ) . '</button>';
-
-
-			$display_view  .= '</span>';
-
-			// Handle my reset button.
-			$display_view  .= '<span class="woo-better-reviews-rating-single-button">';
-
-				$display_view  .= '<button class="woo-better-reviews-rating-button woo-better-reviews-rating-reset-button"" type="reset">' . __( 'Reset', 'woo-better-reviews' ) . '</button>';
-
-			$display_view  .= '</span>';
-			*/
 		// Close my paragraph.
 		$display_view  .= '</p>';
-
-		// Handle some hidden fields.
-		$display_view  .= '<input type="hidden" name="woo-better-reviews-product-id" value="' . absint( $product_id ) . '">';
-		$display_view  .= '<input type="hidden" name="woo-better-reviews-author-id" value="' . get_current_user_id() . '">';
-		$display_view  .= '<input type="hidden" name="woo-better-reviews-add-new" value="1">';
-
-		// And of course our nonce.
-		$display_view  .= wp_nonce_field( 'wbr_new_review_submit_action', 'wbr_new_review_submit_nonce', true, false );
 
 	// Close the div.
 	$display_view  .= '</div>';
 
 	// Return it, filtered.
-	return apply_filters( Core\HOOK_PREFIX . 'review_form_submit_meta_fields_view', $display_view, $fieldset_data, $product_id );
+	return apply_filters( Core\HOOK_PREFIX . 'review_form_submit_actions_fields_view', $display_view, $fieldset_data, $product_id );
+}
+
+/**
+ * Set up the portion displaying the hidden meta entry fields.
+ *
+ * @param  integer $product_id  The product ID we are displaying for.
+ * @param  integer $author_id   The possible author ID we are displaying for.
+ *
+ * @return HTML
+ */
+function set_review_form_hidden_meta_fields_view( $product_id = 0, $author_id = 0 ) {
+
+	// Bail without the parts we want.
+	if ( empty( $product_id ) ) {
+		return;
+	}
+
+	// Set my hidden field array.
+	$fieldset_data  = FormData\get_review_hidden_meta_fields( $product_id, $author_id );
+	// preprint( $fieldset_data, true );
+
+	// Bail without buttons.
+	if ( empty( $fieldset_data ) ) {
+		return apply_filters( Core\HOOK_PREFIX . 'review_form_hidden_meta_fields_view', '', null, $product_id, $author_id );
+	}
+
+	// First set the empty.
+	$display_view   = '';
+
+	// Loop the buttons we have.
+	foreach ( $fieldset_data as $field_id => $field_args ) {
+
+		// Make sure we have a name.
+		$field_name = ! empty( $field_args['name'] ) ? $field_args['name'] : $field_id;
+		$field_val  = ! empty( $field_args['value'] ) ? $field_args['value'] : 0;
+
+		// And show the field.
+		$display_view  .= '<input type="hidden" id="' . esc_attr( $field_id ) . '" name="' . esc_attr( $field_name ) . '" value="' . esc_attr( $field_val ) . '">';
+	}
+
+	// Return it, filtered.
+	return apply_filters( Core\HOOK_PREFIX . 'review_form_hidden_meta_fields_view', $display_view, $fieldset_data, $product_id, $author_id );
 }
