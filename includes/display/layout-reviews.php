@@ -56,7 +56,7 @@ function set_single_review_title_summary_view( $review = array() ) {
 function set_single_review_ratings_view( $review = array() ) {
 
 	// Bail without the parts we want.
-	if ( empty( $review ) || empty( $review['total-score'] ) && empty( $review['rating-attributes'] ) ) {
+	if ( empty( $review ) || empty( $review['total_score'] ) && empty( $review['rating_attributes'] ) ) {
 		return;
 	}
 
@@ -64,10 +64,10 @@ function set_single_review_ratings_view( $review = array() ) {
 	$display_view   = '';
 
 	// Output the total score part.
-	if ( ! empty( $review['total-score'] ) ) {
+	if ( ! empty( $review['total_score'] ) ) {
 
 		// Determine the score parts.
-		$score_had  = absint( $review['total-score'] );
+		$score_had  = absint( $review['total_score'] );
 		$score_left = $score_had < 7 ? 7 - $score_had : 0;
 
 		// Set the aria label.
@@ -89,13 +89,13 @@ function set_single_review_ratings_view( $review = array() ) {
 	}
 
 	//  Handle displaying each attribute.
-	if ( ! empty( $review['rating-attributes'] ) ) {
+	if ( ! empty( $review['rating_attributes'] ) ) {
 
 		// Set an unordered list.
 		$display_view  .= '<ul class="woo-better-reviews-single-rating-attributes">';
 
 		// Loop my characteristics.
-		foreach ( $review['rating-attributes'] as $attribute ) {
+		foreach ( $review['rating_attributes'] as $attribute ) {
 
 			// Set the list item.
 			$display_view  .= '<li class="woo-better-reviews-single-rating-attribute">';
@@ -185,8 +185,8 @@ function set_single_review_date_author_view( $review = array() ) {
 	}
 
 	// Now set up our author view display.
-	if ( ! empty( $review['author-name'] ) ) {
-		$display_view[] = sprintf( __( 'by %s', 'woo-better-reviews' ), '<span class="' . esc_attr( $class_prefix ) . '-author-name">' . esc_attr( $review['author-name'] ) . '</span>' );
+	if ( ! empty( $review['author_name'] ) ) {
+		$display_view[] = sprintf( __( 'by %s', 'woo-better-reviews' ), '<span class="' . esc_attr( $class_prefix ) . '-author-name">' . esc_attr( $review['author_name'] ) . '</span>' );
 	}
 
 	// Check for the verified part to add our icon.
@@ -216,7 +216,7 @@ function set_single_review_date_author_view( $review = array() ) {
 function set_single_review_author_charstcs_view( $review = array() ) {
 
 	// Bail without the parts we want.
-	if ( empty( $review ) || empty( $review['author-charstcs'] ) ) {
+	if ( empty( $review ) || empty( $review['author_charstcs'] ) ) {
 		return;
 	}
 
@@ -227,7 +227,7 @@ function set_single_review_author_charstcs_view( $review = array() ) {
 	$display_view  .= '<ul class="woo-better-reviews-author-charstcs">';
 
 	// Loop my characteristics.
-	foreach ( $review['author-charstcs'] as $charstc ) {
+	foreach ( $review['author_charstcs'] as $charstc ) {
 
 		// Set the list item.
 		$display_view  .= '<li class="woo-better-reviews-single-author-charstc">';

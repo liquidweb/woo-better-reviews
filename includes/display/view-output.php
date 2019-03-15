@@ -256,7 +256,7 @@ function display_existing_reviews( $product_id = 0, $echo = true ) {
 		$class  = Utilities\set_single_review_div_class( $single_review, $i );
 
 		// Now open a div for the individual review.
-		$build .= '<div id="' . sanitize_html_class( 'woo-better-reviews-single-' . absint( $single_review['review-id'] ) ) . '" class="' . esc_attr( $class ) . '">';
+		$build .= '<div id="' . sanitize_html_class( 'woo-better-reviews-single-' . absint( $single_review['review_id'] ) ) . '" class="' . esc_attr( $class ) . '">';
 
 			// Output the title.
 			$build .= LayoutReviews\set_single_review_title_summary_view( $single_review );

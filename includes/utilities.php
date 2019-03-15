@@ -10,6 +10,7 @@ namespace LiquidWeb\WooBetterReviews\Utilities;
 
 // Set our aliases.
 use LiquidWeb\WooBetterReviews as Core;
+use LiquidWeb\WooBetterReviews\Queries as Queries;
 
 /**
  * Increment the review count by 1.
@@ -88,7 +89,7 @@ function merge_review_object_taxonomies( $reviews ) {
 			// preprint( $review, true );
 
 			// Pass it into the author setup.
-			$review = format_review_author_data( $review );
+			$review = format_review_author_charstcs( $review );
 			// preprint( $review, true );
 
 			// Pass it into the meta setup.
@@ -331,6 +332,11 @@ function format_review_textarea_data( $field_args = array() ) {
  */
 function format_review_content_data( $review ) {
 
+	// Bail without a review.
+	if ( empty( $review ) ) {
+		return;
+	}
+
 	// Set the empty.
 	$setup  = array();
 
@@ -374,6 +380,11 @@ function format_review_content_data( $review ) {
  */
 function format_review_scoring_data( $review ) {
 
+	// Bail without a review.
+	if ( empty( $review ) ) {
+		return;
+	}
+
 	// Set the empty for scoring.
 	$setup  = array();
 
@@ -381,31 +392,37 @@ function format_review_scoring_data( $review ) {
 	if ( isset( $review['rating_total_score'] ) ) {
 
 		// Add the item.
-		$setup['total-score'] = $review['rating_total_score'];
+		$setup['total_score'] = $review['rating_total_score'];
 
 		// And unset the old.
 		unset( $review['rating_total_score'] );
 	}
 
-	// Our scoring data has 3 pieces.
-	for ( $i = 1; $i <= 3; $i++ ) {
+	// Check for the attributes kept.
+	if ( isset( $review['rating_attributes'] ) ) {
 
-		// Set the key to pull out the attribute.
-		$array_arg  = 'rating_' . absint( $i ) . '_attrib';
-		$array_key  = $review[ $array_arg ];
+		// Pull out the attributes.
+		$attributes = maybe_unserialize( $review['rating_attributes'] );
+		// preprint( $attributes, true );
 
-		// Set the key for getting the value.
-		$value_arg  = 'rating_' . absint( $i ) . '_score';
+		// Our scoring data has 3 pieces.
+		foreach ( $attributes as $attribute_id => $attribute_score ) {
 
-		// Now set the array accordingly.
-		$setup['rating-attributes'][ $i ] = array(
-			'label' => $array_key,
-			'value' => $review[ $value_arg ],
-		);
+			// Pull my attribute data.
+			$attribute_data = Queries\get_single_attribute( $attribute_id );
+			// preprint( $attribute_data, true );
 
-		// And unset the review parts.
-		unset( $review[ $array_arg ] );
-		unset( $review[ $value_arg ] );
+			// Now set the array accordingly.
+			$setup['rating_attributes'][ $attribute_id ] = array(
+				'label' => $attribute_data['attribute_name'],
+				'value' => $attribute_score,
+			);
+
+			// Nothing left with each attribute.
+		}
+
+		// And unset the old.
+		unset( $review['rating_attributes'] );
 	}
 
 	// Return the array.
@@ -419,46 +436,38 @@ function format_review_scoring_data( $review ) {
  *
  * @return array
  */
-function format_review_author_data( $review ) {
+function format_review_author_charstcs( $review ) {
+
+	// Bail without a review.
+	if ( empty( $review ) || empty( $review['author_charstcs'] ) ) {
+		return;
+	}
 
 	// Set the empty.
 	$setup  = array();
 
-	// Check and modify the overall total.
-	if ( isset( $review['author_id'] ) ) {
+	// Pull out the charstcs.
+	$charstcs   = maybe_unserialize( $review['author_charstcs'] );
+	// preprint( $charstcs, true );
 
-		// Add the item.
-		$setup['author-id'] = $review['author_id'];
+	// Our scoring data has 3 pieces.
+	foreach ( $charstcs as $charstcs_id => $charstcs_slug ) {
 
-		// Include some nice author info.
-		$setup['author-name']   = get_the_author_meta( 'display_name', absint( $review['author_id'] ) );
-		$setup['author-email']  = get_the_author_meta( 'user_email', absint( $review['author_id'] ) );
-		$setup['author-avatar'] = get_avatar_url( absint( $review['author_id'] ) );
-
-		// And unset the old.
-		unset( $review['author_id'] );
-	}
-
-	// Our author data has 4 pieces.
-	for ( $i = 1; $i <= 4; $i++ ) {
-
-		// Set the key to pull out the attribute.
-		$array_arg  = 'author_char_' . absint( $i ) . '_label';
-		$array_key  = $review[ $array_arg ];
-
-		// Set the key for getting the value.
-		$value_arg  = 'author_char_' . absint( $i ) . '_value';
+		// Pull my charstcs data.
+		$charstcs_data  = Queries\get_single_charstcs( $charstcs_id );
+		$charstcs_vals  = maybe_unserialize( $charstcs_data['charstcs_values'] );
 
 		// Now set the array accordingly.
-		$setup['author-charstcs'][ $i ] = array(
-			'label' => $array_key,
-			'value' => $review[ $value_arg ],
+		$setup['author_charstcs'][ $charstcs_id ] = array(
+			'label' => $charstcs_data['charstcs_name'],
+			'value' => $charstcs_vals[ $charstcs_slug ],
 		);
 
-		// And unset the parts.
-		unset( $review[ $array_arg ] );
-		unset( $review[ $value_arg ] );
+		// Nothing left with each attribute.
 	}
+
+	// And unset the old.
+	unset( $review['author_charstcs'] );
 
 	// Return the array.
 	return wp_parse_args( $setup, $review );
@@ -494,7 +503,7 @@ function format_review_meta_data( $review ) {
 		}
 
 		// Make my array key.
-		$array_key  = str_replace( $checks, array( 'consolidated-id', 'review-id', 'product-id', 'status', 'verified' ), $check );
+		$array_key  = str_replace( $checks, array( 'consolidated_id', 'review_id', 'product_id', 'status', 'verified' ), $check );
 
 		// Add the item.
 		$setup[ $array_key ] = $review[ $check ];
@@ -517,6 +526,11 @@ function format_review_meta_data( $review ) {
  */
 function set_single_review_div_class( $review = array(), $index = 0 ) {
 
+	// Bail without a review.
+	if ( empty( $review ) ) {
+		return;
+	}
+
 	// Set our base class, which is also the prefix for all the others.
 	$class_prefix   = 'woo-better-reviews-single-review';
 
@@ -529,9 +543,9 @@ function set_single_review_div_class( $review = array(), $index = 0 ) {
 	$classes    = array(
 		$class_prefix,
 		$class_prefix . '-display-block',
-		$class_prefix . '-author-' . absint( $review['author-id'] ),
-		$class_prefix . '-product-' . absint( $review['product-id'] ),
-		$class_prefix . '-rating-' . absint( $review['total-score'] ),
+		$class_prefix . '-author-' . absint( $review['author_id'] ),
+		$class_prefix . '-product-' . absint( $review['product_id'] ),
+		$class_prefix . '-rating-' . absint( $review['total_score'] ),
 		$class_prefix . '-status-' . esc_attr( $review['status'] ),
 	);
 
