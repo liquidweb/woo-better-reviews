@@ -52,8 +52,16 @@ function test_and_do_database() {
 			test_and_do_delete();
 			break;
 
+		case 'products' :
+			test_and_do_product();
+			break;
+
 		// No more case breaks, no more tables.
 	}
+
+}
+
+function test_and_do_product() {
 
 }
 

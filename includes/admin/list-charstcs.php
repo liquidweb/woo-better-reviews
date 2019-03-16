@@ -266,6 +266,7 @@ class WooBetterReviews_ListCharstcs extends WP_List_Table {
 		// Build our array of hidden columns.
 		$setup  = array(
 			'charstcs_slug',
+			'charstcs_type',
 		);
 
 		// Return a blank array, filtered.

@@ -10,6 +10,26 @@
 		}
 	}
 
+	.woo-better-reviews-form-field.attribute-labels-wrap {
+
+		.woo-better-reviews-form-split {
+
+			display: inline-block;
+			vertical-align: top;
+			width: 50%;
+
+			*.woo-better-reviews-form-split-left {}
+
+			*.woo-better-reviews-form-split-right {}
+
+			.woo-better-reviews-form-split-label {
+				font-size: 11px;
+				font-style: italic;
+				padding: 2px 0 0 2px;
+			}
+		}
+	}
+
 }
 
 @media only screen and (max-width: 782px) {}

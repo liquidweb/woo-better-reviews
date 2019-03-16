@@ -440,7 +440,7 @@ class WooBetterReviews_ListReviews extends WP_List_Table {
 
 		// Make a basic array of the actions we wanna include.
 		$setup  = array(
-			'woo_better_reviews_action' => __( 'Some Action', 'woo-better-reviews' ),
+			'wbr_bulk_approve' => __( 'Approve Pending', 'woo-better-reviews' ),
 		);
 
 		// Return it filtered.
@@ -453,7 +453,55 @@ class WooBetterReviews_ListReviews extends WP_List_Table {
 	 * @see $this->prepare_items()
 	 */
 	protected function process_bulk_action() {
-		return;
+
+		// Make sure we have the page we want.
+		if ( empty( $_GET['page'] ) || Core\REVIEWS_ANCHOR !== sanitize_text_field( $_GET['page'] ) ) {
+			return;
+		}
+
+		// Bail if we aren't on the doing our requested action.
+		if ( empty( $this->current_action() ) || ! in_array( $this->current_action(), array_keys( $this->get_bulk_actions() ) ) ) {
+			return;
+		}
+
+		// Handle the nonce check.
+		if ( empty( $_POST['wbr_list_reviews_nonce'] ) || ! wp_verify_nonce( $_POST['wbr_list_reviews_nonce'], 'wbr_list_reviews_action' ) ) {
+			wp_die( __( 'Your security nonce failed.', 'woo-better-reviews' ) );
+		}
+
+		// Check for the array of review IDs being passed.
+		if ( empty( $_POST['review-ids'] ) ) {
+
+			// Set my error return args.
+			$redirect_args  = array(
+				'success'           => false,
+				'wbr-action-result' => 'failed',
+				'wbr-error-code'    => 'missing-review-ids',
+			);
+
+			// And redirect.
+			Helpers\admin_page_redirect( $redirect_args, Core\REVIEWS_ANCHOR );
+		}
+
+		// Set my review IDs.
+		$review_ids = array_map( 'absint', $_POST['review-ids'] );
+
+		// Now loop my IDs and attempt to update each one.
+		foreach ( $review_ids as $review_id ) {
+
+			// @@todo actually update the row.
+
+			// Nothing left in the loop to do.
+		}
+
+		// Set my success args.
+		$redirect_args  = array(
+			'success'           => 1,
+			'wbr-action-result' => 'reviews-approved-bulk',
+		);
+
+		// And redirect.
+		Helpers\admin_page_redirect( $redirect_args, Core\REVIEWS_ANCHOR );
 	}
 
 	/**
@@ -469,7 +517,7 @@ class WooBetterReviews_ListReviews extends WP_List_Table {
 		$id = absint( $item['id'] );
 
 		// Return my checkbox.
-		return '<input type="checkbox" name="review-id[]" class="woo-better-reviews-admin-checkbox" id="cb-' . $id . '" value="' . $id . '" /><label for="cb-' . $id . '" class="screen-reader-text">' . __( 'Select review', 'woo-better-reviews' ) . '</label>';
+		return '<input type="checkbox" name="review-ids[]" class="woo-better-reviews-admin-checkbox" id="cb-' . $id . '" value="' . $id . '" /><label for="cb-' . $id . '" class="screen-reader-text">' . __( 'Select review', 'woo-better-reviews' ) . '</label>';
 	}
 
 	/**

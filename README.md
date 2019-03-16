@@ -8,3 +8,10 @@
 **License URI:** https://opensource.org/licenses/MIT  
 
 Like reviews, only way better.
+
+
+### To-Do List
+
+* connect product attributes
+* set other field types
+* add / delete / modify reviews

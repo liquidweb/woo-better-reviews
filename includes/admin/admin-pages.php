@@ -533,6 +533,7 @@ function load_add_new_charstcs_form( $action = '' ) {
 			// Close the name field.
 			$build .= '</div>';
 
+			/*
 			// Set the field type dropdown field.
 			$build .= '<div class="woo-better-reviews-form-field form-field characteristic-type-wrap">';
 
@@ -554,6 +555,9 @@ function load_add_new_charstcs_form( $action = '' ) {
 
 			// Close the type field.
 			$build .= '</div>';
+			*/
+			// Hiding the selection for now.
+			$build .= '<input name="new-charstc[type]" value="dropdown" type="hidden">';
 
 			// Output the submit button.
 			$build .= '<p class="submit woo-better-reviews-add-new-submit-wrap">';
@@ -694,6 +698,7 @@ function load_edit_single_charstcs_form( $action ) {
 				// Close the values field.
 				$build .= '</tr>';
 
+				/*
 				// Set the type field.
 				$build .= '<tr class="form-field woo-better-reviews-form-field charstcs-type-wrap">';
 
@@ -724,6 +729,8 @@ function load_edit_single_charstcs_form( $action ) {
 
 				// Close the values field.
 				$build .= '</tr>';
+				*/
+				$build .= '<input name="charstcs-args[type]" value="' . $charstcs_data['charstcs_type'] . '" type="hidden">';
 
 			// Close up the table body.
 			$build .= '</tbody>';

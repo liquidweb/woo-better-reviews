@@ -3,6 +3,14 @@
   .col-primary-display-left .col-wrap .woo-better-reviews-add-new-submit-wrap {
     margin: 0 0 10px;
     padding: 10px 0; }
+.col-primary-display-left .woo-better-reviews-form-field.attribute-labels-wrap .woo-better-reviews-form-split {
+  display: inline-block;
+  vertical-align: top;
+  width: 50%; }
+  .col-primary-display-left .woo-better-reviews-form-field.attribute-labels-wrap .woo-better-reviews-form-split .woo-better-reviews-form-split-label {
+    font-size: 11px;
+    font-style: italic;
+    padding: 2px 0 0 2px; }
 
 form.woo-better-reviews-admin-edit-single-item-form {
   max-width: 800px; }

@@ -106,12 +106,14 @@ form.woo-better-reviews-form-container {
 .woo-better-reviews-rating-stars-fields {
   margin-bottom: 20px; }
   .woo-better-reviews-rating-stars-fields .woo-better-reviews-rating-form-stars-intro {
-    margin: 0 0 5px; }
+    margin: 0 0 5px;
+    background-color: transparent; }
   .woo-better-reviews-rating-stars-fields .woo-better-reviews-rating-form-stars-row {
     width: 100%;
     display: block;
     overflow: hidden; }
   .woo-better-reviews-rating-stars-fields .woo-better-reviews-rating-form-stars-fieldset {
+    background-color: transparent;
     border: none;
     float: left;
     margin: 0;
@@ -155,8 +157,10 @@ form.woo-better-reviews-form-container {
   display: block;
   overflow: hidden; }
   .woo-better-reviews-rating-attribute-single .woo-better-reviews-rating-form-single-attribute-intro {
-    margin: 0 0 5px; }
+    margin: 0 0 5px;
+    background-color: transparent; }
   .woo-better-reviews-rating-attribute-single .woo-better-reviews-rating-form-single-attribute-fieldset {
+    background-color: transparent;
     border: none;
     float: left;
     margin: 0;

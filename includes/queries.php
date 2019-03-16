@@ -990,6 +990,10 @@ function get_all_attributes( $return_type = 'objects', $purge = false ) {
 			return $cached_dataset;
 			break;
 
+		case 'display' :
+			return Utilities\format_attribute_display_data( $cached_dataset );
+			break;
+
 		case 'ids' :
 
 			// Set and return my query list.

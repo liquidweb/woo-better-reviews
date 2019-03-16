@@ -186,14 +186,14 @@ function process_review_submission() {
 		Utilities\increment_product_review_count( $product_id );
 
 		// The review has been successfully entered, so redirect.
-		// redirect_front_submit_result( $base_redirect, '', true );
-		die( 'review added' );
+		redirect_front_submit_result( $base_redirect, '', true, array( 'wbr-new-review' => $maybe_consolidated ) );
 	}
 
-	preprint( $maybe_consolidated, true );
+	// Determine the error code if we have one.
+	$error_code = ! is_wp_error( $maybe_consolidated ) ? 'consolidated-insert-fail' : $maybe_consolidated->get_error_code();
 
-	die( 'review failed somehow' );
-
+	// And run the redirect.
+	redirect_front_submit_result( $base_redirect, $error_code );
 }
 
 /**
@@ -202,11 +202,12 @@ function process_review_submission() {
  * @param  string  $redirect  The link to redirect to.
  * @param  string  $error     Optional error code.
  * @param  boolean $success   Whether it was successful.
+ * @param  array   $custom    Any custom args to add.
  * @param  string  $return    Slug of the menu page to add a return link for.
  *
  * @return void
  */
-function redirect_front_submit_result( $redirect = '', $error = '', $success = false, $return = '' ) {
+function redirect_front_submit_result( $redirect = '', $error = '', $success = false, $custom = array(), $return = '' ) {
 
 	// Set up my results based on the success flag.
 	$check_results  = ! empty( $success ) ? 'added' : 'failed';
@@ -223,6 +224,9 @@ function redirect_front_submit_result( $redirect = '', $error = '', $success = f
 
 	// Now check to see if we have a return, which means a return link.
 	$redirect_args  = ! empty( $return ) ? wp_parse_args( $redirect_args, array( 'wbr-submit-return' => $return ) ) : $redirect_args;
+
+	// Add any custom item.
+	$redirect_args  = ! empty( $custom ) ? wp_parse_args( $custom, $redirect_args ) : $redirect_args;
 
 	// Now set my redirect link.
 	$redirect_link  = add_query_arg( $redirect_args, $redirect );
@@ -269,7 +273,7 @@ function format_submitted_review_content( $form_data = array(), $product_id = 0,
 		'review_slug'    => sanitize_title_with_dashes( $review_title, null, 'save' ),
 		'review_summary' => esc_textarea( $review_summary ),
 		'review_content' => wp_kses_post( $form_data['review-content'] ),
-		'review_status'  => 'pending',
+		'review_status'  => 'approved' , // 'pending',
 		'is_verified'    => 0,
 	);
 
