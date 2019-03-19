@@ -182,6 +182,15 @@ function process_review_submission() {
 	// If we have the good ID coming back, redirect with it.
 	if ( ! empty( $maybe_consolidated ) && ! is_wp_error( $maybe_consolidated ) ) {
 
+		// Set my custom args for transients.
+		$purging_args = array(
+			'author-id'  => $author_id,
+			'product-id' => $product_id,
+		);
+
+		// Handle the transient purging.
+		Utilities\purge_transients( null, 'reviews', $purging_args );
+
 		// Increment the count of reviews we have.
 		Utilities\increment_product_review_count( $product_id );
 

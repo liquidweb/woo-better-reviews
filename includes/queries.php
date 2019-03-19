@@ -701,7 +701,7 @@ function get_consolidated_reviews_for_product( $product_id = 0, $return_type = '
 			break;
 
 		case 'display' :
-			return Utilities\merge_review_object_taxonomies( $cached_dataset );
+			return merge_review_object_taxonomies( $cached_dataset );
 			break;
 
 		case 'ids' :
@@ -1484,4 +1484,78 @@ function get_single_charstcs( $charstcs_id = 0, $purge = false ) {
 
 	// Return the dataset.
 	return $cached_dataset;
+}
+
+/**
+ * Take the review object array and merge the taxonomies.
+ *
+ * @param  array $reviews  The review objects from the query.
+ *
+ * @return array
+ */
+function merge_review_object_taxonomies( $reviews ) {
+
+	// Bail with no reviews.
+	if ( empty( $reviews ) ) {
+		return false;
+	}
+
+	// Set the initial empty.
+	$merged = array();
+
+	// Now loop and do the things.
+	foreach ( $reviews as $object ) {
+
+		// Set the ID.
+		$id = $object->con_id;
+
+		// Set the key to use in our transient.
+		$ky = Core\HOOK_PREFIX . 'reviews_for_product_' . absint( $id );
+
+		// If we don't want the cache'd version, delete the transient first.
+		if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+			delete_transient( $ky );
+		}
+
+		// Attempt to get the reviews from the cache.
+		$cached_dataset = get_transient( $ky );
+
+		// If we have none, do the things.
+		if ( false === $cached_dataset ) {
+
+			// Cast it as an array.
+			$review = (array) $object;
+			// preprint( $review, true );
+
+			// Pass it into the content setup.
+			$review = format_review_content_data( $review );
+			// preprint( $review, true );
+
+			// Pass it into the scoring setup.
+			$review = format_review_scoring_data( $review );
+			// preprint( $review, true );
+
+			// Pass it into the author setup.
+			$review = format_review_author_charstcs( $review );
+			// preprint( $review, true );
+
+			// Pass it into the meta setup.
+			$review = format_review_meta_data( $review );
+			// preprint( $review, true );
+
+			// Set our transient with our data.
+			set_transient( $ky, $review, DAY_IN_SECONDS );
+
+			// And change the variable to do the things.
+			$cached_dataset = $review;
+		}
+
+		// And now merge the data.
+		$merged[ $id ] = $cached_dataset;
+
+		// Should be nothing left inside the loop.
+	}
+
+	// Return our large merged data.
+	return $merged;
 }

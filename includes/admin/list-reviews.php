@@ -101,6 +101,7 @@ class WooBetterReviews_ListReviews extends WP_List_Table {
 			'review_title'   => __( 'Title', 'woo-better-reviews' ),
 			'review_product' => __( 'Product', 'woo-better-reviews' ),
 			'review_date'    => __( 'Date', 'woo-better-reviews' ),
+			'review_author'  => __( 'Author', 'woo-better-reviews' ),
 			'review_status'  => __( 'Status', 'woo-better-reviews' ),
 		);
 
@@ -529,12 +530,15 @@ class WooBetterReviews_ListReviews extends WP_List_Table {
 	 */
 	protected function column_review_title( $item ) {
 
+		// Get the edit link.
+		$edit_link  = $this->get_single_review_action_link( $item['id'], 'edit' );
+
 		// Build my markup.
 		$setup  = '';
 
 		// Set the display name.
 		$setup .= '<span class="woo-better-reviews-admin-table-display woo-better-reviews-admin-table-review-title">';
-			$setup .= esc_html( $item['review_title'] );
+			$setup .= '<a class="row-title" href="' . esc_url( $edit_link ) . '">' . esc_html( $item['review_title'] ) . '</a>';
 		$setup .= '</span>';
 
 		// Create my formatted date.
@@ -582,6 +586,49 @@ class WooBetterReviews_ListReviews extends WP_List_Table {
 
 		// Return my formatted product name.
 		return apply_filters( Core\HOOK_PREFIX . 'review_table_column_review_product', $setup, $item );
+	}
+
+	/**
+	 * The review author column.
+	 *
+	 * @param  array  $item  The item from the data array.
+	 *
+	 * @return string
+	 */
+	protected function column_review_author( $item ) {
+
+		// Determine the author name.
+		$author_name    = ! empty( $item['author_name'] ) ? $item['author_name'] : __( 'Unknown Reviewer', 'woo-better-reviews' );
+
+		// Build my markup.
+		$setup  = '';
+
+		// Set the product name.
+		$setup .= '<span class="woo-better-reviews-admin-table-display woo-better-reviews-admin-table-review-author">';
+
+		// Look for an author ID.
+		if ( empty( $item['author_id'] ) ) {
+
+			// Make the name.
+			$setup .= '<em>' . esc_html( $author_name ) . '</em>';
+
+		} else {
+
+			// Get the edit link based on the ID.
+			$edit_link  = get_edit_user_link( absint( $item['author_id'] ) );
+
+			// Set some text.
+			$edit_text  = __( 'View the user profile', 'woo-better-reviews' );
+
+			// And output.
+			$setup .= '<a title="' . esc_attr( $edit_text ) . '" href="' . esc_url( $edit_link ) . '">' . esc_html( $author_name ) . '</a>';
+		}
+
+		// Close the span.
+		$setup .= '</span>';
+
+		// Return my formatted product name.
+		return apply_filters( Core\HOOK_PREFIX . 'review_table_column_review_author', $setup, $item );
 	}
 
 	/**
@@ -779,6 +826,7 @@ class WooBetterReviews_ListReviews extends WP_List_Table {
 			case 'review_title' :
 			case 'review_product' :
 			case 'review_date' :
+			case 'review_author' :
 			case 'review_status' :
 				return ! empty( $dataset[ $column_name ] ) ? $dataset[ $column_name ] : '';
 
@@ -804,7 +852,147 @@ class WooBetterReviews_ListReviews extends WP_List_Table {
 	 * @return array
 	 */
 	private function setup_row_action_items( $item ) {
-		return apply_filters( Core\HOOK_PREFIX . 'review_table_row_actions', array(), $item );
+
+		// Grab our settings page admin link.
+		$settings_link  = Helpers\get_admin_menu_link( Core\REVIEWS_ANCHOR );
+
+		// Set my review ID.
+		$review_id      = absint( $item['id'] );
+
+		// Create the array of action items.
+		$action_dataset = $this->get_row_action_dataset( $review_id );
+
+		// Set an empty array.
+		$setup  = array();
+
+		// Now loop and create the links.
+		foreach ( $action_dataset as $action_name => $args ) {
+
+			// Make my action link.
+			$action_link    = $this->get_single_review_action_link( $review_id, $action_name );
+
+			// Bail without a link.
+			if ( empty( $action_link ) ) {
+				continue;
+			}
+
+			// Set the classes.
+			$action_class   = 'woo-better-reviews-action-link woo-better-reviews-single-action-link woo-better-reviews-single-' . esc_attr( $action_name ) . '-action-link';
+
+			// Set an empty.
+			$build  = '';
+
+			// Now set up the markup.
+			$build .= '<a class="' . esc_attr( $action_class ) . '"';
+
+			// Check for a title.
+			if ( ! empty( $args['title'] ) ) {
+				$build .= ' title="' . esc_attr( $args['title'] ) . '"';
+			}
+
+			// Check for data items.
+			if ( ! empty( $args['data'] ) ) {
+
+				// Loop and add.
+				foreach ( $args['data'] as $data_key => $data_val ) {
+
+					// Add each one to the build string.
+					$build .= ' data-' . esc_attr( $data_key ) . '="' . esc_attr( $data_val ) . '"';
+				}
+			}
+
+			// Now add the actual link and text to finish it.
+			$build .= ' href="' . esc_url( $action_link ) . '">' . esc_html( $args['label'] ) . '</a>';
+
+			// Add it to the array.
+			$setup[ $action_name ] = $build;
+		}
+
+		// Return the table row.
+		return apply_filters( Core\HOOK_PREFIX . 'review_table_row_actions', $setup, $item, $review_id );
+	}
+
+	/**
+	 * Get the dataset for the action links.
+	 *
+	 * @param  integer $review_id      The individual review we are making links for.
+	 * @param  string  $single_action  Request one action from the entire array.
+	 *
+	 * @return array
+	 */
+	protected function get_row_action_dataset( $review_id = 0, $single_action = '' ) {
+
+		// Create the array of action items.
+		$action_dataset = array(
+			'edit' => array(
+				'nonce'  => wp_create_nonce( 'wbr_edit_single_' . $review_id ),
+				'label'  => __( 'Edit', 'woo-better-reviews' ),
+				'title'  => __( 'Edit Review', 'woo-better-reviews' ),
+				'data'   => array(
+					'item-id'   => $review_id,
+					'item-type' => 'review',
+					'nonce'     => wp_create_nonce( 'wbr_edit_single_' . $review_id ),
+				),
+			),
+
+			'delete' => array(
+				'nonce'  => wp_create_nonce( 'wbr_delete_single_' . $review_id ),
+				'label'  => __( 'Delete', 'woo-better-reviews' ),
+				'title'  => __( 'Delete Review', 'woo-better-reviews' ),
+				'data'   => array(
+					'item-id'   => $review_id,
+					'item-type' => 'review',
+					'nonce'     => wp_create_nonce( 'wbr_delete_single_' . $review_id ),
+				),
+			),
+		);
+
+		// Return the array of data if no single was requested.
+		if ( empty( $single_action ) ) {
+			return $action_dataset;
+		}
+
+		// Now return the single or false.
+		return isset( $action_dataset[ $single_action ] ) ? $action_dataset[ $single_action ] : $single_action;
+	}
+
+	/**
+	 * Create the raw URL for a single review action.
+	 *
+	 * @param  integer $review_id     The individual review we are making links for.
+	 * @param  string  $action_name   The name of the action we want.
+	 *
+	 * @return string
+	 */
+	protected function get_single_review_action_link( $review_id = 0, $action_name = '' ) {
+
+		// Bail without the review ID or action name.
+		if ( empty( $review_id ) || empty( $action_name ) ) {
+			return;
+		}
+
+		// Fetch the dataset for an edit link.
+		$action_dataset = $this->get_row_action_dataset( $review_id, $action_name );
+		// preprint( $action_dataset, true );
+
+		// Bail without the action dataset.
+		if ( empty( $action_dataset ) ) {
+			return;
+		}
+
+		// Get our primary settings link.
+		$settings_link  = Helpers\get_admin_menu_link( Core\REVIEWS_ANCHOR );
+
+		// Set the action link args.
+		$action_linkset = array(
+			'wbr-action-name' => $action_name,
+			'wbr-item-id'     => absint( $review_id ),
+			'wbr-item-type'   => 'review',
+			'wbr-nonce'       => $action_dataset['nonce'],
+		);
+
+		// Create and return the string of the URL.
+		return add_query_arg( $action_linkset, $settings_link );
 	}
 
 	/**

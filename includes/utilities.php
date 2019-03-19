@@ -40,80 +40,6 @@ function increment_product_review_count( $product_id = 0 ) {
 }
 
 /**
- * Take the review object array and merge the taxonomies.
- *
- * @param  array $reviews  The review objects from the query.
- *
- * @return array
- */
-function merge_review_object_taxonomies( $reviews ) {
-
-	// Bail with no reviews.
-	if ( empty( $reviews ) ) {
-		return false;
-	}
-
-	// Set the initial empty.
-	$merged = array();
-
-	// Now loop and do the things.
-	foreach ( $reviews as $object ) {
-
-		// Set the ID.
-		$id = $object->con_id;
-
-		// Set the key to use in our transient.
-		$ky = Core\HOOK_PREFIX . 'reviews_for_product_' . absint( $id );
-
-		// If we don't want the cache'd version, delete the transient first.
-		if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-			delete_transient( $ky );
-		}
-
-		// Attempt to get the reviews from the cache.
-		$cached_dataset = get_transient( $ky );
-
-		// If we have none, do the things.
-		if ( false === $cached_dataset ) {
-
-			// Cast it as an array.
-			$review = (array) $object;
-			// preprint( $review, true );
-
-			// Pass it into the content setup.
-			$review = format_review_content_data( $review );
-			// preprint( $review, true );
-
-			// Pass it into the scoring setup.
-			$review = format_review_scoring_data( $review );
-			// preprint( $review, true );
-
-			// Pass it into the author setup.
-			$review = format_review_author_charstcs( $review );
-			// preprint( $review, true );
-
-			// Pass it into the meta setup.
-			$review = format_review_meta_data( $review );
-			// preprint( $review, true );
-
-			// Set our transient with our data.
-			set_transient( $ky, $review, DAY_IN_SECONDS );
-
-			// And change the variable to do the things.
-			$cached_dataset = $review;
-		}
-
-		// And now merge the data.
-		$merged[ $id ] = $cached_dataset;
-
-		// Should be nothing left inside the loop.
-	}
-
-	// Return our large merged data.
-	return $merged;
-}
-
-/**
  * Take the potentially values and format a nice list.
  *
  * @param  mixed  $values   The values, perhaps serialized.
@@ -615,4 +541,89 @@ function set_review_form_editor( $editor_id = '', $editor_name = '', $editor_cla
 
 	// Now just return it.
 	return ob_get_clean();
+}
+
+/**
+ * Purge one or many transients based on what's happening.
+ *
+ * @param  string $key     A single transient key.
+ * @param  string $group   A group of transients.
+ * @param  array  $custom  Any custom args tied to a group.
+ *
+ * @return void
+ */
+function purge_transients( $key = '', $group = '', $custom = array() ) {
+
+	// Allow others to pop in before.
+	do_action( Core\HOOK_PREFIX . 'before_transient_purge', $key, $group, $custom );
+
+	// If we have a single key, handle it.
+	if ( ! empty( $key ) ) {
+		delete_transient( $key );
+	}
+
+	// Handle groups.
+	if ( ! empty( $group ) ) {
+
+		// Now switch between my return types.
+		switch ( sanitize_text_field( $group ) ) {
+
+			// Handle attributes.
+			case 'attributes' :
+
+				// Check the custom args.
+				$attrib_id  = ! empty( $custom['attribute-id'] ) ? absint( $custom['attribute-id'] ) : 0;
+				$product_id = ! empty( $custom['product-id'] ) ? absint( $custom['product-id'] ) : 0;
+
+				// Start deleting.
+				delete_transient( Core\HOOK_PREFIX . 'all_attributes' );
+				delete_transient( Core\HOOK_PREFIX . 'single_attribute_' . absint( $attrib_id ) );
+				delete_transient( Core\HOOK_PREFIX . 'attributes_product' . absint( $product_id ) );
+
+				// And done.
+				break;
+
+			// Handle characteristics.
+			case 'charstcs' :
+
+				// Check the custom args.
+				$author_id  = ! empty( $custom['author-id'] ) ? absint( $custom['author-id'] ) : 0;
+				$charstc_id = ! empty( $custom['charstcs-id'] ) ? absint( $custom['charstcs-id'] ) : 0;
+
+				// Start deleting.
+				delete_transient( Core\HOOK_PREFIX . 'all_charstcs' );
+				delete_transient( Core\HOOK_PREFIX . 'charstcs_author' . absint( $author_id ) );
+				delete_transient( Core\HOOK_PREFIX . 'single_charstcs_' . absint( $charstc_id ) );
+
+				// And done.
+				break;
+
+			// Handle reviews.
+			case 'reviews' :
+
+				// Check the custom args.
+				$author_id  = ! empty( $custom['author-id'] ) ? absint( $custom['author-id'] ) : 0;
+				$product_id = ! empty( $custom['product-id'] ) ? absint( $custom['product-id'] ) : 0;
+
+				// Start deleting.
+				delete_transient( Core\HOOK_PREFIX . 'verifed_reviews' );
+				delete_transient( Core\HOOK_PREFIX . 'cnsldtd_reviews' );
+				delete_transient( Core\HOOK_PREFIX . 'legacy_review_counts' );
+				delete_transient( Core\HOOK_PREFIX . 'reviews_for_author_' . absint( $author_id ) );
+				delete_transient( Core\HOOK_PREFIX . 'reviews_for_product_' . absint( $product_id ) );
+				delete_transient( Core\HOOK_PREFIX . 'cnsldtd_reviews_for_product_' . absint( $product_id ) );
+				delete_transient( Core\HOOK_PREFIX . 'review_count_product' . absint( $product_id ) );
+
+				// And done.
+				break;
+
+			// No more case breaks, no more return types.
+		}
+
+		// Do an action after the group break.
+		do_action( Core\HOOK_PREFIX . 'transient_purge_group', $group, $custom );
+	}
+
+	// Allow others to pop in after.
+	do_action( Core\HOOK_PREFIX . 'after_transient_purge', $key, $group, $custom );
 }

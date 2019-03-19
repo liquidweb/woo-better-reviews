@@ -673,7 +673,7 @@ class WooBetterReviews_ListAttributes extends WP_List_Table {
 		}
 
 		// Return our row actions.
-		return apply_filters( Core\HOOK_PREFIX . 'attributes_table_row_actions', $setup, $item );
+		return apply_filters( Core\HOOK_PREFIX . 'attributes_table_row_actions', $setup, $item, $attribute_id );
 	}
 
 	/**
@@ -686,31 +686,27 @@ class WooBetterReviews_ListAttributes extends WP_List_Table {
 	 */
 	protected function get_row_action_dataset( $attribute_id = 0, $single_action = '' ) {
 
-		// Create the two nonces.
-		$edit_nonce     = wp_create_nonce( 'lw_woo_edit_single_' . $attribute_id );
-		$delete_nonce   = wp_create_nonce( 'lw_woo_delete_single_' . $attribute_id );
-
 		// Create the array of action items.
 		$action_dataset = array(
 			'edit' => array(
-				'nonce'  => $edit_nonce,
+				'nonce'  => wp_create_nonce( 'wbr_edit_single_' . $attribute_id ),
 				'label'  => __( 'Edit', 'woo-better-reviews' ),
 				'title'  => __( 'Edit Attribute', 'woo-better-reviews' ),
 				'data'   => array(
 					'item-id'   => $attribute_id,
 					'item-type' => 'attribute',
-					'nonce'     => $edit_nonce,
+					'nonce'     => wp_create_nonce( 'wbr_edit_single_' . $attribute_id ),
 				),
 			),
 
 			'delete' => array(
-				'nonce'  => $delete_nonce,
+				'nonce'  => wp_create_nonce( 'wbr_delete_single_' . $attribute_id ),
 				'label'  => __( 'Delete', 'woo-better-reviews' ),
 				'title'  => __( 'Delete Attribute', 'woo-better-reviews' ),
 				'data'   => array(
 					'item-id'   => $attribute_id,
 					'item-type' => 'attribute',
-					'nonce'     => $delete_nonce,
+					'nonce'     => wp_create_nonce( 'wbr_delete_single_' . $attribute_id ),
 				),
 			),
 		);

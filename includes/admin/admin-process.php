@@ -96,15 +96,18 @@ function add_new_attribute() {
 	// Run the update.
 	$maybe_inserted = Database\insert( 'attributes', $formatted_args );
 
-	// Check for the boolean true result.
-	if ( empty( $maybe_inserted ) || false === $maybe_inserted ) {
-		redirect_admin_action_result( $base_redirect, 'attribute-insert-failed' );
+	// Check for some error return or blank.
+	if ( empty( $maybe_inserted ) || false === $maybe_inserted || is_wp_error( $maybe_inserted ) ) {
+
+		// Figure out the error code.
+		$error_code = is_wp_error( $maybe_inserted ) ? $maybe_inserted->get_error_code() : 'attribute-insert-failed';
+
+		// And redirect.
+		redirect_admin_action_result( $base_redirect, $error_code );
 	}
 
-	// Check the result for a WP_Error instance.
-	if ( is_wp_error( $maybe_inserted ) ) {
-		redirect_admin_action_result( $base_redirect, $maybe_inserted->get_error_code() );
-	}
+	// Purge my related transients.
+	Utilities\purge_transients( null, 'attributes', array( 'attribute-id' => $maybe_inserted ) );
 
 	// Redirect a happy one.
 	redirect_admin_action_result( $base_redirect, false, 'attribute-added', true );
@@ -151,15 +154,18 @@ function add_new_charstcs() {
 	// Run the update.
 	$maybe_inserted = Database\insert( 'charstcs', $formatted_args );
 
-	// Check for the boolean true result.
-	if ( empty( $maybe_inserted ) || false === $maybe_inserted ) {
-		redirect_admin_action_result( $base_redirect, 'charstcs-insert-failed' );
+	// Check for some error return or blank.
+	if ( empty( $maybe_inserted ) || false === $maybe_inserted || is_wp_error( $maybe_inserted ) ) {
+
+		// Figure out the error code.
+		$error_code = is_wp_error( $maybe_inserted ) ? $maybe_inserted->get_error_code() : 'charstcs-insert-failed';
+
+		// And redirect.
+		redirect_admin_action_result( $base_redirect, $error_code );
 	}
 
-	// Check the result for a WP_Error instance.
-	if ( is_wp_error( $maybe_inserted ) ) {
-		redirect_admin_action_result( $base_redirect, $maybe_inserted->get_error_code() );
-	}
+	// Purge my related transients.
+	Utilities\purge_transients( null, 'charstcs', array( 'charstcs-id' => $maybe_inserted ) );
 
 	// Redirect a happy one.
 	redirect_admin_action_result( $base_redirect, false, 'charstcs-added', true );
@@ -211,15 +217,18 @@ function update_existing_attribute() {
 	// Run the update.
 	$maybe_updated  = Database\update( 'attributes', absint( $_POST['item-id'] ), $formatted_args );
 
-	// Check for the boolean true result.
-	if ( empty( $maybe_updated ) || false === $maybe_updated ) {
-		redirect_admin_action_result( $edit_redirect, 'attribute-update-failed' );
+	// Check for some error return or blank.
+	if ( empty( $maybe_updated ) || false === $maybe_updated || is_wp_error( $maybe_updated ) ) {
+
+		// Figure out the error code.
+		$error_code = is_wp_error( $maybe_updated ) ? $maybe_updated->get_error_code() : 'attribute-update-failed';
+
+		// And redirect.
+		redirect_admin_action_result( $base_redirect, $error_code );
 	}
 
-	// Check the result for a WP_Error instance.
-	if ( is_wp_error( $maybe_updated ) ) {
-		redirect_admin_action_result( $edit_redirect, $maybe_updated->get_error_code() );
-	}
+	// Purge my related transients.
+	Utilities\purge_transients( null, 'attributes', array( 'attribute-id' => absint( $_POST['item-id'] ) ) );
 
 	// Redirect a happy one.
 	redirect_admin_action_result( $edit_redirect, false, 'attribute-updated', true, Core\ATTRIBUTES_ANCHOR );
@@ -271,15 +280,18 @@ function update_existing_charstcs() {
 	// Run the update.
 	$maybe_updated  = Database\update( 'charstcs', absint( $_POST['item-id'] ), $formatted_args );
 
-	// Check for the boolean true result.
-	if ( empty( $maybe_updated ) || false === $maybe_updated ) {
-		redirect_admin_action_result( $edit_redirect, 'charstcs-update-failed' );
+	// Check for some error return or blank.
+	if ( empty( $maybe_updated ) || false === $maybe_updated || is_wp_error( $maybe_updated ) ) {
+
+		// Figure out the error code.
+		$error_code = is_wp_error( $maybe_updated ) ? $maybe_updated->get_error_code() : 'charstcs-update-failed';
+
+		// And redirect.
+		redirect_admin_action_result( $base_redirect, $error_code );
 	}
 
-	// Check the result for a WP_Error instance.
-	if ( is_wp_error( $maybe_updated ) ) {
-		redirect_admin_action_result( $edit_redirect, $maybe_updated->get_error_code() );
-	}
+	// Purge my related transients.
+	Utilities\purge_transients( null, 'charstcs', array( 'charstcs-id' => absint( $_POST['item-id'] ) ) );
 
 	// Redirect a happy one.
 	redirect_admin_action_result( $edit_redirect, false, 'charstcs-updated', true, Core\CHARSTCS_ANCHOR );
@@ -309,22 +321,25 @@ function delete_existing_attribute() {
 	$attribute_id   = absint( $_GET['wbr-item-id'] );
 
 	// Handle the nonce check.
-	if ( empty( $_GET['wbr-nonce'] ) || ! wp_verify_nonce( $_GET['wbr-nonce'], 'lw_woo_delete_single_' . $attribute_id ) ) {
+	if ( empty( $_GET['wbr-nonce'] ) || ! wp_verify_nonce( $_GET['wbr-nonce'], 'wbr_delete_single_' . $attribute_id ) ) {
 		wp_die( __( 'Your security nonce failed.', 'woo-better-reviews' ) );
 	}
 
 	// Run the delete.
 	$maybe_deleted  = Database\delete( 'attributes', $attribute_id );
 
-	// Check for the boolean true result.
-	if ( empty( $maybe_deleted ) || false === $maybe_deleted ) {
-		redirect_admin_action_result( $base_redirect, 'attribute-delete-failed' );
+	// Check for some error return or blank.
+	if ( empty( $maybe_deleted ) || false === $maybe_deleted || is_wp_error( $maybe_deleted ) ) {
+
+		// Figure out the error code.
+		$error_code = is_wp_error( $maybe_deleted ) ? $maybe_deleted->get_error_code() : 'attribute-delete-failed';
+
+		// And redirect.
+		redirect_admin_action_result( $base_redirect, $error_code );
 	}
 
-	// Check the result for a WP_Error instance.
-	if ( is_wp_error( $maybe_deleted ) ) {
-		redirect_admin_action_result( $base_redirect, $maybe_deleted->get_error_code() );
-	}
+	// Purge my related transients.
+	Utilities\purge_transients( null, 'attributes', array( 'attribute-id' => absint( $_POST['item-id'] ) ) );
 
 	// Redirect a happy one.
 	redirect_admin_action_result( $base_redirect, false, 'attribute-deleted', true );
@@ -354,22 +369,25 @@ function delete_existing_charstcs() {
 	$charstc_id = absint( $_GET['wbr-item-id'] );
 
 	// Handle the nonce check.
-	if ( empty( $_GET['wbr-nonce'] ) || ! wp_verify_nonce( $_GET['wbr-nonce'], 'lw_woo_delete_single_' . $charstc_id ) ) {
+	if ( empty( $_GET['wbr-nonce'] ) || ! wp_verify_nonce( $_GET['wbr-nonce'], 'wbr_delete_single_' . $charstc_id ) ) {
 		wp_die( __( 'Your security nonce failed.', 'woo-better-reviews' ) );
 	}
 
 	// Run the delete.
 	$maybe_deleted  = Database\delete( 'charstcs', $charstc_id );
 
-	// Check for the boolean true result.
-	if ( empty( $maybe_deleted ) || false === $maybe_deleted ) {
-		redirect_admin_action_result( $base_redirect, 'charstcs-delete-failed' );
+	// Check for some error return or blank.
+	if ( empty( $maybe_deleted ) || false === $maybe_deleted || is_wp_error( $maybe_deleted ) ) {
+
+		// Figure out the error code.
+		$error_code = is_wp_error( $maybe_deleted ) ? $maybe_deleted->get_error_code() : 'attribute-delete-failed';
+
+		// And redirect.
+		redirect_admin_action_result( $base_redirect, $error_code );
 	}
 
-	// Check the result for a WP_Error instance.
-	if ( is_wp_error( $maybe_deleted ) ) {
-		redirect_admin_action_result( $base_redirect, $maybe_deleted->get_error_code() );
-	}
+	// Purge my related transients.
+	Utilities\purge_transients( null, 'charstcs', array( 'charstcs-id' => absint( $_POST['item-id'] ) ) );
 
 	// Redirect a happy one.
 	redirect_admin_action_result( $base_redirect, false, 'charstcs-deleted', true );
