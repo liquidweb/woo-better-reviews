@@ -14,7 +14,34 @@ use LiquidWeb\WooBetterReviews as Core;
 /**
  * Start our engines.
  */
+add_filter( 'removable_query_args', __NAMESPACE__ . '\filter_removable_args' );
 add_action( 'admin_enqueue_scripts', __NAMESPACE__ . '\load_admin_stylesheet' );
+
+/**
+ * Add our custom strings to the vars.
+ *
+ * @param  array $args  The existing array of args.
+ *
+ * @return array $args  The modified array of args.
+ */
+function filter_removable_args( $args ) {
+
+	// Set an array of the args we wanna exclude.
+	$remove = array(
+		'wbr-item-type',
+		'wbr-action-complete',
+		'wbr-action-result',
+		'wbr-action-return',
+		'wbr-nonce',
+		'wbr-error-code',
+	);
+
+	// Set the array of new args.
+	$setup  = apply_filters( Core\HOOK_PREFIX . 'removable_args', $remove );
+
+	// Include my new args and return.
+	return ! empty( $setup ) ? wp_parse_args( $setup, $args ) : $args;
+}
 
 /**
  * Load our admin side CSS.

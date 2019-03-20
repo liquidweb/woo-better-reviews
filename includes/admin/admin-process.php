@@ -20,40 +20,12 @@ use WP_Error;
 /**
  * Start our engines.
  */
-add_filter( 'removable_query_args', __NAMESPACE__ . '\filter_removable_args' );
-
 add_action( 'admin_init', __NAMESPACE__ . '\add_new_attribute' );
 add_action( 'admin_init', __NAMESPACE__ . '\update_existing_attribute' );
 add_action( 'admin_init', __NAMESPACE__ . '\delete_existing_attribute' );
 add_action( 'admin_init', __NAMESPACE__ . '\add_new_charstcs' );
 add_action( 'admin_init', __NAMESPACE__ . '\update_existing_charstcs' );
 add_action( 'admin_init', __NAMESPACE__ . '\delete_existing_charstcs' );
-
-/**
- * Add our custom strings to the vars.
- *
- * @param  array $args  The existing array of args.
- *
- * @return array $args  The modified array of args.
- */
-function filter_removable_args( $args ) {
-
-	// Set an array of the args we wanna exclude.
-	$remove = array(
-		'wbr-item-type',
-		'wbr-action-complete',
-		'wbr-action-result',
-		'wbr-action-return',
-		'wbr-nonce',
-		'wbr-error-code',
-	);
-
-	// Set the array of new args.
-	$setup  = apply_filters( Core\HOOK_PREFIX . 'removable_args', $remove );
-
-	// Include my new args and return.
-	return ! empty( $setup ) ? wp_parse_args( $setup, $args ) : $args;
-}
 
 /**
  * Check for the add new function of an attribute.

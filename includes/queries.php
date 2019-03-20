@@ -1007,6 +1007,7 @@ function get_all_attributes( $return_type = 'objects', $purge = false ) {
 			break;
 
 		case 'titles' :
+		case 'names' :
 
 			// Set and return my query list.
 			return wp_list_pluck( $cached_dataset, 'attribute_name', 'attribute_id' );

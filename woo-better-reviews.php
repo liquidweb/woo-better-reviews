@@ -89,6 +89,7 @@ if ( is_admin() ) {
 	require_once __DIR__ . '/includes/admin/list-reviews.php';
 	require_once __DIR__ . '/includes/admin/list-attributes.php';
 	require_once __DIR__ . '/includes/admin/list-charstcs.php';
+	require_once __DIR__ . '/includes/admin/product-meta.php';
 }
 
 // Load the front-end specific files.

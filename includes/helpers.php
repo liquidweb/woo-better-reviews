@@ -118,6 +118,27 @@ function maybe_search_term( $return = 'string' ) {
 }
 
 /**
+ * Get the attributes the product has assigned.
+ *
+ * @param  integer $product_id  The product ID we are checking review counts for.
+ *
+ * @return mixed
+ */
+function get_selected_product_attributes( $product_id = 0 ) {
+
+	// Bail without a product ID.
+	if ( empty( $product_id ) ) {
+		return false;
+	}
+
+	// Get the selected attributes (if any).
+	$maybe_attributes   = get_post_meta( $product_id, Core\META_PREFIX . 'product_attributes', true );
+
+	// Return false if none are stored.
+	return empty( $maybe_attributes ) ? false : $maybe_attributes;
+}
+
+/**
  * Get the review count from post meta, and optionally set 0.
  *
  * @param  integer $product_id  The product ID we are checking review counts for.
@@ -126,6 +147,11 @@ function maybe_search_term( $return = 'string' ) {
  * @return integer
  */
 function get_admin_review_count( $product_id = 0, $set_zero = true ) {
+
+	// Bail without a product ID.
+	if ( empty( $product_id ) ) {
+		return false;
+	}
 
 	// Get the count.
 	$review_count   = get_post_meta( $product_id, Core\META_PREFIX . 'review_count', true );
