@@ -71,6 +71,23 @@ function increment_product_review_count( $product_id = 0 ) {
 }
 
 /**
+ * Update the aggregate scoring.
+ *
+ * @param  integer $product_id  The product ID we are adding.
+ *
+ * @return void
+ */
+function calculate_product_review_scoring( $product_id = 0 ) {
+
+	// Bail without a product ID.
+	if ( empty( $product_id ) ) {
+		return;
+	}
+
+
+}
+
+/**
  * Take the potentially values and format a nice list.
  *
  * @param  mixed  $values   The values, perhaps serialized.
@@ -370,7 +387,8 @@ function format_review_scoring_data( $review ) {
 			// preprint( $attribute_data, true );
 
 			// Now set the array accordingly.
-			$setup['rating_attributes'][ $attribute_id ] = array(
+			$setup['rating_attributes'][] = array(
+				'id'    => $attribute_id,
 				'label' => $attribute_data['attribute_name'],
 				'value' => $attribute_score,
 			);
@@ -415,7 +433,8 @@ function format_review_author_charstcs( $review ) {
 		$charstcs_vals  = maybe_unserialize( $charstcs_data['charstcs_values'] );
 
 		// Now set the array accordingly.
-		$setup['author_charstcs'][ $charstcs_id ] = array(
+		$setup['author_charstcs'][] = array(
+			'id'    => $charstcs_id,
 			'label' => $charstcs_data['charstcs_name'],
 			'value' => $charstcs_vals[ $charstcs_slug ],
 		);
@@ -425,49 +444,6 @@ function format_review_author_charstcs( $review ) {
 
 	// And unset the old.
 	unset( $review['author_charstcs'] );
-
-	// Return the array.
-	return wp_parse_args( $setup, $review );
-}
-
-/**
- * Pull out the meta data and make it nice.
- *
- * @param  array $review  The review from the query.
- *
- * @return array
- */
-function format_review_meta_data( $review ) {
-
-	// Set the empty.
-	$setup  = array();
-
-	// Set the array of what to check.
-	$checks = array(
-		'con_id',
-		'review_id',
-		'product_id',
-		'review_status',
-		'is_verified',
-	);
-
-	// Loop and check.
-	foreach ( $checks as $check ) {
-
-		// Skip if not there.
-		if ( ! isset( $review[ $check ] ) ) {
-			continue;
-		}
-
-		// Make my array key.
-		$array_key  = str_replace( $checks, array( 'consolidated_id', 'review_id', 'product_id', 'status', 'verified' ), $check );
-
-		// Add the item.
-		$setup[ $array_key ] = $review[ $check ];
-
-		// And unset the review parts.
-		unset( $review[ $check ] );
-	}
 
 	// Return the array.
 	return wp_parse_args( $setup, $review );
@@ -599,6 +575,83 @@ function purge_transients( $key = '', $group = '', $custom = array() ) {
 		// Now switch between my return types.
 		switch ( sanitize_text_field( $group ) ) {
 
+			// Handle the non-unique review items.
+			case 'reviews' :
+
+				// Start deleting.
+				delete_transient( Core\HOOK_PREFIX . 'all_reviews' );
+				delete_transient( Core\HOOK_PREFIX . 'verifed_reviews' );
+				delete_transient( Core\HOOK_PREFIX . 'legacy_review_counts' );
+
+			// Handle attributes and characteristics.
+			case 'taxonomies' :
+
+				// Start deleting.
+				delete_transient( Core\HOOK_PREFIX . 'all_attributes' );
+				delete_transient( Core\HOOK_PREFIX . 'all_charstcs' );
+
+				// And done.
+				break;
+
+			// Handle products.
+			case 'products' :
+
+				// Loop what we have.
+				if ( ! empty( $custom['ids'] ) ) {
+
+					// Make sure we have good data.
+					$all_id = array_map( 'absint', $custom['ids'] );
+
+					// Loop and delete.
+					foreach ( $all_id as $id ) {
+						delete_transient( Core\HOOK_PREFIX . 'reviews_for_product_' . $id );
+						delete_transient( Core\HOOK_PREFIX . 'review_count_product' . $id );
+						delete_transient( Core\HOOK_PREFIX . 'attributes_product' . $id );
+					}
+				}
+
+				// And done.
+				break;
+
+			// Handle authors.
+			case 'authors' :
+
+				// Loop what we have.
+				if ( ! empty( $custom['ids'] ) ) {
+
+					// Make sure we have good data.
+					$all_id = array_map( 'absint', $custom['ids'] );
+
+					// Loop and delete.
+					foreach ( $all_id as $id ) {
+						delete_transient( Core\HOOK_PREFIX . 'reviews_for_author_' . $id );
+						delete_transient( Core\HOOK_PREFIX . 'charstcs_author' . $id );
+					}
+				}
+
+				// And done.
+				break;
+
+			// Handle reviews.
+			case 'reviews' :
+
+				// Check the custom args.
+				$author_id  = ! empty( $custom['author-id'] ) ? absint( $custom['author-id'] ) : 0;
+				$product_id = ! empty( $custom['product-id'] ) ? absint( $custom['product-id'] ) : 0;
+
+				// Start deleting.
+				delete_transient( Core\HOOK_PREFIX . 'verifed_reviews' );
+				delete_transient( Core\HOOK_PREFIX . 'cnsldtd_reviews' );
+				delete_transient( Core\HOOK_PREFIX . 'legacy_review_counts' );
+				delete_transient( Core\HOOK_PREFIX . 'reviews_for_author_' . absint( $author_id ) );
+				delete_transient( Core\HOOK_PREFIX . 'reviews_for_product_' . absint( $product_id ) );
+				delete_transient( Core\HOOK_PREFIX . 'cnsldtd_reviews_for_product_' . absint( $product_id ) );
+				delete_transient( Core\HOOK_PREFIX . 'review_count_product' . absint( $product_id ) );
+
+				// And done.
+				break;
+
+			/*
 			// Handle attributes.
 			case 'attributes' :
 
@@ -628,25 +681,7 @@ function purge_transients( $key = '', $group = '', $custom = array() ) {
 
 				// And done.
 				break;
-
-			// Handle reviews.
-			case 'reviews' :
-
-				// Check the custom args.
-				$author_id  = ! empty( $custom['author-id'] ) ? absint( $custom['author-id'] ) : 0;
-				$product_id = ! empty( $custom['product-id'] ) ? absint( $custom['product-id'] ) : 0;
-
-				// Start deleting.
-				delete_transient( Core\HOOK_PREFIX . 'verifed_reviews' );
-				delete_transient( Core\HOOK_PREFIX . 'cnsldtd_reviews' );
-				delete_transient( Core\HOOK_PREFIX . 'legacy_review_counts' );
-				delete_transient( Core\HOOK_PREFIX . 'reviews_for_author_' . absint( $author_id ) );
-				delete_transient( Core\HOOK_PREFIX . 'reviews_for_product_' . absint( $product_id ) );
-				delete_transient( Core\HOOK_PREFIX . 'cnsldtd_reviews_for_product_' . absint( $product_id ) );
-				delete_transient( Core\HOOK_PREFIX . 'review_count_product' . absint( $product_id ) );
-
-				// And done.
-				break;
+			*/
 
 			// No more case breaks, no more return types.
 		}

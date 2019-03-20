@@ -8,7 +8,9 @@
 // Set our aliases.
 use LiquidWeb\WooBetterReviews as Core;
 use LiquidWeb\WooBetterReviews\Helpers as Helpers;
+use LiquidWeb\WooBetterReviews\Utilities as Utilities;
 use LiquidWeb\WooBetterReviews\Queries as Queries;
+use LiquidWeb\WooBetterReviews\Database as Database;
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) exit;
@@ -490,8 +492,41 @@ class WooBetterReviews_ListReviews extends WP_List_Table {
 		// Now loop my IDs and attempt to update each one.
 		foreach ( $review_ids as $review_id ) {
 
-			// @@todo actually update the row.
+			// Run the update.
+			$maybe_updated  = Database\update( 'content', absint( $review_id ), array( 'review_status' => 'approved' ) );
 
+			// Check for some error return or blank.
+			if ( empty( $maybe_updated ) || false === $maybe_updated || is_wp_error( $maybe_updated ) ) {
+
+				// Figure out the error code.
+				$error_code     = is_wp_error( $maybe_updated ) ? $maybe_updated->get_error_code() : 'review-update-failed';
+
+				// Set my error return args.
+				$redirect_args  = array(
+					'success'           => false,
+					'wbr-action-result' => 'failed',
+					'wbr-error-code'    => $error_code,
+				);
+
+				// And redirect.
+				Helpers\admin_page_redirect( $redirect_args, Core\REVIEWS_ANCHOR );
+			}
+			/*
+			// Handle the transient purging.
+			Utilities\purge_transients( Core\HOOK_PREFIX . 'single_cnsldtd_review_' . absint( $review_id ) );
+
+			// Now get my new updated data.
+			$updated_review = Queries\get_single_review( $review_id );
+
+			// Set my custom args for transients.
+			$purging_args = array(
+				'author-id'  => $updated_review->author_id,
+				'product-id' => $updated_review->product_id,
+			);
+
+			// Handle the transient purging.
+			Utilities\purge_transients( null, 'reviews', $purging_args );
+			*/
 			// Nothing left in the loop to do.
 		}
 
@@ -684,7 +719,7 @@ class WooBetterReviews_ListReviews extends WP_List_Table {
 	private function table_data() {
 
 		// Get all the review data.
-		$review_objects = Queries\get_consolidated_reviews();
+		$review_objects = Queries\get_all_reviews();
 
 		// Bail with no data.
 		if ( ! $review_objects ) {

@@ -96,6 +96,7 @@ function process_review_submission() {
 
 	// Attempt to insert the review content and get a review ID back.
 	$attempt_insert = Database\insert( 'content', $content_format );
+	// preprint( $attempt_insert, true );
 
 	// Bail on a failed insert.
 	if ( empty( $attempt_insert ) || is_wp_error( $attempt_insert ) ) {
@@ -164,10 +165,10 @@ function process_review_submission() {
 		$insert_author  = Database\insert( 'authormeta', $single_author_array );
 
 		// Bail on a failed insert.
-		if ( empty( $insert_scoring ) || is_wp_error( $insert_scoring ) ) {
+		if ( empty( $insert_author ) || is_wp_error( $insert_author ) ) {
 
 			// Determine the error code if we have one.
-			$error_code = ! is_wp_error( $insert_scoring ) ? 'scoring-insert-fail' : $insert_scoring->get_error_code();
+			$error_code = ! is_wp_error( $insert_author ) ? 'author-insert-fail' : $insert_author->get_error_code();
 
 			// And run the redirect.
 			redirect_front_submit_result( $base_redirect, $error_code );
@@ -176,30 +177,26 @@ function process_review_submission() {
 		// Author inserts are done.
 	}
 
-	// Now we run our consolidation.
-	$maybe_consolidated = consolidate_single_review_data( $new_review_id, $total_score, $content_format, $scoring_format, $author_format );
+	// Now we run our scoring merge.
+	$scoring_merge  = merge_review_scoring_data( $new_review_id, $total_score, $content_format, $scoring_format, $author_format );
 
 	// If we have the good ID coming back, redirect with it.
-	if ( ! empty( $maybe_consolidated ) && ! is_wp_error( $maybe_consolidated ) ) {
-
-		// Set my custom args for transients.
-		$purging_args = array(
-			'author-id'  => $author_id,
-			'product-id' => $product_id,
-		);
+	if ( ! empty( $scoring_merge ) && ! is_wp_error( $scoring_merge ) ) {
 
 		// Handle the transient purging.
-		Utilities\purge_transients( null, 'reviews', $purging_args );
+		Utilities\purge_transients( null, 'reviews' );
+		Utilities\purge_transients( null, 'products', array( 'ids' => (array) $product_id ) );
+		Utilities\purge_transients( null, 'authors', array( 'ids' => (array) $product_id ) );
 
 		// Increment the count of reviews we have.
 		Utilities\increment_product_review_count( $product_id );
 
 		// The review has been successfully entered, so redirect.
-		redirect_front_submit_result( $base_redirect, '', true, array( 'wbr-new-review' => $maybe_consolidated ) );
+		redirect_front_submit_result( $base_redirect, '', true, array( 'wbr-new-review' => $scoring_merge ) );
 	}
 
 	// Determine the error code if we have one.
-	$error_code = ! is_wp_error( $maybe_consolidated ) ? 'consolidated-insert-fail' : $maybe_consolidated->get_error_code();
+	$error_code = ! is_wp_error( $scoring_merge ) ? 'scoring-update-fail' : $scoring_merge->get_error_code();
 
 	// And run the redirect.
 	redirect_front_submit_result( $base_redirect, $error_code );
@@ -273,17 +270,20 @@ function format_submitted_review_content( $form_data = array(), $product_id = 0,
 
 	// Set up the insert data array.
 	$insert_setup   = array(
-		'author_id'      => absint( $author_id ),
-		'author_name'    => sanitize_text_field( $author_name ),
-		'author_email'   => sanitize_email( $author_email ),
-		'product_id'     => absint( $product_id ),
-		'review_date'    => date( 'Y-m-d H:i:s', $set_timestamp ),
-		'review_title'   => sanitize_text_field( $review_title ),
-		'review_slug'    => sanitize_title_with_dashes( $review_title, null, 'save' ),
-		'review_summary' => esc_textarea( $review_summary ),
-		'review_content' => wp_kses_post( $form_data['review-content'] ),
-		'review_status'  => 'approved' , // 'pending',
-		'is_verified'    => 0,
+		'author_id'          => absint( $author_id ),
+		'author_name'        => sanitize_text_field( $author_name ),
+		'author_email'       => sanitize_email( $author_email ),
+		'product_id'         => absint( $product_id ),
+		'review_date'        => date( 'Y-m-d H:i:s', $set_timestamp ),
+		'review_title'       => sanitize_text_field( $review_title ),
+		'review_slug'        => sanitize_title_with_dashes( $review_title, null, 'save' ),
+		'review_summary'     => esc_textarea( $review_summary ),
+		'review_content'     => wp_kses_post( $form_data['review-content'] ),
+		'review_status'      => 'pending', // 'approved',
+		'is_verified'        => 0,
+		'rating_total_score' => '',
+		'rating_attributes'  => '',
+		'author_charstcs'    => '',
 	);
 
 	// Go ahead and de-slash the content.
@@ -391,7 +391,7 @@ function format_submitted_review_author( $form_data = array(), $review_id = 0, $
 }
 
 /**
- * Take our new review data and create the consolidated values.
+ * Take our new review data and create the scoring values.
  *
  * @param  integer $review_id      The ID of our new review.
  * @param  integer $total_score    The total review score.
@@ -401,56 +401,54 @@ function format_submitted_review_author( $form_data = array(), $review_id = 0, $
  *
  * @return mixed
  */
-function consolidate_single_review_data( $review_id = 0, $total_score = 0, $content_array = array(), $scoring_array = array(), $author_array = array() ) {
+function merge_review_scoring_data( $review_id = 0, $total_score = 0, $content_array = array(), $scoring_array = array(), $author_array = array() ) {
 
 	// Bail without the review ID.
 	if ( empty( $review_id ) ) {
 		return new WP_Error( 'missing-review-id', __( 'The required review ID was not provided.', 'woo-better-reviews' ) );
 	}
 
-	// @@todo check for an existing consolidated review. update? bail?
-
 	// Bail without the data needed.
 	if ( empty( $content_array ) || empty( $scoring_array ) || empty( $author_array ) ) {
 		return new WP_Error( 'missing-formatting-data', __( 'The required data is missing.', 'woo-better-reviews' ) );
 	}
 
-	// Cast our review content as an array while adding the review ID.
-	$consolidated_setup = wp_parse_args( $content_array, array( 'review_id' => absint( $review_id ) ) );
+	// Set an empty.
+	$scoring_merge  = array();
 
 	// We know this key is static so we can enter it.
-	$consolidated_setup['rating_total_score'] = absint( $total_score );
+	$scoring_merge['rating_total_score'] = absint( $total_score );
 
 	// Add the attributes and charstcs.
-	$consolidated_setup['rating_attributes'] = parse_attributes_for_consolidated( $scoring_array );
-	$consolidated_setup['author_charstcs']   = parse_charstcs_for_consolidated( $author_array );
+	$scoring_merge['rating_attributes'] = parse_attributes_for_scoring( $scoring_array );
+	$scoring_merge['author_charstcs']   = parse_charstcs_for_scoring( $author_array );
 
-	// Attempt to insert the review author.
-	$maybe_insert   = Database\insert( 'consolidated', $consolidated_setup );
+	// Attempt to update the review with the scoring data.
+	$maybe_update   = Database\update( 'content', absint( $review_id ), $scoring_merge );
 
 	// Bail on a failed insert.
-	if ( empty( $maybe_insert ) || is_wp_error( $maybe_insert ) ) {
+	if ( empty( $maybe_update ) || is_wp_error( $maybe_update ) ) {
 
 		// Determine the error text and code if we have one.
-		$error_code = ! is_wp_error( $maybe_insert ) ? 'consolidated-insert-fail' : $maybe_insert->get_error_code();
-		$error_text = ! is_wp_error( $maybe_insert ) ? __( 'The consolidated review could not be inserted.', 'woo-better-reviews' ) : $maybe_insert->get_error_message();
+		$error_code = ! is_wp_error( $maybe_update ) ? 'scoring-update-fail' : $maybe_update->get_error_code();
+		$error_text = ! is_wp_error( $maybe_update ) ? __( 'The review scoring could not be inserted.', 'woo-better-reviews' ) : $maybe_update->get_error_message();
 
 		// And return the new WP_Error item.
 		return new WP_Error( $error_code, $error_text );
 	}
 
-	// Return the new consolidated ID.
-	return absint( $maybe_insert );
+	// Return the boolean response.
+	return $maybe_update;
 }
 
 /**
- * Take the scoring attributes data and match it up to our consolidated table.
+ * Take the scoring attributes data and roll it into our content table.
  *
  * @param  array  $scoring_array  Our scoring data.
  *
  * @return array
  */
-function parse_attributes_for_consolidated( $scoring_array = array() ) {
+function parse_attributes_for_scoring( $scoring_array = array() ) {
 
 	// Bail without the array of data.
 	if ( empty( $scoring_array ) ) {
@@ -460,7 +458,7 @@ function parse_attributes_for_consolidated( $scoring_array = array() ) {
 	// Set a blank item.
 	$setup_args = array();
 
-	// Now loop the scoring array and add to the consolidated.
+	// Now loop the scoring array and add to the rolled up content.
 	foreach ( $scoring_array as $single_score ) {
 
 		// Check for the zero attribute ID, which is our total.
@@ -483,13 +481,13 @@ function parse_attributes_for_consolidated( $scoring_array = array() ) {
 }
 
 /**
- * Take the author charstcs data and match it up to our consolidated table.
+ * Take the author charstcs data and and roll it into our content table.
  *
  * @param  array  $author_array  Our author data.
  *
  * @return array
  */
-function parse_charstcs_for_consolidated( $author_array = array() ) {
+function parse_charstcs_for_scoring( $author_array = array() ) {
 
 	// Bail without the array of data.
 	if ( empty( $author_array ) ) {
@@ -499,7 +497,7 @@ function parse_charstcs_for_consolidated( $author_array = array() ) {
 	// Set a blank item.
 	$setup_args = array();
 
-	// Now loop the author array and add to the consolidated.
+	// Now loop the author array and add to the rolled up content.
 	foreach ( $author_array as $single_author ) {
 
 		// Set up my two column keys.

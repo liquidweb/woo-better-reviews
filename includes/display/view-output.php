@@ -144,7 +144,7 @@ function display_review_template_header( $product_id = 0, $echo = true ) {
 	$product_title  = get_the_title( $product_id );
 
 	// Get the total count of reviews we have.
-	$review_count   = Queries\get_consolidated_reviews_for_product( $product_id, 'counts' );
+	$review_count   = Queries\get_review_count_for_product( $product_id );
 
 	// Set our empty.
 	$build  = '';
@@ -212,7 +212,7 @@ function display_existing_reviews( $product_id = 0, $echo = true ) {
 	}
 
 	// Fetch any existing reviews we may have.
-	$fetch_reviews  = Queries\get_consolidated_reviews_for_product( $product_id, 'display' );
+	$fetch_reviews  = Queries\get_reviews_for_product( $product_id, 'display' );
 	// preprint( $fetch_reviews, true );
 
 	// Set my content.

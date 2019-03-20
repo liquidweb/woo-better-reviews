@@ -18,7 +18,6 @@ use LiquidWeb\WooBetterReviews\Tables\AuthorMeta as AuthorMeta;
 use LiquidWeb\WooBetterReviews\Tables\Ratings as Ratings;
 use LiquidWeb\WooBetterReviews\Tables\Attributes as Attributes;
 use LiquidWeb\WooBetterReviews\Tables\Characteristics as Characteristics;
-use LiquidWeb\WooBetterReviews\Tables\Consolidated as Consolidated;
 
 // And pull in any other namespaces.
 use WP_Error;
@@ -46,9 +45,6 @@ function register_tables() {
 	// Set the taxonomy focused tables.
 	$wpdb->wc_better_rvs_attributes   = $wpdb->prefix . Core\TABLE_PREFIX . 'attributes';
 	$wpdb->wc_better_rvs_charstcs     = $wpdb->prefix . Core\TABLE_PREFIX . 'charstcs';
-
-	// And set our consolidated table for queries.
-	$wpdb->wc_better_rvs_consolidated = $wpdb->prefix . Core\TABLE_PREFIX . 'consolidated';
 }
 
 /**
@@ -115,7 +111,6 @@ function get_primary_keys( $table_name = '' ) {
 		'ratings'      => 'rating_id',
 		'attributes'   => 'attribute_id',
 		'charstcs_id'  => 'charstcs_id',
-		'consolidated' => 'con_id',
 	);
 
 	// If we didn't specify a table name, return the whole thing.
@@ -165,10 +160,6 @@ function get_required_args( $table_name = '', $return_type = 'columns' ) {
 			return Characteristics\required_args( $return_type );
 			break;
 
-		case 'consolidated' :
-			return Consolidated\required_args( $return_type );
-			break;
-
 		// No more case breaks, no more tables.
 	}
 
@@ -186,9 +177,14 @@ function get_required_args( $table_name = '', $return_type = 'columns' ) {
  */
 function validate_insert_args( $table_name = '', $insert_args = array() ) {
 
-	// Bail if we don't have a name or args to check.
-	if ( empty( $table_name ) || empty( $insert_args ) ) {
-		return false;
+	// Bail if we don't have a name to check.
+	if ( empty( $table_name ) ) {
+		return new WP_Error( 'no_table_name', __( 'The required table name was not provided.', 'woo-better-reviews' ) );
+	}
+
+	// Bail if we don't have args to check.
+	if ( empty( $insert_args ) ) {
+		return new WP_Error( 'missing_insert_args', __( 'The required arguments were was not provided.', 'woo-better-reviews' ) );
 	}
 
 	// Get the requirements for the table.
@@ -228,9 +224,14 @@ function validate_insert_args( $table_name = '', $insert_args = array() ) {
  */
 function validate_update_args( $table_name = '', $update_args = array() ) {
 
-	// Bail if we don't have a name or args to check.
-	if ( empty( $table_name ) || empty( $update_args ) ) {
-		return false;
+	// Bail if we don't have a name to check.
+	if ( empty( $table_name ) ) {
+		return new WP_Error( 'no_table_name', __( 'The required table name was not provided.', 'woo-better-reviews' ) );
+	}
+
+	// Bail if we don't have args to check.
+	if ( empty( $update_args ) ) {
+		return new WP_Error( 'missing_update_args', __( 'The required arguments were not provided.', 'woo-better-reviews' ) );
 	}
 
 	// Get the requirements for the table.
@@ -270,9 +271,14 @@ function validate_update_args( $table_name = '', $update_args = array() ) {
  */
 function set_update_format( $table_name = '', $update_args = array() ) {
 
-	// Bail if we don't have a name or args to check.
-	if ( empty( $table_name ) || empty( $update_args ) ) {
-		return false;
+	// Bail if we don't have a name to check.
+	if ( empty( $table_name ) ) {
+		return new WP_Error( 'no_table_name', __( 'The required table name was not provided.', 'woo-better-reviews' ) );
+	}
+
+	// Bail if we don't have args to check.
+	if ( empty( $update_args ) ) {
+		return new WP_Error( 'missing_update_args', __( 'The required arguments were not provided.', 'woo-better-reviews' ) );
 	}
 
 	// Get the formats for the table.
@@ -416,10 +422,6 @@ function install_single_table( $table_name = '' ) {
 			return Characteristics\install_table();
 			break;
 
-		case 'consolidated' :
-			return Consolidated\install_table();
-			break;
-
 		// No more case breaks, no more tables.
 	}
 
@@ -500,6 +502,11 @@ function insert( $table_name = '', $insert_args = array() ) {
 		return new WP_Error( 'missing-table-name', __( 'The required table name is missing.', 'woo-better-reviews' ) );
 	}
 
+	// Make sure we have args.
+	if ( empty( $insert_args ) || ! is_array( $insert_args ) ) {
+		return new WP_Error( 'missing_insert_args', __( 'The required database arguments are missing or invalid.', 'woo-better-reviews' ) );
+	}
+
 	// Check to make sure the table provided is approved.
 	$table_valid   = Helpers\maybe_valid_table( $table_name );
 
@@ -537,10 +544,6 @@ function insert( $table_name = '', $insert_args = array() ) {
 
 		case 'charstcs' :
 			return Characteristics\insert_row( $insert_args );
-			break;
-
-		case 'consolidated' :
-			return Consolidated\insert_row( $insert_args );
 			break;
 
 		// No more case breaks, no more tables.
@@ -624,10 +627,6 @@ function update( $table_name = '', $update_id = 0, $update_args = array() ) {
 			return Characteristics\update_row( $update_id, $update_args );
 			break;
 
-		case 'consolidated' :
-			return Consolidated\update_row( $update_id, $update_args );
-			break;
-
 		// No more case breaks, no more tables.
 	}
 
@@ -701,10 +700,6 @@ function delete( $table_name = '', $delete_id = 0 ) {
 
 		case 'charstcs' :
 			return Characteristics\delete_row( $delete_id );
-			break;
-
-		case 'consolidated' :
-			return Consolidated\delete_row( $delete_id );
 			break;
 
 		// No more case breaks, no more tables.

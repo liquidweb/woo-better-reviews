@@ -56,6 +56,9 @@ function install_table() {
 			review_content longtext NOT NULL,
 			review_status varchar(20) NOT NULL DEFAULT 'pending',
 			is_verified int(1) NOT NULL DEFAULT 0,
+			rating_total_score varchar(8) NOT NULL DEFAULT '',
+			rating_attributes longtext NOT NULL DEFAULT '',
+			author_charstcs longtext NOT NULL DEFAULT '',
 		PRIMARY KEY  (review_id),
 		KEY `author_id` (`author_id`),
 		KEY `author_email` (`author_email`),
@@ -81,17 +84,20 @@ function required_args( $return_type = '' ) {
 
 	// Set up the basic array.
 	$insert_setup   = array(
-		'author_id'      => '%d',
-		'author_name'    => '%s',
-		'author_email'   => '%s',
-		'product_id'     => '%d',
-		'review_date'    => '%s',
-		'review_title'   => '%s',
-		'review_slug'    => '%s',
-		'review_summary' => '%s',
-		'review_content' => '%s',
-		'review_status'  => '%s',
-		'is_verified'    => '%d',
+		'author_id'           => '%d',
+		'author_name'         => '%s',
+		'author_email'        => '%s',
+		'product_id'          => '%d',
+		'review_date'         => '%s',
+		'review_title'        => '%s',
+		'review_slug'         => '%s',
+		'review_summary'      => '%s',
+		'review_content'      => '%s',
+		'review_status'       => '%s',
+		'is_verified'         => '%d',
+		'rating_total_score'  => '%d',
+		'rating_attributes'   => '%s',
+		'author_charstcs'     => '%s',
 	);
 
 	// Return the requested setup.
@@ -131,7 +137,12 @@ function insert_row( $insert_args = array() ) {
 	}
 
 	// Do the validations.
-	Database\validate_insert_args( 'content', $insert_args ); // @@todo better return?
+	$validate_args  = Database\validate_insert_args( 'content', $insert_args ); // @@todo better return?
+
+	// Return if we're a WP_Error.
+	if ( is_wp_error( $validate_args ) ) {
+		return $validate_args;
+	}
 
 	// Call the global DB.
 	global $wpdb;

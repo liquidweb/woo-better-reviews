@@ -20,8 +20,37 @@ use WP_Error;
 /**
  * Start our engines.
  */
+add_filter( 'removable_query_args', __NAMESPACE__ . '\front_removable_args' );
 add_action( 'comments_template', __NAMESPACE__ . '\load_review_template', 99 );
 add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\load_review_front_assets' );
+
+/**
+ * Add our custom strings to the vars.
+ *
+ * @param  array $args  The existing array of args.
+ *
+ * @return array $args  The modified array of args.
+ */
+function front_removable_args( $args ) {
+
+	// Only filter my args on the front end.
+	if ( is_admin() ) {
+		return $args;
+	}
+
+	// Set an array of the args we wanna exclude.
+	$remove = array(
+		'wbr-submit-complete',
+		'wbr-submit-result',
+		'wbr-new-review',
+	);
+
+	// Set the array of new args.
+	$setup  = apply_filters( Core\HOOK_PREFIX . 'front_removable_args', $remove );
+
+	// Include my new args and return.
+	return ! empty( $setup ) ? wp_parse_args( $setup, $args ) : $args;
+}
 
 /**
  * Load our own review template from the plugin.

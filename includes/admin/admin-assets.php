@@ -14,7 +14,7 @@ use LiquidWeb\WooBetterReviews as Core;
 /**
  * Start our engines.
  */
-add_filter( 'removable_query_args', __NAMESPACE__ . '\filter_removable_args' );
+add_filter( 'removable_query_args', __NAMESPACE__ . '\admin_removable_args' );
 add_action( 'admin_enqueue_scripts', __NAMESPACE__ . '\load_admin_stylesheet' );
 
 /**
@@ -24,7 +24,12 @@ add_action( 'admin_enqueue_scripts', __NAMESPACE__ . '\load_admin_stylesheet' );
  *
  * @return array $args  The modified array of args.
  */
-function filter_removable_args( $args ) {
+function admin_removable_args( $args ) {
+
+	// Only filter my args on the admin.
+	if ( ! is_admin() ) {
+		return $args;
+	}
 
 	// Set an array of the args we wanna exclude.
 	$remove = array(
@@ -37,7 +42,7 @@ function filter_removable_args( $args ) {
 	);
 
 	// Set the array of new args.
-	$setup  = apply_filters( Core\HOOK_PREFIX . 'removable_args', $remove );
+	$setup  = apply_filters( Core\HOOK_PREFIX . 'admin_removable_args', $remove );
 
 	// Include my new args and return.
 	return ! empty( $setup ) ? wp_parse_args( $setup, $args ) : $args;

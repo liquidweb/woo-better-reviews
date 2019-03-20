@@ -70,7 +70,6 @@ require_once __DIR__ . '/includes/tables/data-ratings.php';
 require_once __DIR__ . '/includes/tables/data-authormeta.php';
 require_once __DIR__ . '/includes/tables/tax-attributes.php';
 require_once __DIR__ . '/includes/tables/tax-characteristics.php';
-require_once __DIR__ . '/includes/tables/query-consolidated.php';
 
 // Load the files loaded plugin-wide.
 require_once __DIR__ . '/includes/queries.php';

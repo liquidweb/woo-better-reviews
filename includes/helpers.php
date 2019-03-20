@@ -29,7 +29,6 @@ function get_table_args( $keys = false ) {
 		'attributes'   => __( 'Product Attributes', 'woo-better-reviews' ),
 		'charstcs'     => __( 'Author Characteristics', 'woo-better-reviews' ),
 		'authorsetup'  => __( 'Author Setup', 'woo-better-reviews' ),
-		'consolidated' => __( 'Consolidated Reviews', 'woo-better-reviews' ),
 	);
 
 	// Either return the full array, or just the keys if requested.
@@ -398,6 +397,14 @@ function get_admin_notice_text( $return_code = '' ) {
 
 		case 'missing-formatted-args' :
 			return __( 'The required arguments could not be formatted.', 'woo-better-reviews' );
+			break;
+
+		case 'reviews-approved-bulk' :
+			return __( 'The selected reviews have been updated.', 'woo-better-reviews' );
+			break;
+
+		case 'reviews-deleted-bulk' :
+			return __( 'The selected reviews have been deleted.', 'woo-better-reviews' );
 			break;
 
 		case 'unknown' :
