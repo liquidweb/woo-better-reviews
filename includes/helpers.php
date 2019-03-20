@@ -28,7 +28,6 @@ function get_table_args( $keys = false ) {
 		'attributes'   => __( 'Product Attributes', 'woo-better-reviews' ),
 		'charstcs'     => __( 'Author Characteristics', 'woo-better-reviews' ),
 		'authorsetup'  => __( 'Author Setup', 'woo-better-reviews' ),
-		'productsetup' => __( 'Product Setup', 'woo-better-reviews' ),
 		'consolidated' => __( 'Consolidated Reviews', 'woo-better-reviews' ),
 	);
 

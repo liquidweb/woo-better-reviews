@@ -18,7 +18,6 @@ use LiquidWeb\WooBetterReviews\Tables\AuthorMeta as AuthorMeta;
 use LiquidWeb\WooBetterReviews\Tables\Ratings as Ratings;
 use LiquidWeb\WooBetterReviews\Tables\Attributes as Attributes;
 use LiquidWeb\WooBetterReviews\Tables\Characteristics as Characteristics;
-use LiquidWeb\WooBetterReviews\Tables\ProductSetup as ProductSetup;
 use LiquidWeb\WooBetterReviews\Tables\Consolidated as Consolidated;
 
 // And pull in any other namespaces.
@@ -47,9 +46,6 @@ function register_tables() {
 	// Set the taxonomy focused tables.
 	$wpdb->wc_better_rvs_attributes   = $wpdb->prefix . Core\TABLE_PREFIX . 'attributes';
 	$wpdb->wc_better_rvs_charstcs     = $wpdb->prefix . Core\TABLE_PREFIX . 'charstcs';
-
-	// Set the grouping focused tables.
-	$wpdb->wc_better_rvs_productsetup = $wpdb->prefix . Core\TABLE_PREFIX . 'productsetup';
 
 	// And set our consolidated table for queries.
 	$wpdb->wc_better_rvs_consolidated = $wpdb->prefix . Core\TABLE_PREFIX . 'consolidated';
@@ -119,7 +115,6 @@ function get_primary_keys( $table_name = '' ) {
 		'ratings'      => 'rating_id',
 		'attributes'   => 'attribute_id',
 		'charstcs_id'  => 'charstcs_id',
-		'productsetup' => 'psetup_id',
 		'consolidated' => 'con_id',
 	);
 
@@ -168,10 +163,6 @@ function get_required_args( $table_name = '', $return_type = 'columns' ) {
 
 		case 'charstcs' :
 			return Characteristics\required_args( $return_type );
-			break;
-
-		case 'productsetup' :
-			return ProductSetup\required_args( $return_type );
 			break;
 
 		case 'consolidated' :
@@ -425,10 +416,6 @@ function install_single_table( $table_name = '' ) {
 			return Characteristics\install_table();
 			break;
 
-		case 'productsetup' :
-			return ProductSetup\install_table();
-			break;
-
 		case 'consolidated' :
 			return Consolidated\install_table();
 			break;
@@ -552,10 +539,6 @@ function insert( $table_name = '', $insert_args = array() ) {
 			return Characteristics\insert_row( $insert_args );
 			break;
 
-		case 'productsetup' :
-			return ProductSetup\insert_row( $insert_args );
-			break;
-
 		case 'consolidated' :
 			return Consolidated\insert_row( $insert_args );
 			break;
@@ -641,10 +624,6 @@ function update( $table_name = '', $update_id = 0, $update_args = array() ) {
 			return Characteristics\update_row( $update_id, $update_args );
 			break;
 
-		case 'productsetup' :
-			return ProductSetup\update_row( $update_id, $update_args );
-			break;
-
 		case 'consolidated' :
 			return Consolidated\update_row( $update_id, $update_args );
 			break;
@@ -722,10 +701,6 @@ function delete( $table_name = '', $delete_id = 0 ) {
 
 		case 'charstcs' :
 			return Characteristics\delete_row( $delete_id );
-			break;
-
-		case 'productsetup' :
-			return ProductSetup\delete_row( $delete_id );
 			break;
 
 		case 'consolidated' :
