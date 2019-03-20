@@ -47,7 +47,7 @@ define( __NAMESPACE__ . '\HOOK_PREFIX', 'wc_better_reviews_' );
 // Set our custom table prefix.
 define( __NAMESPACE__ . '\TABLE_PREFIX', 'woocommerce_better_reviews_' );
 
-// Set the prefix for our meta keys.
+// Set the prefix for meta keys.
 define( __NAMESPACE__ . '\META_PREFIX', '_wbr_meta_' );
 
 // Set the name for our various menu page anchors.

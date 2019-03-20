@@ -107,8 +107,8 @@ function set_review_form_rating_attributes_view( $product_id = 0 ) {
 	}
 
 	// Attempt to get our attributes.
-	// $attributes = Queries\get_attributes_for_product( $product_id, 'display' );
-	$attributes = Queries\get_all_attributes( 'display' );
+	$attributes = Queries\get_attributes_for_product( $product_id, 'display' );
+	// $attributes = Queries\get_all_attributes( 'display' );
 	// preprint( $attributes, true );
 
 	// Bail without the attributes to display.

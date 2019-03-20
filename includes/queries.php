@@ -1056,24 +1056,11 @@ function get_attributes_for_product( $product_id = 0, $return_type = 'objects', 
 	// If we have none, do the things.
 	if ( false === $cached_dataset ) {
 
-		// Call the global database.
-		global $wpdb;
+		// Check for the stored product meta.
+		$maybe_attributes   = Helpers\get_selected_product_attributes( $product_id );
 
-		// Set our table name.
-		$table_name = $wpdb->prefix . Core\TABLE_PREFIX . 'productsetup';
-
-		// Set up our query.
-		$query_args = $wpdb->prepare("
-			SELECT   attribute_id
-			FROM     $table_name
-			WHERE    product_id = '%d'
-		", absint( $product_id ) );
-
-		// Process the query.
-		$query_run  = $wpdb->get_results( $query_args );
-
-		// Bail without any reviews.
-		if ( empty( $query_run ) ) {
+		// Bail without any selected attributes.
+		if ( empty( $maybe_attributes ) ) {
 			return false;
 		}
 
@@ -1081,10 +1068,7 @@ function get_attributes_for_product( $product_id = 0, $return_type = 'objects', 
 		$query_list = array();
 
 		// Loop the attribute IDs.
-		foreach ( $query_run as $single_arg ) {
-
-			// Pull out my ID.
-			$attribute_id   = absint( $single_arg->attribute_id );
+		foreach ( $maybe_attributes as $attribute_id ) {
 
 			// Get the single attribute data.
 			$attribute_data = get_single_attribute( $attribute_id );

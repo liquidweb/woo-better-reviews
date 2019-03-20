@@ -13,6 +13,37 @@ use LiquidWeb\WooBetterReviews as Core;
 use LiquidWeb\WooBetterReviews\Queries as Queries;
 
 /**
+ * Check the constants we know about during an Ajax call.
+ *
+ * @return boolean
+ */
+function check_constants_for_process( $include_ajax = true ) {
+
+	// Bail out if running an autosave.
+	if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
+		return false;
+	}
+
+	// Bail out if running a cron, unless we've skipped that.
+	if ( defined( 'DOING_CRON' ) && DOING_CRON ) {
+		return false;
+	}
+
+	// Bail if we are doing a REST API request.
+	if ( defined( 'REST_REQUEST' ) && REST_REQUEST ) {
+		return false;
+	}
+
+	// Include the possible Ajax check.
+	if ( ! empty( $include_ajax ) && defined( 'DOING_AJAX' ) && DOING_AJAX ) {
+		return false;
+	}
+
+	// Passed them all. Return true.
+	return true;
+}
+
+/**
  * Increment the review count by 1.
  *
  * @param  integer $product_id  The product ID we are adding.

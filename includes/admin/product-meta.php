@@ -21,6 +21,7 @@ use WP_Error;
  * Start our engines.
  */
 add_action( 'add_meta_boxes_product', __NAMESPACE__ . '\load_attribute_metabox' );
+add_action( 'save_post_product', __NAMESPACE__ . '\save_product_attributes', 10, 2 );
 
 /**
  * Load the metabox for applying review attributes.
@@ -30,6 +31,14 @@ add_action( 'add_meta_boxes_product', __NAMESPACE__ . '\load_attribute_metabox' 
  * @return void
  */
 function load_attribute_metabox( $post ) {
+
+	// Run the check if we're enabled or not.
+	$maybe_enabled  = Helpers\maybe_reviews_enabled();
+
+	// Bail if we aren't enabled.
+	if ( ! $maybe_enabled ) {
+		return;
+	}
 
 	// Call the actual metabox.
 	add_meta_box( 'wbr-product-attributes', __( 'Review Attributes', 'woo-better-reviews' ), __NAMESPACE__ . '\attribute_metabox', 'product', 'side', 'core' );
@@ -96,4 +105,57 @@ function attribute_metabox( $post ) {
 	echo '</ul>';
 
 	// Gimme some sweet nonce action.
+	echo wp_nonce_field( 'wbr_save_product_meta_action', 'wbr_save_product_meta_nonce', false, false );
+}
+
+/**
+ * Save the assigned product attributes.
+ *
+ * @param  integer $post_id  The individual post ID.
+ * @param  object  $post     The entire post object.
+ *
+ * @return void
+ */
+function save_product_attributes( $post_id, $post ) {
+
+	// Run the check if we're enabled or not.
+	$maybe_enabled  = Helpers\maybe_reviews_enabled();
+
+	// Bail if we aren't enabled.
+	if ( ! $maybe_enabled ) {
+		return;
+	}
+
+	// Do the constants check.
+	$check_constant = Utilities\check_constants_for_process();
+
+	// Bail out if we hit a constant.
+	if ( ! $check_constant ) {
+		return;
+	}
+
+	// Do our nonce check. ALWAYS A NONCE CHECK.
+	if ( empty( $_POST['wbr_save_product_meta_nonce'] ) || ! wp_verify_nonce( $_POST['wbr_save_product_meta_nonce'], 'wbr_save_product_meta_action' ) ) {
+		wp_die( __( 'Your security nonce failed.', 'woo-better-reviews' ) );
+	}
+
+	// Make sure we have the cap.
+	if ( ! current_user_can( 'edit_post', $post_id ) ) {
+		wp_die( __( 'You do not have the capability to perform this action.', 'woo-better-reviews' ) );
+	}
+
+	// Run the before action.
+	do_action( Core\HOOK_PREFIX . 'before_product_meta_save' );
+
+	// Check for the attributes being posted.
+	$maybe_attributes   = ! empty( $_POST['wbr-product-attributes'] ) ? array_map( 'absint', $_POST['wbr-product-attributes'] ) : array();
+
+	// Now update the array.
+	update_post_meta( $post_id, Core\META_PREFIX . 'product_attributes', $maybe_attributes );
+
+	// Handle some transient purging.
+	Utilities\purge_transients( Core\HOOK_PREFIX . 'attributes_product' . $post_id );
+
+	// Run the after action.
+	do_action( Core\HOOK_PREFIX . 'after_product_meta_save' );
 }
