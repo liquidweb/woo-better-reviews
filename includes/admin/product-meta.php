@@ -132,14 +132,6 @@ function attribute_metabox( $post, $callback ) {
  */
 function save_product_attributes( $post_id, $post ) {
 
-	// Run the check if we're enabled or not.
-	$maybe_enabled  = Helpers\maybe_reviews_enabled();
-
-	// Bail if we aren't enabled.
-	if ( ! $maybe_enabled ) {
-		return;
-	}
-
 	// Do the constants check.
 	$check_constant = Utilities\check_constants_for_process();
 
@@ -148,11 +140,19 @@ function save_product_attributes( $post_id, $post ) {
 		return;
 	}
 
+	// Run the check if we're enabled or not.
+	$maybe_enabled  = Helpers\maybe_reviews_enabled();
+
+	// Bail if we aren't enabled.
+	if ( ! $maybe_enabled ) {
+		return;
+	}
+
 	// Check for the global setting.
-	$check_global   = Helpers\maybe_attributes_global();
+	$maybe_global   = Helpers\maybe_attributes_global();
 
 	// If we are global, send the whole bunch.
-	if ( false !== $check_global ) {
+	if ( false !== $maybe_global ) {
 		return;
 	}
 
