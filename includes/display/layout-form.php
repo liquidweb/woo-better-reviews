@@ -106,10 +106,9 @@ function set_review_form_rating_attributes_view( $product_id = 0 ) {
 		return;
 	}
 
-	// Attempt to get our attributes.
-	$attributes = Queries\get_attributes_for_product( $product_id, 'display' );
-	// $attributes = Queries\get_all_attributes( 'display' );
-	// preprint( $attributes, true );
+	// Attempt to get our attributes based on the global setting.
+	$attributes = Helpers\get_product_attributes_for_form( $product_id );
+	preprint( $attributes, true );
 
 	// Bail without the attributes to display.
 	if ( empty( $attributes ) ) {

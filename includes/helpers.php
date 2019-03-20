@@ -10,6 +10,7 @@ namespace LiquidWeb\WooBetterReviews\Helpers;
 
 // Set our aliases.
 use LiquidWeb\WooBetterReviews as Core;
+use LiquidWeb\WooBetterReviews\Queries as Queries;
 
 /**
  * Set the key / value pair for all our custom tables.
@@ -90,6 +91,20 @@ function maybe_reviews_enabled() {
 }
 
 /**
+ * Check to see if product attributes are globally enabled.
+ *
+ * @return boolean
+ */
+function maybe_attributes_global() {
+
+	// Check the Woo setting.
+	$are_global = get_option( 'woocommerce_wbr_global_attributes', 0 );
+
+	// Return a basic boolean.
+	return ! empty( $are_global ) && 'yes' === sanitize_text_field( $are_global ) ? true : false;
+}
+
+/**
  * Check to see if there is a search term and return it.
  *
  * @param  string $return  The return type we wanna have. Boolean or string.
@@ -135,6 +150,35 @@ function get_selected_product_attributes( $product_id = 0 ) {
 
 	// Return false if none are stored.
 	return empty( $maybe_attributes ) ? false : $maybe_attributes;
+}
+
+/**
+ * Get the attributes to display on a form.
+ *
+ * @param  integer $product_id  The product ID being viewed.
+ *
+ * @return array
+ */
+function get_product_attributes_for_form( $product_id = 0 ) {
+
+	// First check for the global setting.
+	$are_global = maybe_attributes_global();
+
+	// If we are global, send the whole bunch.
+	if ( false !== $are_global ) {
+		return Queries\get_all_attributes( 'display' );
+	}
+
+	// Now confirm we have a product ID.
+	if ( empty( $product_id ) ) {
+		return false;
+	}
+
+	// Attempt to get our attributes based on the global setting.
+	$maybe_has  = Queries\get_attributes_for_product( $product_id, 'display' );
+
+	// Return the applied items, or return false.
+	return ! empty( $maybe_has ) && ! is_wp_error( $maybe_has ) ? $maybe_has : false;
 }
 
 /**

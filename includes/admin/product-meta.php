@@ -40,48 +40,62 @@ function load_attribute_metabox( $post ) {
 		return;
 	}
 
+	// Create some easy setup args to pass.
+	$setup_args = array(
+		'global'     => Helpers\maybe_attributes_global(),
+		'attributes' => Queries\get_all_attributes( 'names' ),
+		'selected'   => Helpers\get_selected_product_attributes( $post->ID ),
+	);
+
 	// Call the actual metabox.
-	add_meta_box( 'wbr-product-attributes', __( 'Review Attributes', 'woo-better-reviews' ), __NAMESPACE__ . '\attribute_metabox', 'product', 'side', 'core' );
+	add_meta_box( 'wbr-attribute-metabox', __( 'Review Attributes', 'woo-better-reviews' ), __NAMESPACE__ . '\attribute_metabox', 'product', 'side', 'core', $setup_args );
 }
 
 /**
  * Build and display the metabox for applying review attributes.
  *
- * @param  object $post  The WP_Post object.
+ * @param  object $post      The WP_Post object.
+ * @param  array  $callback  The custom callback args.
  *
  * @return void
  */
-function attribute_metabox( $post ) {
-
-	// Get my attributes first.
-	$all_attributes     = Queries\get_all_attributes( 'names' );
-	// preprint( $all_attributes, true );
+function attribute_metabox( $post, $callback ) {
 
 	// If none exist, show the message and bail.
-	if ( empty( $all_attributes ) ) {
+	if ( empty( $callback['args']['attributes'] ) ) {
 
 		// Do the message.
-		echo '<p>' . __( 'No product attributes have been created yet.', 'woo-better-reviews' ) . '</p>';
+		echo '<p class="description">' . __( 'No product attributes have been created yet.', 'woo-better-reviews' ) . '</p>';
+
+		// And be done.
+		return;
+	}
+
+	// If they are global, just message.
+	if ( ! empty( $callback['args']['global'] ) ) {
+
+		// Do the message.
+		echo '<p class="description">' . __( 'Product attributes have been enabled globally by the site administrator.', 'woo-better-reviews' ) . '</p>';
 
 		// And be done.
 		return;
 	}
 
 	// Get my selected items.
-	$maybe_attributes   = Helpers\get_selected_product_attributes( $post->ID );
+	$selected   = ! empty( $callback['args']['selected'] ) ? $callback['args']['selected'] : array();
 
 	// Begin the markup for an unordered list.
 	echo '<ul class="woo-better-reviews-product-attribute-list">';
 
 	// Now loop my attributes to create my checkboxes.
-	foreach ( $all_attributes as $attribute_id => $attribute_name ) {
+	foreach ( $callback['args']['attributes'] as $attribute_id => $attribute_name ) {
 
 		// Set the field name and ID.
 		$field_name = 'wbr-product-attributes[]';
 		$field_id   = 'wbr-product-attributes-' . absint( $attribute_id );
 
 		// Determine if it's checked or not.
-		$is_checked = in_array( $attribute_id, (array) $maybe_attributes ) ? 'checked="checked"' : '';
+		$is_checked = in_array( $attribute_id, (array) $selected ) ? 'checked="checked"' : '';
 
 		// Echo the markup.
 		echo '<li class="woo-better-reviews-single-product-attribute">';
@@ -131,6 +145,14 @@ function save_product_attributes( $post_id, $post ) {
 
 	// Bail out if we hit a constant.
 	if ( ! $check_constant ) {
+		return;
+	}
+
+	// Check for the global setting.
+	$check_global   = Helpers\maybe_attributes_global();
+
+	// If we are global, send the whole bunch.
+	if ( false !== $check_global ) {
 		return;
 	}
 

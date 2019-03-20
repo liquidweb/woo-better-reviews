@@ -11,6 +11,7 @@ namespace LiquidWeb\WooBetterReviews\WooSettings;
 // Set our aliases.
 use LiquidWeb\WooBetterReviews as Core;
 use LiquidWeb\WooBetterReviews\Helpers as Helpers;
+use LiquidWeb\WooBetterReviews\Utilities as Utilities;
 use LiquidWeb\WooBetterReviews\Queries as Queries;
 
 // And pull in any other namespaces.
@@ -83,7 +84,7 @@ function filter_woo_admin_review_settings( $settings ) {
 	// preprint( $settings, true );
 
 	// Set my removes.
-	$remove = array( 'woocommerce_enable_review_rating', 'woocommerce_review_rating_required' );
+	$removals   = array( 'woocommerce_enable_review_rating', 'woocommerce_review_rating_required' );
 
 	// Now loop our settings and modify the items we want.
 	foreach ( $settings as $index => $field_args ) {
@@ -94,7 +95,7 @@ function filter_woo_admin_review_settings( $settings ) {
 		}
 
 		// Remove the question about stars.
-		if ( in_array( sanitize_text_field( $field_args['id'] ), $remove ) ) {
+		if ( in_array( sanitize_text_field( $field_args['id'] ), $removals ) ) {
 			unset( $settings[ $index ] );
 		}
 
@@ -103,6 +104,20 @@ function filter_woo_admin_review_settings( $settings ) {
 			$settings[ $index ]['desc'] = esc_html__( 'Enable reviews using Woo Better Reviews', 'woo-better-reviews' );
 		}
 	}
+
+	// Set the attributes for the product global.
+	$prod_args  = array(
+		'title'           => __( 'Product Attributes', 'woo-better-reviews' ),
+		'desc'            => __( 'Apply attributes to every product.', 'woo-better-reviews' ),
+		'id'              => 'woocommerce_wbr_global_attributes',
+		'default'         => 'no',
+		'type'            => 'checkbox',
+		'checkboxgroup'   => '',
+		'show_if_checked' => 'yes',
+	);
+
+	// Add our custom setting for the global attributes.
+	$settings   = Utilities\array_insert_after( 11, $settings, 'attrib', $prod_args );
 
 	// Return our settings, resetting the indexes.
 	return array_values( $settings );

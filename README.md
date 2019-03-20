@@ -12,7 +12,7 @@ Like reviews, only way better.
 
 ### To-Do List
 
-* connect product attributes
+* connect product attributes  DONE
 * set other field types
 * modify review status
 * add / delete / modify reviews

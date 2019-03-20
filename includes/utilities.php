@@ -658,3 +658,75 @@ function purge_transients( $key = '', $group = '', $custom = array() ) {
 	// Allow others to pop in after.
 	do_action( Core\HOOK_PREFIX . 'after_transient_purge', $key, $group, $custom );
 }
+
+/**
+ * Inserts a new key/value before the key in the array.
+ *
+ * @param  string $key        The key to insert before.
+ * @param  array  $array      An array to insert in to.
+ * @param  mixed  $new_key    The key to insert.
+ * @param  mixed  $new_value  An value to insert.
+ *
+ * @return array
+ */
+function array_insert_before( $key, $array, $new_key, $new_value ) {
+
+	// Check the requirements.
+	if ( empty( $key ) || empty( $array ) || ! array_key_exists( $key, $array ) ) {
+		return false;
+	}
+
+	// Set up the new array.
+	$updated_array  = array();
+
+	// Now loop the array we have.
+	foreach ( (array) $array as $k => $value ) {
+
+		// If our key matches, add it inside.
+		if ( $k === $key ) {
+			$updated_array[ $new_key ] = $new_value;
+		}
+
+		// Continue adding the array.
+		$updated_array[ $k ] = $value;
+	}
+
+	// Return the resulting array.
+	return $updated_array;
+}
+
+/**
+ * Inserts a new key/value after the key in the array.
+ *
+ * @param  string $key        The key to insert before.
+ * @param  array  $array      An array to insert in to.
+ * @param  mixed  $new_key    The key to insert.
+ * @param  mixed  $new_value  An value to insert.
+ *
+ * @return array
+ */
+function array_insert_after( $key, $array, $new_key, $new_value ) {
+
+	// Check the requirements.
+	if ( empty( $key ) || empty( $array ) || ! array_key_exists( $key, $array ) ) {
+		return false;
+	}
+
+	// Set up the new array.
+	$updated_array  = array();
+
+	// Now loop the array we have.
+	foreach ( (array) $array as $k => $value ) {
+
+		// Continue adding the array.
+		$updated_array[ $k ] = $value;
+
+		// If our key matches, add it inside.
+		if ( $k === $key ) {
+			$updated_array[ $new_key ] = $new_value;
+		}
+	}
+
+	// Return the resulting array.
+	return $updated_array;
+}
