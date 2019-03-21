@@ -24,6 +24,12 @@ use WP_Error;
  */
 function display_reviews_list_page() {
 
+	// Fetch the action link.
+	$action = Helpers\get_admin_menu_link( Core\REVIEWS_ANCHOR );
+
+	// Check to see if we are editing an attribute or not.
+	$isedit = ! empty( $_GET['wbr-action-name'] ) && 'edit' === sanitize_text_field( $_GET['wbr-action-name'] ) ? 1 : 0;
+
 	// Wrap the entire thing.
 	echo '<div class="wrap woo-better-reviews-admin-wrap woo-better-reviews-admin-reviews-wrap">';
 
@@ -33,17 +39,170 @@ function display_reviews_list_page() {
 		// Cut off the header.
 		echo '<hr class="wp-header-end">';
 
-		// Call our table class.
-		$table  = new \WooBetterReviews_ListReviews();
-
-		// And output the table.
-		$table->prepare_items();
-
-		// The actual table itself.
-		$table->display();
+		// Load the proper page.
+		echo ! $isedit ? load_primary_reviews_display( $action ) : load_edit_single_review_form( $action );
 
 	// Close the entire thing.
 	echo '</div>';
+}
+
+/**
+ * Load the primary display, which is the big table
+ *
+ * @param  string $action  The URL to include in the form action.
+ *
+ * @return void
+ */
+function load_primary_reviews_display( $action = '' ) {
+
+	// Bail if we shouldn't be here.
+	if ( ! current_user_can( 'manage_options' ) ) {
+		wp_die( __( 'You are not permitted to view this page.', 'woo-better-reviews' ) );
+	}
+
+	// Call our table class.
+	$table  = new \WooBetterReviews_ListReviews();
+
+	// And output the table.
+	$table->prepare_items();
+
+	// The actual table itself.
+	$table->display();
+}
+
+/**
+ * Load the form to edit an existing review.
+ *
+ * @param  string $action  The URL to include in the form action.
+ *
+ * @return HTML
+ */
+function load_edit_single_review_form( $action ) {
+
+	// Bail if we shouldn't be here.
+	if ( ! current_user_can( 'edit_posts' ) ) {
+		wp_die( __( 'You are not permitted to view this page.', 'woo-better-reviews' ) );
+	}
+
+	// Get the review data.
+	$review_data    = Queries\get_single_review( $_GET['wbr-item-id'] );
+
+	// Set an empty.
+	$build  = '';
+
+	// Now set the actual form itself.
+	$build .= '<form class="woo-better-reviews-admin-form woo-better-reviews-admin-edit-single-item-form" id="woo-better-reviews-admin-edit-review-form" action="' . esc_url( $action ) . '" method="post">';
+
+		$build .= '<input type="hidden" name="action" value="update">';
+		$build .= '<input type="hidden" name="item-id" value="' . absint( $_GET['wbr-item-id'] ) . '">';
+		$build .= '<input type="hidden" name="item-type" value="review">';
+		$build .= '<input type="hidden" name="product-id" value="' . absint( $review_data->product_id ) . '">';
+		$build .= '<input type="hidden" name="author-id" value="' . absint( $review_data->author_id ) . '">';
+
+		// Output our nonce.
+		$build .= wp_nonce_field( 'wbr_edit_review_action', 'wbr_edit_review_nonce', true, false );
+
+		// Now set the table wrap.
+		$build .= '<table class="form-table">';
+
+			// Set up the table body.
+			$build .= '<tbody>';
+
+				// Set the title field.
+				$build .= '<tr class="form-field woo-better-reviews-form-field form-required review-title-wrap">';
+
+					// Output the label.
+					$build .= '<th scope="row">';
+						$build .= '<label for="review-title">' . esc_html__( 'Title', 'woo-better-reviews' ) . '</label>';
+					$build .= '</th>';
+
+					// Output the actual field.
+					$build .= '<td>';
+						$build .= '<input name="review-args[title]" id="review-title" value="' . esc_attr( $review_data->review_title ) . '" size="40" aria-required="true" type="text">';
+					$build .= '</td>';
+
+				// Close the title field.
+				$build .= '</tr>';
+
+				// Set the summary field.
+				$build .= '<tr class="form-field woo-better-reviews-form-field review-summary-wrap">';
+
+					// Output the label.
+					$build .= '<th scope="row">';
+						$build .= '<label for="review-summary">' . esc_html__( 'Summary', 'woo-better-reviews' ) . '</label>';
+					$build .= '</th>';
+
+					// Output the actual field.
+					$build .= '<td>';
+						$build .= '<textarea name="review-args[summary]" id="review-summary" rows="5" cols="40">' . esc_textarea( $review_data->review_summary ) . '</textarea>';
+					$build .= '</td>';
+
+				// Close the summary field.
+				$build .= '</tr>';
+
+				// Set the main content field.
+				$build .= '<tr class="form-field woo-better-reviews-form-field review-content-wrap">';
+
+					// Output the label.
+					$build .= '<th scope="row">';
+						$build .= '<label for="review-content">' . esc_html__( 'Content', 'woo-better-reviews' ) . '</label>';
+					$build .= '</th>';
+
+					// Output the actual field.
+					$build .= '<td>';
+						$build .= Utilities\set_review_form_editor( 'review-content', 'review-args[content]', 'edit-review-content', $review_data->review_content );
+					$build .= '</td>';
+
+				// Close the summary field.
+				$build .= '</tr>';
+
+				// Set the type field.
+				$build .= '<tr class="form-field woo-better-reviews-form-field review-status-wrap">';
+
+					// Output the label.
+					$build .= '<th scope="row">';
+						$build .= '<label for="review-status">' . esc_html__( 'Status', 'woo-better-reviews' ) . '</label>';
+					$build .= '</th>';
+
+					// Output the actual field.
+					$build .= '<td>';
+						$build .= set_admin_data_dropdown( Helpers\get_review_statuses(), 'review-args[status]', 'review-status', $review_data->review_status );
+					$build .= '</td>';
+
+				// Close the values field.
+				$build .= '</tr>';
+
+			// Close up the table body.
+			$build .= '</tbody>';
+
+		// Close up the table.
+		$build .= '</table>';
+
+		// Output the submit button.
+		$build .= '<div class="edit-tag-actions edit-single-item-actions edit-review-actions">';
+
+			// Wrap it in a paragraph.
+			$build .= '<p class="submit">';
+
+				// The actual submit button.
+				$build .= get_submit_button( __( 'Update Review', 'woo-better-reviews' ), 'primary', 'edit-existing-review', false );
+
+				// Our cancel link.
+				$build .= '<span class="cancel-edit-link-wrap">';
+					$build .= '<a class="cancel-edit-link" href="' . esc_url( $action ) . '">' . esc_html__( 'Cancel', 'woo-better-reviews' ) . '</a>';
+				$build .= '</span>';
+
+			// Close up the paragraph.
+			$build .= '</p>';
+
+		// And the div.
+		$build .= '</div>';
+
+	// Close up the form markup.
+	$build .= '</form>';
+
+	// Return the entire form build.
+	return $build;
 }
 
 /**
@@ -72,6 +231,9 @@ function display_product_attributes_page() {
 		if ( ! empty( $search ) ) {
 			printf( '<span class="subtitle">' . __( 'Search results for &#8220;%s&#8221;' ) . '</span>', esc_html( $search ) );
 		}
+
+		// Cut off the header.
+		echo '<hr class="wp-header-end">';
 
 		// Load the proper page.
 		echo ! $isedit ? load_primary_attributes_display( $action ) : load_edit_single_attribute_form( $action );
@@ -110,6 +272,9 @@ function display_author_characteristics_page() {
 
 		// Load the proper page.
 		echo ! $isedit ? load_primary_charstcs_display( $action ) : load_edit_single_charstcs_form( $action );
+
+		// Cut off the header.
+		echo '<hr class="wp-header-end">';
 
 	// Close the wrapper.
 	echo '</div>';
@@ -763,4 +928,35 @@ function load_edit_single_charstcs_form( $action ) {
 
 	// Return the entire form build.
 	return $build;
+}
+
+/**
+ * Set up the dropdown some data.
+ */
+function set_admin_data_dropdown( $dropdown_data = array(), $field_name = '', $field_id = '', $selected ) {
+
+	// Bail without the dropdown.
+	if ( empty( $dropdown_data ) ) {
+		return;
+	}
+
+	// Set up my empty.
+	$setup  = '';
+
+	// Now our select dropdown.
+	$setup .= '<select name="' . esc_attr( $field_name ) . '" id="' . esc_attr( $field_id ) . '" class="postform">';
+
+		// Our blank value.
+		$setup .= '<option value="0">' . esc_html__( '(select)', 'woo-better-reviews' ) . '</option>';
+
+		// Now loop them.
+		foreach ( $dropdown_data as $key => $label ) {
+			$setup .= '<option value="' . esc_attr( $key ) . '" ' . selected( $selected, $key, false ) . ' >' . esc_html( $label ) . '</option>';
+		}
+
+	// Close out my select.
+	$setup .= '</select>';
+
+	// Return the setup.
+	return $setup;
 }

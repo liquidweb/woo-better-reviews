@@ -20,12 +20,139 @@ use WP_Error;
 /**
  * Start our engines.
  */
+add_action( 'admin_init', __NAMESPACE__ . '\update_existing_review' );
+add_action( 'admin_init', __NAMESPACE__ . '\delete_existing_review' );
 add_action( 'admin_init', __NAMESPACE__ . '\add_new_attribute' );
 add_action( 'admin_init', __NAMESPACE__ . '\update_existing_attribute' );
 add_action( 'admin_init', __NAMESPACE__ . '\delete_existing_attribute' );
 add_action( 'admin_init', __NAMESPACE__ . '\add_new_charstcs' );
 add_action( 'admin_init', __NAMESPACE__ . '\update_existing_charstcs' );
 add_action( 'admin_init', __NAMESPACE__ . '\delete_existing_charstcs' );
+
+/**
+ * Check for the editing function of an attribute.
+ *
+ * @return void
+ */
+function update_existing_review() {
+
+	// Confirm we're on the right place.
+	if ( ! isset( $_POST['edit-existing-review'] ) || empty( $_POST['action'] ) || 'update' !== sanitize_text_field( $_POST['action'] ) ) {
+		return;
+	}
+
+	// Handle the nonce check.
+	if ( empty( $_POST['wbr_edit_review_nonce'] ) || ! wp_verify_nonce( $_POST['wbr_edit_review_nonce'], 'wbr_edit_review_action' ) ) {
+		wp_die( __( 'Your security nonce failed.', 'woo-better-reviews' ) );
+	}
+
+	// Confirm we have an ID, which is sorta critical.
+	if ( empty( $_POST['item-id'] ) ) {
+		redirect_admin_action_result( Core\REVIEWS_ANCHOR, 'missing-item-id' );
+	}
+
+	// Make my edit link.
+	$edit_redirect  = create_item_action_link( $_POST['item-id'], 'reviews' );
+
+	// Check for the remainder of items.
+	if ( empty( $_POST['item-type'] ) || 'review' !== sanitize_text_field( $_POST['item-type'] ) ) {
+		redirect_admin_action_result( $edit_redirect, 'missing-posted-args' );
+	}
+
+	// Bail if we don't have a name to check.
+	if ( empty( $_POST['review-args'] ) ) {
+		redirect_admin_action_result( $edit_redirect, 'missing-review-args' );
+	}
+
+	// Format the arguments passed for updating.
+	$formatted_args = format_review_db_args( $_POST['review-args'] );
+
+	// Bail without the args coming back.
+	if ( empty( $formatted_args ) ) {
+		redirect_admin_action_result( $edit_redirect, 'missing-formatted-args' );
+	}
+
+	// Run the update.
+	$maybe_updated  = Database\update( 'content', absint( $_POST['item-id'] ), $formatted_args );
+
+	// Check for some error return or blank.
+	if ( empty( $maybe_updated ) || false === $maybe_updated || is_wp_error( $maybe_updated ) ) {
+
+		// Figure out the error code.
+		$error_code = is_wp_error( $maybe_updated ) ? $maybe_updated->get_error_code() : 'review-update-failed';
+
+		// And redirect.
+		redirect_admin_action_result( $base_redirect, $error_code );
+	}
+
+	// Purge my related transients.
+	Utilities\purge_transients( Core\HOOK_PREFIX . 'single_review_' . absint( $_POST['item-id'] ), 'reviews' );
+
+	// Recalculate the values.
+	if ( ! empty( $_POST['product-id'] ) ) {
+
+		// Set my ID.
+		$update_id  = absint( $_POST['product-id'] );
+
+		// Recalc it.
+		Utilities\update_product_review_count( $update_id );
+	}
+
+	// Redirect a happy one.
+	redirect_admin_action_result( $edit_redirect, false, 'review-updated', true, Core\REVIEWS_ANCHOR );
+}
+
+/**
+ * Check for the delete function of an charstcs.
+ *
+ * @return void
+ */
+function delete_existing_review() {
+
+	// Confirm we're on the right place.
+	if ( empty( $_GET['page'] ) || empty( $_GET['wbr-action-name'] ) || Core\REVIEWS_ANCHOR !== sanitize_text_field( $_GET['page'] ) || 'delete' !== sanitize_text_field( $_GET['wbr-action-name'] ) ) {
+		return;
+	}
+
+	// Create my base redirect link.
+	$base_redirect  = Helpers\get_admin_menu_link( Core\REVIEWS_ANCHOR );
+
+	// Confirm we have an ID, which is sorta critical.
+	if ( empty( $_GET['wbr-item-id'] ) || empty( $_GET['wbr-item-type'] ) || 'review' !== sanitize_text_field( $_GET['wbr-item-type'] ) ) {
+		redirect_admin_action_result( $base_redirect, 'missing-item-id' );
+	}
+
+	// Set my review item ID.
+	$review_id  = absint( $_GET['wbr-item-id'] );
+
+	// Handle the nonce check.
+	if ( empty( $_GET['wbr-nonce'] ) || ! wp_verify_nonce( $_GET['wbr-nonce'], 'wbr_delete_single_' . $review_id ) ) {
+		wp_die( __( 'Your security nonce failed.', 'woo-better-reviews' ) );
+	}
+
+	// Run the delete.
+	$maybe_deleted  = Database\delete( 'content', $review_id );
+
+	// Check for some error return or blank.
+	if ( empty( $maybe_deleted ) || false === $maybe_deleted || is_wp_error( $maybe_deleted ) ) {
+
+		// Figure out the error code.
+		$error_code = is_wp_error( $maybe_deleted ) ? $maybe_deleted->get_error_code() : 'review-delete-failed';
+
+		// And redirect.
+		redirect_admin_action_result( $base_redirect, $error_code );
+	}
+
+	// Run my related cleanup.
+	delete_related_review_data( $review_id );
+
+	// Purge my related transients.
+	Utilities\purge_transients( Core\HOOK_PREFIX . 'single_review_' . absint( $_POST['item-id'] ), 'reviews' );
+	Utilities\purge_transients( null, 'taxonomies' );
+
+	// Redirect a happy one.
+	redirect_admin_action_result( $base_redirect, false, 'review-deleted', true );
+}
 
 /**
  * Check for the add new function of an attribute.
@@ -79,7 +206,7 @@ function add_new_attribute() {
 	}
 
 	// Purge my related transients.
-	Utilities\purge_transients( null, 'attributes', array( 'attribute-id' => $maybe_inserted ) );
+	Utilities\purge_transients( null, 'taxonomies' );
 
 	// Redirect a happy one.
 	redirect_admin_action_result( $base_redirect, false, 'attribute-added', true );
@@ -137,7 +264,7 @@ function add_new_charstcs() {
 	}
 
 	// Purge my related transients.
-	Utilities\purge_transients( null, 'charstcs', array( 'charstcs-id' => $maybe_inserted ) );
+	Utilities\purge_transients( null, 'taxonomies' );
 
 	// Redirect a happy one.
 	redirect_admin_action_result( $base_redirect, false, 'charstcs-added', true );
@@ -166,7 +293,7 @@ function update_existing_attribute() {
 	}
 
 	// Make my edit link.
-	$edit_redirect  = create_item_action_link( $_POST['item-id'] );
+	$edit_redirect  = create_item_action_link( $_POST['item-id'], 'attributes' );
 
 	// Check for the remainder of items.
 	if ( empty( $_POST['item-type'] ) || 'attribute' !== sanitize_text_field( $_POST['item-type'] ) ) {
@@ -200,7 +327,7 @@ function update_existing_attribute() {
 	}
 
 	// Purge my related transients.
-	Utilities\purge_transients( null, 'attributes', array( 'attribute-id' => absint( $_POST['item-id'] ) ) );
+	Utilities\purge_transients( Core\HOOK_PREFIX . 'single_attribute_' . absint( $_POST['item-id'] ), 'taxonomies' );
 
 	// Redirect a happy one.
 	redirect_admin_action_result( $edit_redirect, false, 'attribute-updated', true, Core\ATTRIBUTES_ANCHOR );
@@ -263,7 +390,7 @@ function update_existing_charstcs() {
 	}
 
 	// Purge my related transients.
-	Utilities\purge_transients( null, 'charstcs', array( 'charstcs-id' => absint( $_POST['item-id'] ) ) );
+	Utilities\purge_transients( Core\HOOK_PREFIX . 'single_charstcs_' . absint( $_POST['item-id'] ), 'taxonomies' );
 
 	// Redirect a happy one.
 	redirect_admin_action_result( $edit_redirect, false, 'charstcs-updated', true, Core\CHARSTCS_ANCHOR );
@@ -311,7 +438,7 @@ function delete_existing_attribute() {
 	}
 
 	// Purge my related transients.
-	Utilities\purge_transients( null, 'attributes', array( 'attribute-id' => absint( $_POST['item-id'] ) ) );
+	Utilities\purge_transients( Core\HOOK_PREFIX . 'single_attribute_' . absint( $_POST['item-id'] ), 'taxonomies' );
 
 	// Redirect a happy one.
 	redirect_admin_action_result( $base_redirect, false, 'attribute-deleted', true );
@@ -359,10 +486,49 @@ function delete_existing_charstcs() {
 	}
 
 	// Purge my related transients.
-	Utilities\purge_transients( null, 'charstcs', array( 'charstcs-id' => absint( $_POST['item-id'] ) ) );
+	Utilities\purge_transients( Core\HOOK_PREFIX . 'single_charstcs_' . absint( $_POST['item-id'] ), 'taxonomies' );
 
 	// Redirect a happy one.
 	redirect_admin_action_result( $base_redirect, false, 'charstcs-deleted', true );
+}
+
+/**
+ * Take the posted args and format to how the DB needs them.
+ *
+ * @param  array  $posted_args  The args posted from the user form.
+ *
+ * @return array
+ */
+function format_review_db_args( $posted_args = array() ) {
+
+	// Bail if we don't have args.
+	if ( empty( $posted_args ) ) {
+		return false;
+	}
+
+	// Clean up each posted arg.
+	$stripped_args  = stripslashes_deep( $posted_args ); // array_filter( $posted_args, 'sanitize_text_field' );
+
+	// Start figuring out each part.
+	$review_date    = ! empty( $stripped_args['date'] ) ? trim( $stripped_args['date'] ) : '';
+	$review_title   = ! empty( $stripped_args['title'] ) ? trim( $stripped_args['title'] ) : '';
+	$review_slug    = ! empty( $review_title ) ? sanitize_title_with_dashes( $review_title, null, 'save' ) : '';
+	$review_summary = ! empty( $stripped_args['summary'] ) ? trim( $stripped_args['summary'] ) : '';
+	$review_content = ! empty( $stripped_args['content'] ) ? trim( $stripped_args['content'] ) : '';
+	$review_status  = ! empty( $stripped_args['status'] ) ? trim( $stripped_args['status'] ) : '';
+
+	// Format the new array structure and return it.
+	$update_setup   = array(
+		'review_date'         => $review_date,
+		'review_title'        => $review_title,
+		'review_slug'         => $review_slug,
+		'review_summary'      => $review_summary,
+		'review_content'      => $review_content,
+		'review_status'       => $review_status,
+	);
+
+	// Return it cleaned up.
+	return array_filter( $update_setup );
 }
 
 /**
@@ -435,13 +601,13 @@ function format_charstcs_db_args( $posted_args = array() ) {
  * Create the link to redirect on an edit.
  *
  * @param  integer $item_id   The ID of the item we are editing.
- * @param  string  $type      The item type we are handling. Defaults to 'attribute'.
+ * @param  string  $type      The item type we are handling. Defaults to 'attributes'.
  * @param  string  $action    The action being taken. Defaults to 'edit'.
  * @param  string  $redirect  Our base link to build off of.
  *
  * @return string
  */
-function create_item_action_link( $item_id = 0, $type = 'attribute', $action = 'edit', $redirect = '' ) {
+function create_item_action_link( $item_id = 0, $type = 'attributes', $action = 'edit', $redirect = '' ) {
 
 	// Bail if we don't have the required pieces.
 	if ( empty( $item_id ) || empty( $action ) || empty( $type ) ) {
@@ -457,7 +623,7 @@ function create_item_action_link( $item_id = 0, $type = 'attribute', $action = '
 			$redirect = Helpers\get_admin_menu_link( Core\REVIEWS_ANCHOR );
 			break;
 
-		case 'attribute' :
+		case 'attributes' :
 
 			// Set my proper anchor.
 			$redirect = Helpers\get_admin_menu_link( Core\ATTRIBUTES_ANCHOR );
@@ -520,4 +686,26 @@ function redirect_admin_action_result( $redirect = '', $error = '', $result = 'f
 	// Do the redirect.
 	wp_safe_redirect( $redirect_link );
 	exit;
+}
+
+/**
+ * Review the related items tied to a review.
+ *
+ * @param  integer $review_id  The review ID we are checking.
+ *
+ * @return void
+ */
+function delete_related_review_data( $review_id = 0 ) {
+
+	// Bail if we don't have a review ID.
+	if ( empty( $review_id ) ) {
+		return;
+	}
+
+	// Call the global DB.
+	global $wpdb;
+
+	// Run my delete functions.
+	$wpdb->delete( $wpdb->wc_better_rvs_ratings, array( 'review_id' => absint( $review_id ) ), array( '%d' ) );
+	$wpdb->delete( $wpdb->wc_better_rvs_authormeta, array( 'review_id' => absint( $review_id ) ), array( '%d' ) );
 }

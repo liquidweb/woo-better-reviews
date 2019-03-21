@@ -152,7 +152,7 @@ function get_menu_page_title( $menu = '' ) {
 		case 'reviews' :
 
 			// Make and return my label.
-			return __( 'Reviews','woo-better-reviews' );
+			return ! $isedit ? __( 'Reviews', 'woo-better-reviews' ) : __( 'Edit Review', 'woo-better-reviews' );
 			break;
 
 		case 'attributes' :

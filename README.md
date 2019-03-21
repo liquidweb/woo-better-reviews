@@ -14,7 +14,7 @@ Like reviews, only way better.
 
 * connect product attributes  DONE
 * set other field types
-* modify review status
-* add / delete / modify reviews
+* modify review status   DONE
+* add / delete / modify reviews  (ALMOST)
 * edit single reviews
 * transient purging

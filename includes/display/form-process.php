@@ -213,7 +213,7 @@ function redirect_front_submit_result( $redirect = '', $error = '', $success = f
 	}
 
 	// If we have success, skip the rest.
-	if ( ! empty( $success ) ) {
+	if ( false !== $success ) {
 
 		// Now set my redirect link.
 		$redirect_link  = add_query_arg( array( 'success' => 1 ), $redirect );

@@ -15,14 +15,14 @@ use LiquidWeb\WooBetterReviews\Helpers as Helpers;
 /**
  * Start our engines.
  */
-add_action( 'admin_notices', __NAMESPACE__ . '\attribute_result_notices' );
+add_action( 'admin_notices', __NAMESPACE__ . '\admin_result_notices' );
 
 /**
  * Check for the result of adding or editing an attribute.
  *
  * @return void
  */
-function attribute_result_notices() {
+function admin_result_notices() {
 
 	// Make sure we have the completed flag.
 	if ( empty( $_GET['wbr-action-complete'] ) || empty( $_GET['wbr-action-result'] ) ) {

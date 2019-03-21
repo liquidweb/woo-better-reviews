@@ -676,8 +676,7 @@ class WooBetterReviews_ListReviews extends WP_List_Table {
 			$tochange[] = $single_review->product_id;
 
 			// Handle the transient purging.
-			Utilities\purge_transients( null, 'reviews' );
-			Utilities\purge_transients( Core\HOOK_PREFIX . 'single_review_' . $review_id );
+			Utilities\purge_transients( Core\HOOK_PREFIX . 'single_review_' . $review_id, 'reviews' );
 
 			// Nothing left in the loop to do.
 		}

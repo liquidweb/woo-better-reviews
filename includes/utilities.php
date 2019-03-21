@@ -511,14 +511,15 @@ function set_single_review_div_class( $review = array(), $index = 0 ) {
 /**
  * Set a buffered editor output.
  *
- * @param string  $editor_id     The ID of the editor form.
- * @param string  $editor_name   The field name for the editor.
- * @param string  $editor_class  Optional class to include.
- * @param array   $custom_args   Any other custom args.
+ * @param string  $editor_id       The ID of the editor form.
+ * @param string  $editor_name     The field name for the editor.
+ * @param string  $editor_class    Optional class to include.
+ * @param mixed   $editor_content  Optional class to include.
+ * @param array   $custom_args     Any other custom args.
  *
  * @return HTML
  */
-function set_review_form_editor( $editor_id = '', $editor_name = '', $editor_class = '', $custom_args = array() ) {
+function set_review_form_editor( $editor_id = '', $editor_name = '', $editor_class = '', $editor_content, $custom_args = array() ) {
 
 	// Bail if we're missing anything.
 	if ( empty( $editor_id ) || empty( $editor_name ) ) {
@@ -547,7 +548,7 @@ function set_review_form_editor( $editor_id = '', $editor_name = '', $editor_cla
 	ob_start();
 
 	// Now handle the editor getting buffered.
-	wp_editor( '', $editor_id, $setup_args );
+	wp_editor( $editor_content, $editor_id, $setup_args );
 
 	// Now just return it.
 	return ob_get_clean();
@@ -609,6 +610,7 @@ function purge_transients( $key = '', $group = '', $custom = array() ) {
 					// Loop and delete.
 					foreach ( $all_id as $id ) {
 						delete_transient( Core\HOOK_PREFIX . 'reviews_for_product_' . $id );
+						delete_transient( Core\HOOK_PREFIX . 'approved_reviews_for_product_' . $id );
 						delete_transient( Core\HOOK_PREFIX . 'review_count_product' . $id );
 						delete_transient( Core\HOOK_PREFIX . 'attributes_product' . $id );
 					}
@@ -635,57 +637,6 @@ function purge_transients( $key = '', $group = '', $custom = array() ) {
 
 				// And done.
 				break;
-
-			// Handle reviews.
-			case 'reviews' :
-
-				// Check the custom args.
-				$author_id  = ! empty( $custom['author-id'] ) ? absint( $custom['author-id'] ) : 0;
-				$product_id = ! empty( $custom['product-id'] ) ? absint( $custom['product-id'] ) : 0;
-
-				// Start deleting.
-				delete_transient( Core\HOOK_PREFIX . 'verifed_reviews' );
-				delete_transient( Core\HOOK_PREFIX . 'cnsldtd_reviews' );
-				delete_transient( Core\HOOK_PREFIX . 'legacy_review_counts' );
-				delete_transient( Core\HOOK_PREFIX . 'reviews_for_author_' . absint( $author_id ) );
-				delete_transient( Core\HOOK_PREFIX . 'reviews_for_product_' . absint( $product_id ) );
-				delete_transient( Core\HOOK_PREFIX . 'cnsldtd_reviews_for_product_' . absint( $product_id ) );
-				delete_transient( Core\HOOK_PREFIX . 'review_count_product' . absint( $product_id ) );
-
-				// And done.
-				break;
-
-			/*
-			// Handle attributes.
-			case 'attributes' :
-
-				// Check the custom args.
-				$attrib_id  = ! empty( $custom['attribute-id'] ) ? absint( $custom['attribute-id'] ) : 0;
-				$product_id = ! empty( $custom['product-id'] ) ? absint( $custom['product-id'] ) : 0;
-
-				// Start deleting.
-				delete_transient( Core\HOOK_PREFIX . 'all_attributes' );
-				delete_transient( Core\HOOK_PREFIX . 'single_attribute_' . absint( $attrib_id ) );
-				delete_transient( Core\HOOK_PREFIX . 'attributes_product' . absint( $product_id ) );
-
-				// And done.
-				break;
-
-			// Handle characteristics.
-			case 'charstcs' :
-
-				// Check the custom args.
-				$author_id  = ! empty( $custom['author-id'] ) ? absint( $custom['author-id'] ) : 0;
-				$charstc_id = ! empty( $custom['charstcs-id'] ) ? absint( $custom['charstcs-id'] ) : 0;
-
-				// Start deleting.
-				delete_transient( Core\HOOK_PREFIX . 'all_charstcs' );
-				delete_transient( Core\HOOK_PREFIX . 'charstcs_author' . absint( $author_id ) );
-				delete_transient( Core\HOOK_PREFIX . 'single_charstcs_' . absint( $charstc_id ) );
-
-				// And done.
-				break;
-			*/
 
 			// No more case breaks, no more return types.
 		}

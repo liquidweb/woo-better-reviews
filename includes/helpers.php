@@ -336,6 +336,14 @@ function get_admin_notice_text( $return_code = '' ) {
 	// Handle my different error codes.
 	switch ( esc_attr( $return_code ) ) {
 
+		case 'review-updated' :
+			return __( 'The selected review has been updated.', 'woo-better-reviews' );
+			break;
+
+		case 'review-deleted' :
+			return __( 'The selected review has been deleted.', 'woo-better-reviews' );
+			break;
+
 		case 'attribute-added' :
 			return __( 'The new attribute has been added.', 'woo-better-reviews' );
 			break;
