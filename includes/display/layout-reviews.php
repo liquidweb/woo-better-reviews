@@ -16,6 +16,13 @@ use LiquidWeb\WooBetterReviews\Queries as Queries;
 use LiquidWeb\WooBetterReviews\Display\FormFields as FormFields;
 
 /**
+ * [set_single_review_scoring_total_view description]
+ */
+function set_single_review_scoring_total_view() {
+
+}
+
+/**
  * Set the display view for the review post date.
  *
  * @param  array $review  The data tied to the review.

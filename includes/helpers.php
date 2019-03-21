@@ -168,7 +168,7 @@ function maybe_sorted_reviews() {
 	}
 
 	// Now pull my matching reviews, if we have any.
-	$matching_reviews   = call_user_func_array( 'array_intersect', $requested_ids );
+	$matching_reviews   = isset( $requested_ids[1] ) ? call_user_func_array( 'array_intersect', $requested_ids ) : $requested_ids[0];
 
 	// Return the IDs we have.
 	return ! empty( $matching_reviews ) ? $matching_reviews : 'none';
@@ -281,6 +281,62 @@ function get_admin_review_count( $product_id = 0, $set_zero = true ) {
 
 	// And return the count.
 	return $review_count;
+}
+
+/**
+ * Get the review score from post meta.
+ *
+ * @param  integer $product_id  The product ID we are checking review counts for.
+ *
+ * @return integer
+ */
+function get_average_scoring_display( $product_id = 0 ) {
+
+	// Bail without a product ID.
+	if ( empty( $product_id ) ) {
+		return false;
+	}
+
+	// Get the count.
+	$review_score   = get_post_meta( $product_id, Core\META_PREFIX . 'average_rating', true );
+
+	// Bail with no score.
+	if ( empty( $review_score ) ) {
+		return;
+	}
+
+	// Determine the score parts.
+	$score_had  = absint( $review_score );
+	$score_left = $score_had < 7 ? 7 - $score_had : 0;
+
+	// Set the aria label.
+	$aria_label = sprintf( __( 'Overall Score: %s', 'woo-better-reviews' ), absint( $score_had ) );
+
+	// Set the empty.
+	$setup  = '';
+
+	// Wrap the whole thing in a div.
+	$setup .= '<div class="woo-better-reviews-list-title-score-wrapper">';
+
+		// Wrap it in a span.
+		$setup  .= '<span class="woo-better-reviews-list-total-score" aria-label="' . esc_attr( $aria_label ) . '">';
+
+			// Output the full stars.
+			$setup  .= str_repeat( '<span class="woo-better-reviews-single-star woo-better-reviews-single-star-full">&#9733;</span>', $score_had );
+
+			// Output the empty stars.
+			if ( $score_left > 0 ) {
+				$setup  .= str_repeat( '<span class="woo-better-reviews-single-star woo-better-reviews-single-star-empty">&#9734;</span>', $score_left );
+			}
+
+		// Close the span.
+		$setup  .= '</span>';
+
+	// Close the div.
+	$setup  .= '</div>';
+
+	// Return the setup.
+	return $setup;
 }
 
 /**

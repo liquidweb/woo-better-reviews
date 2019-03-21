@@ -79,14 +79,31 @@ function update_product_review_count( $product_ids ) {
  *
  * @return void
  */
-function calculate_product_review_scoring( $product_id = 0 ) {
+function calculate_total_review_scoring( $product_id = 0 ) {
 
 	// Bail without a product ID.
 	if ( empty( $product_id ) ) {
 		return;
 	}
 
-	// @@todo scoring
+	// Get all the totals from approved reviews.
+	$approved_totals    = Queries\get_approved_reviews_for_product( $product_id, 'total' );
+
+	// Bail without having any reviews to calculate.
+	// @@todo zero out any scoring?
+	if ( empty( $approved_totals ) ) {
+		return;
+	}
+
+	// And calculate the average.
+	// @@todo round up / down?
+	$review_avg_score   = array_sum( $approved_totals ) / count( $approved_totals );
+
+	// Update the Woo postmeta key.
+	update_post_meta( $product_id, '_wc_average_rating', round( $review_avg_score, 0 ) );
+
+	// Update our own post meta key as well.
+	update_post_meta( $product_id, Core\META_PREFIX . 'average_rating', round( $review_avg_score, 0 ) );
 }
 
 /**

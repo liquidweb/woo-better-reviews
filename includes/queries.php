@@ -17,7 +17,6 @@ use LiquidWeb\WooBetterReviews\Database as Database;
 // And pull in any other namespaces.
 use WP_Error;
 
-
 /**
  * Get all the reviews.
  *
@@ -530,6 +529,20 @@ function get_approved_reviews_for_product( $product_id = 0, $return_type = 'obje
 			return $query_list;
 			break;
 
+		case 'total' :
+
+			// Set my query list.
+			$query_list = wp_list_pluck( $cached_dataset, 'rating_total_score', 'review_id' );
+
+			// Sort my list assuming we didn't want date order.
+			if ( ! $date_order ) {
+				ksort( $query_list );
+			}
+
+			// Return my list, sorted.
+			return $query_list;
+			break;
+
 		case 'products' :
 
 			// Set my query list.
@@ -938,6 +951,10 @@ function get_single_review( $review_id = 0, $return_type = 'objects', $purge = f
 			return merge_review_object_taxonomies( $cached_dataset );
 			break;
 
+		case 'product' :
+			return $cached_dataset->product_id;
+			break;
+
 		// No more case breaks, no more return types.
 	}
 
@@ -994,7 +1011,7 @@ function get_reviews_for_sorting( $product_id = 0, $charstcs_id = 0, $charstcs_v
 		return false;
 	}
 
-	// Set my empty.
+	// Set my list.
 	$query_list = wp_list_pluck( $query_run, 'review_id', null );
 
 	// Bail without any reviews.
@@ -1002,7 +1019,7 @@ function get_reviews_for_sorting( $product_id = 0, $charstcs_id = 0, $charstcs_v
 }
 
 /**
- * Get a batch of reviews
+ * Get a batch of reviews from a sort or filter.
  *
  * @param  array   $review_ids   The IDs we want.
  * @param  string  $return_type  What type of return we want. Accepts "counts", "objects", "display", or single fields.
@@ -1032,6 +1049,51 @@ function get_review_batch( $review_ids = array(), $return_type = 'objects', $pur
 
 	// Return my list with formatting.
 	return merge_review_object_taxonomies( $review_list );
+}
+
+/**
+ * Get all the ratings for a review ID.
+ *
+ * @param  integer $review_id    The review ID we want scores from.
+ * @param  string  $return_type  What type of return we want. Accepts "counts", "objects", "display", or single fields.
+ * @param  boolean $purge        Optional to purge the cache'd version before looking up.
+ *
+ * @return mixed
+ */
+function get_ratings_for_review_attribute( $review_id = 0, $attribute_id = 0, $return_type = 'objects', $purge = false ) {
+
+	// Bail without a review ID.
+	if ( empty( $review_id ) ) {
+		return new WP_Error( 'missing_review_id', __( 'A review ID is required.', 'woo-better-reviews' ) );
+	}
+
+	// Call the global database.
+	global $wpdb;
+
+	// Set our table name.
+	$table_name = $wpdb->prefix . Core\TABLE_PREFIX . 'ratings';
+
+	// Set up our query.
+	$query_args = $wpdb->prepare("
+		SELECT   rating_score
+		FROM     $table_name
+		WHERE    review_id = '%d'
+		AND      attribute_id = '%d'
+	", absint( $review_id ), absint( $attribute_id ) );
+
+	// Process the query.
+	$query_run  = $wpdb->get_row( $query_args );
+	preprint( $query_run, true );
+	// Bail without any results.
+	if ( empty( $query_run ) ) {
+		return false;
+	}
+
+	// Set my list.
+	$query_list = wp_list_pluck( $query_run, 'rating_score', 'attribute_id' );
+
+	// Bail without any scoring data.
+	return ! empty( $query_list ) ? $query_list : false;
 }
 
 /**

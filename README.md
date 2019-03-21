@@ -18,3 +18,24 @@ Like reviews, only way better.
 * add / delete / modify reviews  (ALMOST)
 * edit single reviews
 * transient purging
+* front-end messages
+* anonymous reviews
+* single attribute scoring
+* show read-only scoring on edit
+* kill summary field
+* check for return to reviews
+
+add visual summary to aggregate reviews
+scoring breakdown
+
+move stars to single row above title
+move attributes under title
+move author name to bottom, above author stuff
+
+stars / title same line
+date
+attributes
+content
+author info
+
+https://www.underarmour.com/en-us/ua-curry-6-basketball-shoes/pid3020612-405

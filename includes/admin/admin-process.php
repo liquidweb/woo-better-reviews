@@ -12,6 +12,7 @@ namespace LiquidWeb\WooBetterReviews\Admin\AdminProcess;
 use LiquidWeb\WooBetterReviews as Core;
 use LiquidWeb\WooBetterReviews\Helpers as Helpers;
 use LiquidWeb\WooBetterReviews\Utilities as Utilities;
+use LiquidWeb\WooBetterReviews\Queries as Queries;
 use LiquidWeb\WooBetterReviews\Database as Database;
 
 // And pull in any other namespaces.
@@ -94,8 +95,11 @@ function update_existing_review() {
 		// Set my ID.
 		$update_id  = absint( $_POST['product-id'] );
 
-		// Recalc it.
+		// Update the product review count.
 		Utilities\update_product_review_count( $update_id );
+
+		// Update the overall score.
+		Utilities\calculate_total_review_scoring( $update_id );
 	}
 
 	// Redirect a happy one.
@@ -130,6 +134,9 @@ function delete_existing_review() {
 		wp_die( __( 'Your security nonce failed.', 'woo-better-reviews' ) );
 	}
 
+	// Get my product ID before deleting.
+	$old_product_id = Queries\get_single_review( $review_id, 'product' );
+
 	// Run the delete.
 	$maybe_deleted  = Database\delete( 'content', $review_id );
 
@@ -149,6 +156,16 @@ function delete_existing_review() {
 	// Purge my related transients.
 	Utilities\purge_transients( Core\HOOK_PREFIX . 'single_review_' . absint( $_POST['item-id'] ), 'reviews' );
 	Utilities\purge_transients( null, 'taxonomies' );
+
+	// Run the relcalculations with the product ID.
+	if ( ! empty( $old_product_id ) ) {
+
+		// Update the product review count.
+		Utilities\update_product_review_count( $old_product_id );
+
+		// Update the overall score.
+		Utilities\calculate_total_review_scoring( $old_product_id );
+	}
 
 	// Redirect a happy one.
 	redirect_admin_action_result( $base_redirect, false, 'review-deleted', true );

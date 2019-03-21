@@ -556,6 +556,13 @@ class WooBetterReviews_ListReviews extends WP_List_Table {
 
 			// Update all my counts.
 			Utilities\update_product_review_count( $update_ids );
+
+			// Recalculate the total score on each.
+			foreach ( $update_ids as $update_id ) {
+				Utilities\calculate_total_review_scoring( $update_id );
+			}
+
+			// Nothing left for the changed items.
 		}
 
 		// Set my success args.
@@ -689,6 +696,13 @@ class WooBetterReviews_ListReviews extends WP_List_Table {
 
 			// Update all my counts.
 			Utilities\update_product_review_count( $update_ids );
+
+			// Recalculate the total score on each.
+			foreach ( $update_ids as $update_id ) {
+				Utilities\calculate_total_review_scoring( $update_id );
+			}
+
+			// Nothing left for the changed items.
 		}
 
 		// Set my success args.

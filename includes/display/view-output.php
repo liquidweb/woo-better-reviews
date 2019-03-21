@@ -21,93 +21,6 @@ use LiquidWeb\WooBetterReviews\Display\LayoutReviews as LayoutReviews;
 use WP_Error;
 
 /**
- * Build and display the 'leave a review' form.
- *
- * @param  integer $product_id  The product ID we are leaving a review for.
- * @param  boolean $echo        Whether to echo it out or return it.
- *
- * @return HTML
- */
-function display_new_review_form( $product_id = 0, $echo = true ) {
-
-	// Bail without a product ID.
-	if ( empty( $product_id ) ) {
-		return;
-	}
-
-	// Check for an override.
-	$maybe_override = apply_filters( Core\HOOK_PREFIX . 'display_new_review_form_override', null, $product_id );
-
-	// Return the override if we have it.
-	if ( ! empty( $maybe_override ) ) {
-
-		// Return if requested.
-		if ( empty( $echo ) ) {
-			return $maybe_override;
-		}
-
-		// Just echo it.
-		echo $maybe_override;
-
-		// And be done, since we skipped it.
-		return;
-	}
-
-	// Set my action link.
-	$action_link    = get_permalink( $product_id );
-
-	// Set our empty.
-	$build  = '';
-
-	// Wrap the entire thing in our div.
-	$build .= '<div id="review_form_wrapper" class="woo-better-reviews-display-block woo-better-reviews-form-block">';
-
-		// Set our form wrapper.
-		$build .= '<form class="woo-better-reviews-form-container" name="woo-better-reviews-rating-form" action="' . esc_url( $action_link ) . '" method="post">';
-
-			// Add filterable fields.
-			$build .= apply_filters( Core\HOOK_PREFIX . 'before_display_new_review_form', null, $product_id );
-
-			// Add the title.
-			$build .= LayoutForm\set_review_form_rating_title_view( $product_id );
-
-			// Output the rating input.
-			$build .= LayoutForm\set_review_form_rating_stars_view( $product_id );
-
-			// Set the attributes.
-			$build .= LayoutForm\set_review_form_rating_attributes_view( $product_id );
-
-			// Handle the inputs themselves.
-			$build .= LayoutForm\set_review_form_content_fields_view( $product_id );
-
-			// Now get the author fields.
-			$build .= LayoutForm\set_review_form_author_fields_view( get_current_user_id() );
-
-			// Output the submit actions.
-			$build .= LayoutForm\set_review_form_submit_action_fields_view( $product_id );
-
-			// Output the hidden stuff.
-			$build .= LayoutForm\set_review_form_hidden_meta_fields_view( $product_id, get_current_user_id() );
-
-			// Add filterable fields.
-			$build .= apply_filters( Core\HOOK_PREFIX . 'after_new_review_form_after', null, $product_id );
-
-		// Close out the form.
-		$build .= '</form>';
-
-	// Close up the div.
-	$build .= '</div>';
-
-	// Return if requested.
-	if ( empty( $echo ) ) {
-		return $build;
-	}
-
-	// Just echo it.
-	echo $build;
-}
-
-/**
  * Build and display the header.
  *
  * @param  integer $product_id  The product ID we are leaving a review for.
@@ -143,9 +56,8 @@ function display_review_template_header( $product_id = 0, $echo = true ) {
 	// Get some variables based on the product ID.
 	$leave_review   = get_permalink( $product_id ) . '#review_form_wrapper';
 	$product_title  = get_the_title( $product_id );
-
-	// Get the total count of reviews we have.
 	$review_count   = Helpers\get_admin_review_count( $product_id );
+	$score_display  = Helpers\get_average_scoring_display( $product_id );
 
 	// Set our empty.
 	$build  = '';
@@ -155,6 +67,8 @@ function display_review_template_header( $product_id = 0, $echo = true ) {
 
 		// Wrap the title with our H2.
 		$build .= '<h2 class="woocommerce-Reviews-title woo-better-reviews-template-title">';
+
+			$build .= $score_display;
 
 			/* translators: 1: reviews count 2: product name */
 			$build .= sprintf( esc_html( _n( '%1$s review for %2$s', '%1$s reviews for %2$s', $review_count, 'woo-better-reviews' ) ), esc_html( $review_count ), '<span class="woo-better-reviews-template-title-product-name">' . esc_html( $product_title ) . '</span>' );
@@ -394,6 +308,93 @@ function display_existing_reviews( $product_id = 0, $echo = true ) {
 	}
 
 	// Close the large div wrapper.
+	$build .= '</div>';
+
+	// Return if requested.
+	if ( empty( $echo ) ) {
+		return $build;
+	}
+
+	// Just echo it.
+	echo $build;
+}
+
+/**
+ * Build and display the 'leave a review' form.
+ *
+ * @param  integer $product_id  The product ID we are leaving a review for.
+ * @param  boolean $echo        Whether to echo it out or return it.
+ *
+ * @return HTML
+ */
+function display_new_review_form( $product_id = 0, $echo = true ) {
+
+	// Bail without a product ID.
+	if ( empty( $product_id ) ) {
+		return;
+	}
+
+	// Check for an override.
+	$maybe_override = apply_filters( Core\HOOK_PREFIX . 'display_new_review_form_override', null, $product_id );
+
+	// Return the override if we have it.
+	if ( ! empty( $maybe_override ) ) {
+
+		// Return if requested.
+		if ( empty( $echo ) ) {
+			return $maybe_override;
+		}
+
+		// Just echo it.
+		echo $maybe_override;
+
+		// And be done, since we skipped it.
+		return;
+	}
+
+	// Set my action link.
+	$action_link    = get_permalink( $product_id );
+
+	// Set our empty.
+	$build  = '';
+
+	// Wrap the entire thing in our div.
+	$build .= '<div id="review_form_wrapper" class="woo-better-reviews-display-block woo-better-reviews-form-block">';
+
+		// Set our form wrapper.
+		$build .= '<form class="woo-better-reviews-form-container" name="woo-better-reviews-rating-form" action="' . esc_url( $action_link ) . '" method="post">';
+
+			// Add filterable fields.
+			$build .= apply_filters( Core\HOOK_PREFIX . 'before_display_new_review_form', null, $product_id );
+
+			// Add the title.
+			$build .= LayoutForm\set_review_form_rating_title_view( $product_id );
+
+			// Output the rating input.
+			$build .= LayoutForm\set_review_form_rating_stars_view( $product_id );
+
+			// Set the attributes.
+			$build .= LayoutForm\set_review_form_rating_attributes_view( $product_id );
+
+			// Handle the inputs themselves.
+			$build .= LayoutForm\set_review_form_content_fields_view( $product_id );
+
+			// Now get the author fields.
+			$build .= LayoutForm\set_review_form_author_fields_view( get_current_user_id() );
+
+			// Output the submit actions.
+			$build .= LayoutForm\set_review_form_submit_action_fields_view( $product_id );
+
+			// Output the hidden stuff.
+			$build .= LayoutForm\set_review_form_hidden_meta_fields_view( $product_id, get_current_user_id() );
+
+			// Add filterable fields.
+			$build .= apply_filters( Core\HOOK_PREFIX . 'after_new_review_form_after', null, $product_id );
+
+		// Close out the form.
+		$build .= '</form>';
+
+	// Close up the div.
 	$build .= '</div>';
 
 	// Return if requested.
