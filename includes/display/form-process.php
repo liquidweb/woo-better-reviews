@@ -184,7 +184,7 @@ function process_review_submission() {
 		Utilities\purge_transients( null, 'authors', array( 'ids' => (array) $product_id ) );
 
 		// The review has been successfully entered, so redirect.
-		redirect_front_submit_result( $base_redirect, '', true, array( 'wbr-new-review' => $scoring_merge ) );
+		redirect_front_submit_result( $base_redirect, '', true );
 	}
 
 	// Determine the error code if we have one.
@@ -207,18 +207,24 @@ function process_review_submission() {
  */
 function redirect_front_submit_result( $redirect = '', $error = '', $success = false, $custom = array(), $return = '' ) {
 
-	// Set up my results based on the success flag.
-	$check_results  = ! empty( $success ) ? 'added' : 'failed';
+	// Just fail without the redirect URL.
+	if ( empty( $redirect ) ) {
+		return;
+	}
+
+	// If we have success, skip the rest.
+	if ( ! empty( $success ) ) {
+
+		// Now set my redirect link.
+		$redirect_link  = add_query_arg( array( 'success' => 1 ), $redirect );
+
+		// Do the redirect.
+		wp_safe_redirect( $redirect_link );
+		exit;
+	}
 
 	// Set up my redirect args.
-	$redirect_args  = array(
-		'success'             => $success,
-		'wbr-submit-complete' => 1,
-		'wbr-submit-result'   => esc_attr( $check_results ),
-	);
-
-	// Add the error code if we have one.
-	$redirect_args  = ! empty( $error ) ? wp_parse_args( $redirect_args, array( 'wbr-error-code' => esc_attr( $error ) ) ) : $redirect_args;
+	$redirect_args  = array( 'success' => 0, 'wbr-error-code' => esc_attr( $error ) );
 
 	// Now check to see if we have a return, which means a return link.
 	$redirect_args  = ! empty( $return ) ? wp_parse_args( $redirect_args, array( 'wbr-submit-return' => $return ) ) : $redirect_args;

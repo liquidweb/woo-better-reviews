@@ -426,9 +426,9 @@ function get_approved_reviews_for_product( $product_id = 0, $return_type = 'obje
 		$query_args = $wpdb->prepare("
 			SELECT   *
 			FROM     $table_name
-			AND      review_status LIKE '%s'
+			WHERE    review_status LIKE '%s'
 			ORDER BY review_date DESC
-		", absint( 1 ), esc_attr( 'approved' ) );
+		", esc_attr( 'approved' ) );
 
 		// Process the query.
 		$query_run  = $wpdb->get_results( $query_args );

@@ -65,10 +65,10 @@ function update_product_review_count( $product_ids ) {
 		$approved_count = ! empty( $maybe_approved ) ? absint( $maybe_approved ) : 0;
 
 		// Update the Woo postmeta key.
-		update_post_meta( $product_id, '_wc_review_count', $update_count );
+		update_post_meta( $product_id, '_wc_review_count', $approved_count );
 
 		// Update our own post meta key as well.
-		update_post_meta( $product_id, Core\META_PREFIX . 'review_count', $update_count );
+		update_post_meta( $product_id, Core\META_PREFIX . 'review_count', $approved_count );
 	}
 }
 
@@ -323,6 +323,7 @@ function format_review_content_data( $review ) {
 		'review_title',
 		'review_summary',
 		'review_content',
+		'review_status',
 	);
 
 	// Loop and check.

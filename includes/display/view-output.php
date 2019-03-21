@@ -244,7 +244,7 @@ function display_existing_reviews( $product_id = 0, $echo = true ) {
 
 	// Now begin to loop the reviews and do the thing.
 	foreach ( $fetch_reviews as $single_review ) {
-		preprint( $single_review, true );
+		// preprint( $single_review, true );
 
 		// Skip the non-approved ones for now.
 		if ( empty( $single_review['status'] ) || 'approved' !== sanitize_text_field( $single_review['status'] ) ) {
