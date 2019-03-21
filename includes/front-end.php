@@ -20,7 +20,7 @@ use WP_Error;
 /**
  * Start our engines.
  */
-add_filter( 'removable_query_args', __NAMESPACE__ . '\front_removable_args' );
+// add_filter( 'removable_query_args', __NAMESPACE__ . '\front_removable_args' );
 add_action( 'comments_template', __NAMESPACE__ . '\load_review_template', 99 );
 add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\load_review_front_assets' );
 
@@ -49,7 +49,7 @@ function front_removable_args( $args ) {
 	$setup  = apply_filters( Core\HOOK_PREFIX . 'front_removable_args', $remove );
 
 	// Include my new args and return.
-	return ! empty( $setup ) ? wp_parse_args( $setup, $args ) : $args;
+	return ! empty( $setup ) ? wp_parse_args( $setup, (array) $args ) : (array) $args;
 }
 
 /**

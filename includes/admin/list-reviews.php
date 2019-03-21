@@ -86,6 +86,9 @@ class WooBetterReviews_ListReviews extends WP_List_Table {
 		// Make sure we have the bulk action running.
 		$this->process_bulk_action();
 
+		// Make sure we have the status change.
+		$this->process_status_change();
+
 		// And the result.
 		$this->items = $dataset;
 	}
@@ -388,7 +391,20 @@ class WooBetterReviews_ListReviews extends WP_List_Table {
 	 * @return HTML
 	 */
 	protected function extra_tablenav( $which ) {
-		return apply_filters( Core\HOOK_PREFIX . 'review_table_extra_tablenav', '', $which );
+
+		// Get my dropdown values.
+		$status_dropdown    = $this->set_status_change_dropdown();
+
+		// Set our empty.
+		$build  = '';
+
+		// Set up the top bar.
+		if ( ! empty( $status_dropdown ) && 'top' === $which ) {
+			$build .= '<div class="alignleft actions">' . $status_dropdown . '</div>';
+		}
+
+		// Echo out the filtered version.
+		echo apply_filters( Core\HOOK_PREFIX . 'review_table_extra_tablenav', $build, $which );
 	}
 
 	/**
@@ -489,8 +505,19 @@ class WooBetterReviews_ListReviews extends WP_List_Table {
 		// Set my review IDs.
 		$review_ids = array_map( 'absint', $_POST['review-ids'] );
 
+		// Set an empty array for updating.
+		$tochange   = array();
+
 		// Now loop my IDs and attempt to update each one.
 		foreach ( $review_ids as $review_id ) {
+
+			// Get my single review data.
+			$single_review  = Queries\get_single_review( $review_id );
+
+			// Check the status so we don't change unneeded.
+			if ( 'approved' === $single_review->review_status ) {
+				continue;
+			}
 
 			// Run the update.
 			$maybe_updated  = Database\update( 'content', absint( $review_id ), array( 'review_status' => 'approved' ) );
@@ -511,29 +538,164 @@ class WooBetterReviews_ListReviews extends WP_List_Table {
 				// And redirect.
 				Helpers\admin_page_redirect( $redirect_args, Core\REVIEWS_ANCHOR );
 			}
-			/*
-			// Handle the transient purging.
-			Utilities\purge_transients( Core\HOOK_PREFIX . 'single_cnsldtd_review_' . absint( $review_id ) );
 
-			// Now get my new updated data.
-			$updated_review = Queries\get_single_review( $review_id );
-
-			// Set my custom args for transients.
-			$purging_args = array(
-				'author-id'  => $updated_review->author_id,
-				'product-id' => $updated_review->product_id,
-			);
+			// Add the ID to the update.
+			$tochange[] = $single_review->product_id;
 
 			// Handle the transient purging.
-			Utilities\purge_transients( null, 'reviews', $purging_args );
-			*/
+			Utilities\purge_transients( null, 'reviews' );
+
 			// Nothing left in the loop to do.
+		}
+
+		// Run the change loop if we have items.
+		if ( ! empty( $tochange ) ) {
+
+			// Get just the individual unique IDs.
+			$update_ids = array_unique( $tochange );
+
+			// Update all my counts.
+			Utilities\update_product_review_count( $update_ids );
 		}
 
 		// Set my success args.
 		$redirect_args  = array(
 			'success'           => 1,
 			'wbr-action-result' => 'reviews-approved-bulk',
+		);
+
+		// And redirect.
+		Helpers\admin_page_redirect( $redirect_args, Core\REVIEWS_ANCHOR );
+	}
+
+	/**
+	 * Handle the specific status type changes.
+	 *
+	 * @return void
+	 */
+	protected function process_status_change() {
+
+		// Make sure we have the page we want.
+		if ( empty( $_GET['page'] ) || Core\REVIEWS_ANCHOR !== sanitize_text_field( $_GET['page'] ) ) {
+			return;
+		}
+
+		// Bail if we aren't on the doing our requested action.
+		if ( ! isset( $_POST['wbr-change-selected-reviews'] ) || ! empty( $this->current_action() ) ) {
+			return;
+		}
+
+		// Handle the nonce check.
+		if ( empty( $_POST['wbr_list_reviews_nonce'] ) || ! wp_verify_nonce( $_POST['wbr_list_reviews_nonce'], 'wbr_list_reviews_action' ) ) {
+			wp_die( __( 'Your security nonce failed.', 'woo-better-reviews' ) );
+		}
+
+		// Check for the new status being provided.
+		if ( empty( $_POST['wbr-change-reviews-new-status'] ) ) {
+
+			// Set my error return args.
+			$redirect_args  = array(
+				'success'           => false,
+				'wbr-action-result' => 'failed',
+				'wbr-error-code'    => 'missing-review-status',
+			);
+
+			// And redirect.
+			Helpers\admin_page_redirect( $redirect_args, Core\REVIEWS_ANCHOR );
+		}
+
+		// Set my new status.
+		$new_status = sanitize_text_field( $_POST['wbr-change-reviews-new-status'] );
+
+		// Confirm the new status is a valid one.
+		if ( ! in_array( $new_status, Helpers\get_review_statuses( true ) ) ) {
+
+			// Set my error return args.
+			$redirect_args  = array(
+				'success'           => false,
+				'wbr-action-result' => 'failed',
+				'wbr-error-code'    => 'invalid-review-status',
+			);
+
+			// And redirect.
+			Helpers\admin_page_redirect( $redirect_args, Core\REVIEWS_ANCHOR );
+		}
+
+		// Check for the array of review IDs being passed.
+		if ( empty( $_POST['review-ids'] ) ) {
+
+			// Set my error return args.
+			$redirect_args  = array(
+				'success'           => false,
+				'wbr-action-result' => 'failed',
+				'wbr-error-code'    => 'missing-review-ids',
+			);
+
+			// And redirect.
+			Helpers\admin_page_redirect( $redirect_args, Core\REVIEWS_ANCHOR );
+		}
+
+		// Set my review IDs.
+		$review_ids = array_map( 'absint', $_POST['review-ids'] );
+
+		// Set an empty array for updating.
+		$tochange   = array();
+
+		// Now loop my IDs and attempt to update each one.
+		foreach ( $review_ids as $review_id ) {
+
+			// Get my single review data.
+			$single_review  = Queries\get_single_review( $review_id );
+
+			// Check the status so we don't change unneeded.
+			if ( $new_status === $single_review->review_status ) {
+				continue;
+			}
+
+			// Run the update.
+			$maybe_updated  = Database\update( 'content', absint( $review_id ), array( 'review_status' => $new_status ) );
+
+			// Check for some error return or blank.
+			if ( empty( $maybe_updated ) || false === $maybe_updated || is_wp_error( $maybe_updated ) ) {
+
+				// Figure out the error code.
+				$error_code     = is_wp_error( $maybe_updated ) ? $maybe_updated->get_error_code() : 'review-update-failed';
+
+				// Set my error return args.
+				$redirect_args  = array(
+					'success'           => false,
+					'wbr-action-result' => 'failed',
+					'wbr-error-code'    => $error_code,
+				);
+
+				// And redirect.
+				Helpers\admin_page_redirect( $redirect_args, Core\REVIEWS_ANCHOR );
+			}
+
+			// Add the ID to the update.
+			$tochange[] = $single_review->product_id;
+
+			// Handle the transient purging.
+			Utilities\purge_transients( null, 'reviews' );
+			Utilities\purge_transients( Core\HOOK_PREFIX . 'single_review_' . $review_id );
+
+			// Nothing left in the loop to do.
+		}
+
+		// Run the change loop if we have items.
+		if ( ! empty( $tochange ) ) {
+
+			// Get just the individual unique IDs.
+			$update_ids = array_unique( $tochange );
+
+			// Update all my counts.
+			Utilities\update_product_review_count( $update_ids );
+		}
+
+		// Set my success args.
+		$redirect_args  = array(
+			'success'           => 1,
+			'wbr-action-result' => 'status-changed-bulk',
 		);
 
 		// And redirect.
@@ -719,7 +881,7 @@ class WooBetterReviews_ListReviews extends WP_List_Table {
 	private function table_data() {
 
 		// Get all the review data.
-		$review_objects = Queries\get_all_reviews();
+		$review_objects = Queries\get_reviews_for_admin();
 
 		// Bail with no data.
 		if ( ! $review_objects ) {
@@ -1037,6 +1199,46 @@ class WooBetterReviews_ListReviews extends WP_List_Table {
 	 */
 	public function no_items() {
 		_e( 'No reviews avaliable.', 'woo-better-reviews' );
+	}
+
+	/**
+	 * Set up the dropdown of statuses.
+	 */
+	private function set_status_change_dropdown() {
+
+		// First check for statuses.
+		$statuses   = Helpers\get_review_statuses();
+
+		// Bail without the statuses.
+		if ( empty( $statuses ) ) {
+			return;
+		}
+
+		// Set up my empty.
+		$setup  = '';
+
+		// Set my label.
+		$setup .= '<label for="wbr-change-reviews-new-status" class="screen-reader-text">' . __( 'Change Selected Reviews', 'woo-better-reviews' ) . '</label>';
+
+		// Now our select dropdown.
+		$setup .= '<select name="wbr-change-reviews-new-status" id="wbr-change-reviews-new-status">';
+
+			// Our blank value.
+			$setup .= '<option value="0">(' . __( 'Select Status', 'woo-better-reviews' ) . ')</option>';
+
+			// Now loop them.
+			foreach ( $statuses as $type => $label ) {
+				$setup .= '<option value="' . esc_attr( $type ) . '">' . esc_attr( $label ) . '</option>';
+			}
+
+		// Close out my select.
+		$setup .= '</select>';
+
+		// Add the input button.
+		$setup .= '<button type="submit" name="wbr-change-selected-reviews" class="button" value="1">' . __( 'Change Selected Reviews', 'woo-better-reviews' ) . '</button>';
+
+		// Return the setup.
+		return $setup;
 	}
 
 	/**

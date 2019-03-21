@@ -44,30 +44,32 @@ function check_constants_for_process( $include_ajax = true ) {
 }
 
 /**
- * Increment the review count by 1.
+ * Update the aggregate scoring.
  *
- * @param  integer $product_id  The product ID we are adding.
+ * @param  array $product_ids  The product IDs we are handling.
  *
  * @return void
  */
-function increment_product_review_count( $product_id = 0 ) {
+function update_product_review_count( $product_ids ) {
 
-	// Bail without a product ID.
-	if ( empty( $product_id ) ) {
+	// Bail without a product IDs.
+	if ( empty( $product_ids ) ) {
 		return;
 	}
 
-	// Get the count.
-	$current_count  = get_post_meta( $product_id, Core\META_PREFIX . 'review_count', true );
+	// Loop my IDs and update each one.
+	foreach ( (array) $product_ids as $product_id ) {
 
-	// Do the increment.
-	$update_count   = ! empty( $current_count ) ? absint( $current_count ) + 1 : 1;
+		// Fetch my approved counts.
+		$maybe_approved = Queries\get_approved_reviews_for_product( $product_id, 'counts' );
+		$approved_count = ! empty( $maybe_approved ) ? absint( $maybe_approved ) : 0;
 
-	// Update the Woo postmeta key.
-	update_post_meta( $product_id, '_wc_review_count', $update_count );
+		// Update the Woo postmeta key.
+		update_post_meta( $product_id, '_wc_review_count', $update_count );
 
-	// Update our own post meta key as well.
-	update_post_meta( $product_id, Core\META_PREFIX . 'review_count', $update_count );
+		// Update our own post meta key as well.
+		update_post_meta( $product_id, Core\META_PREFIX . 'review_count', $update_count );
+	}
 }
 
 /**
@@ -580,6 +582,7 @@ function purge_transients( $key = '', $group = '', $custom = array() ) {
 
 				// Start deleting.
 				delete_transient( Core\HOOK_PREFIX . 'all_reviews' );
+				delete_transient( Core\HOOK_PREFIX . 'admin_reviews' );
 				delete_transient( Core\HOOK_PREFIX . 'verifed_reviews' );
 				delete_transient( Core\HOOK_PREFIX . 'legacy_review_counts' );
 

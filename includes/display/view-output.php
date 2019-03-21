@@ -144,7 +144,7 @@ function display_review_template_header( $product_id = 0, $echo = true ) {
 	$product_title  = get_the_title( $product_id );
 
 	// Get the total count of reviews we have.
-	$review_count   = Queries\get_review_count_for_product( $product_id );
+	$review_count   = Helpers\get_admin_review_count( $product_id );
 
 	// Set our empty.
 	$build  = '';
@@ -244,7 +244,7 @@ function display_existing_reviews( $product_id = 0, $echo = true ) {
 
 	// Now begin to loop the reviews and do the thing.
 	foreach ( $fetch_reviews as $single_review ) {
-		// preprint( $single_review, true );
+		preprint( $single_review, true );
 
 		// Skip the non-approved ones for now.
 		if ( empty( $single_review['status'] ) || 'approved' !== sanitize_text_field( $single_review['status'] ) ) {

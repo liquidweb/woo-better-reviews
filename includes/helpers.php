@@ -59,9 +59,11 @@ function maybe_valid_table( $table_name = '' ) {
 /**
  * Set and return the array of possible review statuses.
  *
+ * @param  boolean $array_keys  Return just the array keys.
+ *
  * @return array
  */
-function get_review_statuses() {
+function get_review_statuses( $array_keys = false ) {
 
 	// Set up the possible statuses.
 	$statuses   = array(
@@ -71,8 +73,11 @@ function get_review_statuses() {
 		'hidden'   => __( 'Hidden', 'woo-better-reviews' ),
 	);
 
-	// Return via filtered.
-	return apply_filters( Core\HOOK_PREFIX . 'reviews_statuses', $statuses );
+	// Include via filtered.
+	$statuses   = apply_filters( Core\HOOK_PREFIX . 'reviews_statuses', $statuses );
+
+	// Return the array keys or the whole thing.
+	return false !== $array_keys ? array_keys( $statuses ) : $statuses;
 }
 
 /**
@@ -133,7 +138,7 @@ function maybe_search_term( $return = 'string' ) {
 /**
  * Get the attributes the product has assigned.
  *
- * @param  integer $product_id  The product ID we are checking review counts for.
+ * @param  integer $product_id  The product ID we are checking attributes for.
  *
  * @return mixed
  */
@@ -405,6 +410,10 @@ function get_admin_notice_text( $return_code = '' ) {
 
 		case 'reviews-deleted-bulk' :
 			return __( 'The selected reviews have been deleted.', 'woo-better-reviews' );
+			break;
+
+		case 'status-changed-bulk' :
+			return __( 'The selected review statuses have been updated.', 'woo-better-reviews' );
 			break;
 
 		case 'unknown' :

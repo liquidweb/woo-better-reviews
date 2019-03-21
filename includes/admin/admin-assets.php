@@ -26,11 +26,6 @@ add_action( 'admin_enqueue_scripts', __NAMESPACE__ . '\load_admin_stylesheet' );
  */
 function admin_removable_args( $args ) {
 
-	// Only filter my args on the admin.
-	if ( ! is_admin() ) {
-		return $args;
-	}
-
 	// Set an array of the args we wanna exclude.
 	$remove = array(
 		'wbr-item-type',

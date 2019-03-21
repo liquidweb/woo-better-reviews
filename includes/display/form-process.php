@@ -39,7 +39,7 @@ function process_review_submission() {
 	if ( empty( $_POST['woo-better-reviews-add-new-nonce'] ) || ! wp_verify_nonce( $_POST['woo-better-reviews-add-new-nonce'], 'woo-better-reviews-add-new-action' ) ) {
 		wp_die( __( 'Your security nonce failed.', 'woo-better-reviews' ) );
 	}
-	// preprint( $_POST, true );
+
 	// Check for a product ID first.
 	if ( empty( $_POST['woo-better-reviews-product-id'] ) ) {
 
@@ -70,7 +70,6 @@ function process_review_submission() {
 
 	// Set our submitted data as it's own variable.
 	$form_data  = $_POST['woo-better-reviews-rating'];
-	// preprint( $form_data, true );
 
 	// If we don't have the overall score, bail.
 	if ( empty( $form_data['score'] ) ) {
@@ -82,7 +81,6 @@ function process_review_submission() {
 
 	// Format my content.
 	$content_format = format_submitted_review_content( $form_data, $product_id, $author_id );
-	// preprint( $content_format, true );
 
 	// Bail without my content formatted.
 	if ( empty( $content_format ) || is_wp_error( $content_format ) ) {
@@ -96,7 +94,6 @@ function process_review_submission() {
 
 	// Attempt to insert the review content and get a review ID back.
 	$attempt_insert = Database\insert( 'content', $content_format );
-	// preprint( $attempt_insert, true );
 
 	// Bail on a failed insert.
 	if ( empty( $attempt_insert ) || is_wp_error( $attempt_insert ) ) {
@@ -113,7 +110,6 @@ function process_review_submission() {
 
 	// Format my scoring.
 	$scoring_format = format_submitted_review_scoring( $form_data, $new_review_id, $product_id, $author_id );
-	// preprint( $scoring_format ,true );
 
 	// Bail without my scoring formatted.
 	if ( empty( $scoring_format ) || is_wp_error( $scoring_format ) ) {
@@ -146,7 +142,6 @@ function process_review_submission() {
 
 	// Set up the author formatting insert.
 	$author_format  = format_submitted_review_author( $form_data, $new_review_id, $author_id );
-	// preprint( $author_format, true );
 
 	// Bail without my author formatted.
 	if ( empty( $author_format ) || is_wp_error( $author_format ) ) {
@@ -187,9 +182,6 @@ function process_review_submission() {
 		Utilities\purge_transients( null, 'reviews' );
 		Utilities\purge_transients( null, 'products', array( 'ids' => (array) $product_id ) );
 		Utilities\purge_transients( null, 'authors', array( 'ids' => (array) $product_id ) );
-
-		// Increment the count of reviews we have.
-		Utilities\increment_product_review_count( $product_id );
 
 		// The review has been successfully entered, so redirect.
 		redirect_front_submit_result( $base_redirect, '', true, array( 'wbr-new-review' => $scoring_merge ) );
@@ -279,7 +271,7 @@ function format_submitted_review_content( $form_data = array(), $product_id = 0,
 		'review_slug'        => sanitize_title_with_dashes( $review_title, null, 'save' ),
 		'review_summary'     => esc_textarea( $review_summary ),
 		'review_content'     => wp_kses_post( $form_data['review-content'] ),
-		'review_status'      => 'pending', // 'approved',
+		'review_status'      => apply_filters( Core\HOOK_PREFIX . 'initial_review_status', 'pending' ), // 'approved',
 		'is_verified'        => 0,
 		'rating_total_score' => '',
 		'rating_attributes'  => '',
