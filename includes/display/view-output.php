@@ -265,6 +265,10 @@ function display_review_template_sorting( $product_id = 0, $echo = true ) {
 			// Close up the list.
 			$build .= '</ul>';
 
+			// Include some hidden fields for this.
+			$build .= '<input type="hidden" name="wbr-single-sort-product-id" value="' . absint( $product_id ) . '">';
+			$build .= wp_nonce_field( 'wbr_sort_reviews_action', 'wbr_sort_reviews_nonce', true, false );
+
 		// Close out the form.
 		$build .= '</form>';
 
@@ -313,15 +317,21 @@ function display_existing_reviews( $product_id = 0, $echo = true ) {
 		return;
 	}
 
+	// Check for a sorting request.
+	$filtered_ids   = Helpers\maybe_sorted_reviews();
+	// preprint( $sorting_vars, true );
+
 	// Fetch any existing reviews we may have.
-	$fetch_reviews  = Queries\get_reviews_for_product( $product_id, 'display' );
-	// preprint( $fetch_reviews, true );
+	$fetch_reviews  = false !== $filtered_ids ? Queries\get_review_batch( $filtered_ids ) : Queries\get_reviews_for_product( $product_id, 'display' );
 
 	// Set my content.
 	if ( empty( $fetch_reviews ) ) {
 
+		// Determine the text based on whether we have a filter sort request.
+		$no_msg = false !== $filtered_ids ? __( 'No reviews matched your criteria. Please try again.', 'woo-better-reviews' ) : __( 'There are no reviews yet. Be the first!', 'woo-better-reviews' );
+
 		// Set our single line return.
-		$notext = '<p class="woocommerce-noreviews woo-better-reviews-no-reviews">' . esc_html__( 'There are no reviews yet. Be the first!', 'woo-better-reviews' ) . '</p>';
+		$notext = '<p class="woocommerce-noreviews woo-better-reviews-no-reviews">' . esc_html( $no_msg ) . '</p>';
 
 		// Return if requested.
 		if ( empty( $echo ) ) {

@@ -45,11 +45,13 @@ function install_table() {
 		CREATE TABLE {$table_name} (
 			ameta_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
 			author_id BIGINT UNSIGNED NOT NULL DEFAULT 0,
+			product_id BIGINT UNSIGNED NOT NULL DEFAULT 0,
 			review_id BIGINT UNSIGNED NOT NULL DEFAULT 0,
 			charstcs_id BIGINT UNSIGNED NOT NULL DEFAULT 0,
 			charstcs_value varchar(200) NOT NULL DEFAULT '',
 		PRIMARY KEY  (ameta_id),
 		KEY `author_id` (`author_id`),
+		KEY `product_id` (`author_id`),
 		KEY `review_id` (`review_id`),
 		KEY `charstcs_id` (`charstcs_id`)
 		) $char_coll;
@@ -74,6 +76,7 @@ function required_args( $return_type = '' ) {
 	// Set up the basic array.
 	$insert_setup   = array(
 		'author_id'      => '%d',
+		'product_id'     => '%d',
 		'review_id'      => '%d',
 		'charstcs_id'    => '%d',
 		'charstcs_value' => '%s',

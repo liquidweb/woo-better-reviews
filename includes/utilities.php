@@ -86,7 +86,7 @@ function calculate_product_review_scoring( $product_id = 0 ) {
 		return;
 	}
 
-
+	// @@todo scoring
 }
 
 /**

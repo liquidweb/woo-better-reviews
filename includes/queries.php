@@ -946,6 +946,90 @@ function get_single_review( $review_id = 0, $return_type = 'objects', $purge = f
 }
 
 /**
+ * Check for reviews that match search criteria.
+ *
+ * @param  integer $charstcs_id  Which author ID we are looking up.
+ * @param  string  $return_type  What type of return we want. Accepts "counts", "objects", "display", or single fields.
+ * @param  boolean $purge        Optional to purge the cache'd version before looking up.
+ *
+ * @return mixed
+ */
+function get_reviews_for_sorting( $product_id = 0, $charstcs_id = 0, $charstcs_value = '', $return_type = 'objects', $purge = false ) {
+
+	// Bail without a product ID.
+	if ( empty( $product_id ) ) {
+		return new WP_Error( 'missing_product_id', __( 'A product ID is required.', 'woo-better-reviews' ) );
+	}
+
+	// Bail without a characteristic ID.
+	if ( empty( $charstcs_id ) ) {
+		return new WP_Error( 'missing_charstcs_id', __( 'An characteristic ID is required.', 'woo-better-reviews' ) );
+	}
+
+	// Bail without a characteristic value.
+	if ( empty( $charstcs_value ) ) {
+		return new WP_Error( 'missing_charstcs_value', __( 'An characteristic value is required.', 'woo-better-reviews' ) );
+	}
+
+	// Call the global database.
+	global $wpdb;
+
+	// Set our table name.
+	$table_name = $wpdb->prefix . Core\TABLE_PREFIX . 'authormeta';
+
+	// Set up our query.
+	$query_args = $wpdb->prepare("
+		SELECT   review_id
+		FROM     $table_name
+		WHERE    product_id = '%d'
+		AND      charstcs_id = '%d'
+		AND      charstcs_value = '%s'
+	", absint( $product_id ), absint( $charstcs_id ), esc_attr( $charstcs_value ) );
+
+	// Process the query.
+	$query_run  = $wpdb->get_results( $query_args );
+
+	// Bail without any results.
+	if ( empty( $query_run ) ) {
+		return false;
+	}
+
+	// Set my empty.
+	$query_list = wp_list_pluck( $query_run, 'review_id', null );
+
+	// Bail without any reviews.
+	return ! empty( $query_list ) ? $query_list : false;
+}
+
+/**
+ * Get a batch of reviews
+ *
+ * @param  array   $review_ids   The IDs we want.
+ * @param  string  $return_type  What type of return we want. Accepts "counts", "objects", "display", or single fields.
+ * @param  boolean $purge        Optional to purge the cache'd version before looking up.
+ *
+ * @return mixed
+ */
+function get_review_batch( $review_ids = array(), $return_type = 'objects', $purge = false ) {
+
+	// Bail without review IDs.
+	if ( empty( $review_ids ) ) {
+		return new WP_Error( 'missing_review_ids', __( 'Review IDs are required for batch.', 'woo-better-reviews' ) );
+	}
+
+	// Set an empty return.
+	$review_list    = array();
+
+	// Now loop and fetch.
+	foreach ( $review_ids as $review_id ) {
+		$review_list[ $review_id ] = get_single_review( $review_id );
+	}
+
+	// Return my list with formatting.
+	return merge_review_object_taxonomies( $review_list );
+}
+
+/**
  * Get just the review count for a given product ID.
  *
  * @param  integer $product_id  Which product ID we are looking up.

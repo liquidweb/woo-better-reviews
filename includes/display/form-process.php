@@ -141,7 +141,7 @@ function process_review_submission() {
 	}
 
 	// Set up the author formatting insert.
-	$author_format  = format_submitted_review_author( $form_data, $new_review_id, $author_id );
+	$author_format  = format_submitted_review_author( $form_data, $new_review_id, $product_id, $author_id );
 
 	// Bail without my author formatted.
 	if ( empty( $author_format ) || is_wp_error( $author_format ) ) {
@@ -355,7 +355,7 @@ function format_submitted_review_scoring( $form_data = array(), $review_id = 0, 
  *
  * @return array
  */
-function format_submitted_review_author( $form_data = array(), $review_id = 0, $author_id = 0 ) {
+function format_submitted_review_author( $form_data = array(), $review_id = 0, $product_id = 0, $author_id = 0 ) {
 
 	// Bail without the review ID.
 	if ( empty( $review_id ) ) {
@@ -363,7 +363,7 @@ function format_submitted_review_author( $form_data = array(), $review_id = 0, $
 	}
 
 	// Bail without the data needed.
-	if ( empty( $form_data ) || empty( $form_data['author-charstcs'] ) ) {
+	if ( empty( $form_data ) || empty( $product_id ) || empty( $form_data['author-charstcs'] ) ) {
 		return new WP_Error( 'missing-formatting-data', __( 'The required data to format.', 'woo-better-reviews' ) );
 	}
 
@@ -376,6 +376,7 @@ function format_submitted_review_author( $form_data = array(), $review_id = 0, $
 		// Add to the array using this attribute.
 		$insert_setup[] = array(
 			'author_id'      => $author_id,
+			'product_id'     => $product_id,
 			'review_id'      => $review_id,
 			'charstcs_id'    => $charstcs_id,
 			'charstcs_value' => $charstcs_value,

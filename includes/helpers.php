@@ -57,30 +57,6 @@ function maybe_valid_table( $table_name = '' ) {
 }
 
 /**
- * Set and return the array of possible review statuses.
- *
- * @param  boolean $array_keys  Return just the array keys.
- *
- * @return array
- */
-function get_review_statuses( $array_keys = false ) {
-
-	// Set up the possible statuses.
-	$statuses   = array(
-		'approved' => __( 'Approved', 'woo-better-reviews' ),
-		'pending'  => __( 'Pending Approval', 'woo-better-reviews' ),
-		'rejected' => __( 'Rejected', 'woo-better-reviews' ),
-		'hidden'   => __( 'Hidden', 'woo-better-reviews' ),
-	);
-
-	// Include via filtered.
-	$statuses   = apply_filters( Core\HOOK_PREFIX . 'reviews_statuses', $statuses );
-
-	// Return the array keys or the whole thing.
-	return false !== $array_keys ? array_keys( $statuses ) : $statuses;
-}
-
-/**
  * Check to see if reviews are enabled.
  *
  * @return boolean
@@ -133,6 +109,83 @@ function maybe_search_term( $return = 'string' ) {
 
 		// End all case breaks.
 	}
+}
+
+/**
+ * Determine if a person is attempting to sort.
+ *
+ * @return mixed
+ */
+function maybe_sorted_reviews() {
+
+	// Check for the sort trigger.
+	if ( empty( $_POST['wbr-single-sort-submit'] ) ) {
+		return false;
+	}
+
+	// Handle the nonce check.
+	if ( empty( $_POST['wbr_sort_reviews_nonce'] ) || ! wp_verify_nonce( $_POST['wbr_sort_reviews_nonce'], 'wbr_sort_reviews_action' ) ) {
+		wp_die( __( 'Your security nonce failed.', 'woo-better-reviews' ) );
+	}
+
+	// Check for the sorting flags.
+	if ( empty( $_POST['woo-better-reviews-sorting']['charstcs'] ) ) {
+		return false;
+	}
+
+	// Check for a product ID.
+	if ( empty( $_POST['wbr-single-sort-product-id'] ) ) {
+		return false;
+	}
+
+	// Set my product ID.
+	$product_id = absint( $_POST['wbr-single-sort-product-id'] );
+
+	// Set an empty for our return.
+	$requested_reviews  = array();
+
+	// Set an array of the non-empty.
+	$passed_charstcs    = array_map( 'sanitize_text_field', $_POST['woo-better-reviews-sorting']['charstcs'] );
+
+	// Now filter them.
+	$sorting_charstcs   = array_filter( $passed_charstcs );
+
+	// Now loop and fetch the review IDs.
+	foreach ( $sorting_charstcs as $charstcs_id => $charstcs_value ) {
+
+		// Attempt reviews.
+		$maybe_found_items = Queries\get_reviews_for_sorting( $product_id, $charstcs_id, $charstcs_value );
+
+		// Get the related review IDs.
+		$requested_reviews = ! empty( $maybe_found_items ) ? wp_parse_args( $maybe_found_items, $requested_reviews ) : $requested_reviews;
+	}
+
+	// Return the IDs we have.
+	return ! empty( $requested_reviews ) ? $requested_reviews : false;
+}
+
+/**
+ * Set and return the array of possible review statuses.
+ *
+ * @param  boolean $array_keys  Return just the array keys.
+ *
+ * @return array
+ */
+function get_review_statuses( $array_keys = false ) {
+
+	// Set up the possible statuses.
+	$statuses   = array(
+		'approved' => __( 'Approved', 'woo-better-reviews' ),
+		'pending'  => __( 'Pending Approval', 'woo-better-reviews' ),
+		'rejected' => __( 'Rejected', 'woo-better-reviews' ),
+		'hidden'   => __( 'Hidden', 'woo-better-reviews' ),
+	);
+
+	// Include via filtered.
+	$statuses   = apply_filters( Core\HOOK_PREFIX . 'reviews_statuses', $statuses );
+
+	// Return the array keys or the whole thing.
+	return false !== $array_keys ? array_keys( $statuses ) : $statuses;
 }
 
 /**
