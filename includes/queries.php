@@ -1430,6 +1430,15 @@ function get_all_charstcs( $return_type = 'objects', $purge = false ) {
 			return wp_list_pluck( $cached_dataset, 'charstcs_desc', 'charstcs_id' );
 			break;
 
+		case 'values' :
+
+			// Parse out the values.
+			$plucked_values = wp_list_pluck( $cached_dataset, 'charstcs_values', 'charstcs_id' );
+
+			// Set and return my query list.
+			return array_map( 'maybe_unserialize', $plucked_values );
+			break;
+
 		// No more case breaks, no more return types.
 	}
 

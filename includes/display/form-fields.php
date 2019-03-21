@@ -488,3 +488,53 @@ function get_review_form_button_field( $field_args = array(), $field_key = '', $
 	// Return the field, filtered.
 	return apply_filters( Core\HOOK_PREFIX . 'review_form_button_field', $setup, $field_args, $field_key, $field_id, $field_name );
 }
+
+/**
+ * Build and return a select dropdown field.
+ *
+ * @param  array  $field_args  The field args array.
+ * @param  string $field_key   The specific key used in the field.
+ * @param  string $field_name  Optional field name, otherwise one is generated from the key.
+ *
+ * @return HTML
+ */
+function get_review_sorting_dropdown_field( $field_args = array(), $field_key = '', $field_name = '' ) {
+	// preprint( $field_args, true );
+
+	// Bail if we don't have the args, options, or the key.
+	if ( empty( $field_args ) || empty( $field_args['options'] ) || empty( $field_key ) ) {
+		return;
+	}
+
+	// Set my field class, name, and ID.
+	$set_field_class    = 'woo-better-reviews-sorting-select-field';
+	$set_field_class   .= ! empty( $field_args['class'] ) ? ' ' . sanitize_html_class( $field_args['class'] ) : '';
+
+	$set_field_id       = 'woo-better-reviews-sorting-charstcs-' . sanitize_html_class( $field_key );
+	$set_field_name     = ! empty( $field_name ) ? $field_name : 'woo-better-reviews-sorting[charstcs][' . sanitize_html_class( $field_key ) . ']';
+
+	// Check for the empty to be included in the data array.
+	$set_select_options = array( '0' => __( '(Select)', 'woo-better-reviews' ) ) + $field_args['options'];
+
+	// Set my empty.
+	$field  = '';
+
+	// Check for the label first.
+	if ( ! empty( $field_args['label'] ) ) {
+		$field .= '<label for="' . esc_attr( $set_field_id ) . '" class="woo-better-reviews-sorting-field-label">' . esc_html( $field_args['label'] ) . '</label>';
+	}
+
+	// Now set the select tag.
+	$field .= '<select id="' . esc_attr( $set_field_id ) . '" name="' . esc_attr( $set_field_name ) . '" class="' . esc_attr( $set_field_class ) . '">';
+
+	// Loop the options.
+	foreach ( $set_select_options as $option_value => $option_label ) {
+		$field .= '<option value="' . esc_attr( $option_value ) . '">' . esc_html( $option_label ) . '</option>';
+	}
+
+	// Close the select tag.
+	$field .= '</select>';
+
+	// Return the field, filtered.
+	return apply_filters( Core\HOOK_PREFIX . 'review_sorting_dropdown_field', $field, $field_args, $field_key, $field_name );
+}

@@ -24,6 +24,8 @@ if ( ! comments_open() ) {
 
 		<?php \LiquidWeb\WooBetterReviews\Display\ViewOutput\display_review_template_header( $product->get_id() ); ?>
 
+		<?php \LiquidWeb\WooBetterReviews\Display\ViewOutput\display_review_template_sorting( $product->get_id() ); ?>
+
 		<?php \LiquidWeb\WooBetterReviews\Display\ViewOutput\display_existing_reviews( $product->get_id() ); ?>
 
 	</div>

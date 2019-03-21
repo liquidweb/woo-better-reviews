@@ -519,7 +519,7 @@ function set_single_review_div_class( $review = array(), $index = 0 ) {
  *
  * @return HTML
  */
-function set_review_form_editor( $editor_id = '', $editor_name = '', $editor_class = '', $editor_content, $custom_args = array() ) {
+function set_review_form_editor( $editor_id = '', $editor_name = '', $editor_class = '', $editor_content = '', $custom_args = array() ) {
 
 	// Bail if we're missing anything.
 	if ( empty( $editor_id ) || empty( $editor_name ) ) {

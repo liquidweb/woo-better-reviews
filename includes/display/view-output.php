@@ -13,6 +13,7 @@ use LiquidWeb\WooBetterReviews as Core;
 use LiquidWeb\WooBetterReviews\Helpers as Helpers;
 use LiquidWeb\WooBetterReviews\Utilities as Utilities;
 use LiquidWeb\WooBetterReviews\Queries as Queries;
+use LiquidWeb\WooBetterReviews\Display\FormFields as FormFields;
 use LiquidWeb\WooBetterReviews\Display\LayoutForm as LayoutForm;
 use LiquidWeb\WooBetterReviews\Display\LayoutReviews as LayoutReviews;
 
@@ -165,6 +166,107 @@ function display_review_template_header( $product_id = 0, $echo = true ) {
 
 		// Close up the H2 tag.
 		$build .= '</h2>';
+
+	// Close up the div tag.
+	$build .= '</div>';
+
+	// Return if requested.
+	if ( empty( $echo ) ) {
+		return $build;
+	}
+
+	// Just echo it.
+	echo $build;
+}
+
+/**
+ * Build and display the sorting options.
+ *
+ * @param  integer $product_id  The product ID we are leaving a review for.
+ * @param  boolean $echo        Whether to echo it out or return it.
+ *
+ * @return HTML
+ */
+function display_review_template_sorting( $product_id = 0, $echo = true ) {
+
+	// Bail without a product ID.
+	if ( empty( $product_id ) ) {
+		return;
+	}
+
+	// Check for an override.
+	$maybe_override = apply_filters( Core\HOOK_PREFIX . 'display_review_template_sorting_override', null, $product_id );
+
+	// Return the override if we have it.
+	if ( ! empty( $maybe_override ) ) {
+
+		// Return if requested.
+		if ( empty( $echo ) ) {
+			return $maybe_override;
+		}
+
+		// Just echo it.
+		echo $maybe_override;
+
+		// And be done, since we skipped it.
+		return;
+	}
+
+	// Get all the characteristics we have.
+	$all_charstcs   = Queries\get_all_charstcs( 'display' );
+	// preprint( $all_charstcs, true );
+
+	// Show nothing if we have no characteristics.
+	if ( empty( $all_charstcs ) ) {
+		return;
+	}
+
+	// Set my action link.
+	$action_link    = get_permalink( $product_id );
+
+	// Set our empty.
+	$build  = '';
+
+	// Set the div wrapper.
+	$build .= '<div class="woo-better-reviews-list-sorting-wrapper">';
+
+		// Set our form wrapper.
+		$build .= '<form class="woo-better-reviews-sorting-container" name="woo-better-reviews-sorting-form" action="' . esc_url( $action_link ) . '" method="post">';
+
+			// Set these in an unordered list.
+			$build .= '<ul class="woo-better-reviews-list-group">';
+
+				// Set the title / intro piece.
+				$build .= '<li class="woo-better-reviews-list-single woo-better-reviews-list-single-intro">' . __( 'Sort By:', 'woo-better-reviews' ) . '</li>';
+
+				// Now loop each characteristic and make a dropdown.
+				foreach ( $all_charstcs as $single_charstc ) {
+
+					// Set my field name.
+					$field_name = 'woo-better-reviews-sorting[charstcs][' . absint( $single_charstc['id'] ) . ']';
+
+					// Set up my field args.
+					$field_args = array(
+						'label'   => $single_charstc['name'],
+						'options' => $single_charstc['values'],
+					);
+
+					// And set the markup.
+					$build .= '<li class="woo-better-reviews-list-single woo-better-reviews-list-single-field">';
+					$build .= FormFields\get_review_sorting_dropdown_field( $field_args, $single_charstc['slug'], $field_name );
+					$build .= '</li>';
+				}
+
+				// Set the submit piece.
+				$build .= '<li class="woo-better-reviews-list-single woo-better-reviews-list-single-submit">';
+					$build .= '<button name="wbr-single-sort-submit" type="submit" class="button" value="1">' . __( 'Filter', 'woo-better-reviews' ) . '</button>';
+				$build .= '</li>';
+
+			// Close up the list.
+			$build .= '</ul>';
+
+		// Close out the form.
+		$build .= '</form>';
 
 	// Close up the div tag.
 	$build .= '</div>';
