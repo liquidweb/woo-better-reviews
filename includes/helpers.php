@@ -167,7 +167,7 @@ function maybe_sorted_reviews() {
 		return 'none';
 	}
 
-	// Now pull my matching reviews, if we have any.
+	// Now pull my matching reviews, if we have more than one array. Otherwise, send the first.
 	$matching_reviews   = isset( $requested_ids[1] ) ? call_user_func_array( 'array_intersect', $requested_ids ) : $requested_ids[0];
 
 	// Return the IDs we have.
