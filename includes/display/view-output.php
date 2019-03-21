@@ -247,6 +247,8 @@ function display_review_template_sorting( $product_id = 0, $echo = true ) {
 
 					// Set up my field args.
 					$field_args = array(
+						'id'      => $single_charstc['id'],
+						'slug'    => $single_charstc['slug'],
 						'label'   => $single_charstc['name'],
 						'options' => $single_charstc['values'],
 					);
@@ -319,7 +321,6 @@ function display_existing_reviews( $product_id = 0, $echo = true ) {
 
 	// Check for a sorting request.
 	$filtered_ids   = Helpers\maybe_sorted_reviews();
-	// preprint( $sorting_vars, true );
 
 	// Fetch any existing reviews we may have.
 	$fetch_reviews  = false !== $filtered_ids ? Queries\get_review_batch( $filtered_ids ) : Queries\get_reviews_for_product( $product_id, 'display' );

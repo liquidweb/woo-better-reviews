@@ -138,11 +138,8 @@ function maybe_sorted_reviews() {
 		return false;
 	}
 
-	// Set my product ID.
-	$product_id = absint( $_POST['wbr-single-sort-product-id'] );
-
 	// Set an empty for our return.
-	$requested_reviews  = array();
+	$requested_ids      = array();
 
 	// Set an array of the non-empty.
 	$passed_charstcs    = array_map( 'sanitize_text_field', $_POST['woo-better-reviews-sorting']['charstcs'] );
@@ -154,14 +151,27 @@ function maybe_sorted_reviews() {
 	foreach ( $sorting_charstcs as $charstcs_id => $charstcs_value ) {
 
 		// Attempt reviews.
-		$maybe_found_items = Queries\get_reviews_for_sorting( $product_id, $charstcs_id, $charstcs_value );
+		$maybe_found_items = Queries\get_reviews_for_sorting( absint( $_POST['wbr-single-sort-product-id'] ), $charstcs_id, $charstcs_value );
+
+		// If no items are found, just bail because we don't have a match.
+		if ( empty( $maybe_found_items ) || is_wp_error( $maybe_found_items ) ) {
+			return 'none';
+		}
 
 		// Get the related review IDs.
-		$requested_reviews = ! empty( $maybe_found_items ) ? wp_parse_args( $maybe_found_items, $requested_reviews ) : $requested_reviews;
+		$requested_ids[] = $maybe_found_items;
 	}
 
+	// Confirm we have IDs before going forward.
+	if ( empty( $requested_ids ) ) {
+		return 'none';
+	}
+
+	// Now pull my matching reviews, if we have any.
+	$matching_reviews   = call_user_func_array( 'array_intersect', $requested_ids );
+
 	// Return the IDs we have.
-	return ! empty( $requested_reviews ) ? $requested_reviews : false;
+	return ! empty( $matching_reviews ) ? $matching_reviews : 'none';
 }
 
 /**

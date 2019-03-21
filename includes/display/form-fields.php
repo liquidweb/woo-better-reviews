@@ -516,6 +516,10 @@ function get_review_sorting_dropdown_field( $field_args = array(), $field_key = 
 	// Check for the empty to be included in the data array.
 	$set_select_options = array( '0' => __( '(Select)', 'woo-better-reviews' ) ) + $field_args['options'];
 
+	// Attempt to check for a POSTed value.
+	$set_posted_char_id = ! empty( $field_args['id'] ) ? $field_args['id'] : 0;
+	$set_posted_value   = ! empty( $_POST['woo-better-reviews-sorting']['charstcs'][ $set_posted_char_id ] ) ? $_POST['woo-better-reviews-sorting']['charstcs'][ $set_posted_char_id ] : '';
+
 	// Set my empty.
 	$field  = '';
 
@@ -529,7 +533,7 @@ function get_review_sorting_dropdown_field( $field_args = array(), $field_key = 
 
 	// Loop the options.
 	foreach ( $set_select_options as $option_value => $option_label ) {
-		$field .= '<option value="' . esc_attr( $option_value ) . '">' . esc_html( $option_label ) . '</option>';
+		$field .= '<option value="' . esc_attr( $option_value ) . '" ' . selected(  $set_posted_value, $option_value, false ) . '>' . esc_html( $option_label ) . '</option>';
 	}
 
 	// Close the select tag.

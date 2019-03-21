@@ -1012,6 +1012,11 @@ function get_reviews_for_sorting( $product_id = 0, $charstcs_id = 0, $charstcs_v
  */
 function get_review_batch( $review_ids = array(), $return_type = 'objects', $purge = false ) {
 
+	// If we have a 'none', return false right away.
+	if ( 'none' === sanitize_text_field( $review_ids ) ) {
+		return false;
+	}
+
 	// Bail without review IDs.
 	if ( empty( $review_ids ) ) {
 		return new WP_Error( 'missing_review_ids', __( 'Review IDs are required for batch.', 'woo-better-reviews' ) );
