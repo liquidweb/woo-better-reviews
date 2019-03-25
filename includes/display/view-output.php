@@ -136,7 +136,7 @@ function display_review_template_sorting( $product_id = 0, $echo = true ) {
 	}
 
 	// Set my action link.
-	$action_link    = get_permalink( $product_id );
+	$action_link    = Helpers\get_review_action_link( $product_id, 'tab-reviews' );
 
 	// Set our empty.
 	$build  = '';
@@ -353,7 +353,7 @@ function display_new_review_form( $product_id = 0, $echo = true ) {
 	}
 
 	// Set my action link.
-	$action_link    = get_permalink( $product_id );
+	$action_link    = Helpers\get_review_action_link( $product_id );
 
 	// Set our empty.
 	$build  = '';

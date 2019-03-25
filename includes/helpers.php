@@ -220,6 +220,31 @@ function get_selected_product_attributes( $product_id = 0 ) {
 }
 
 /**
+ * Construct and return the link for a form in a review.
+ *
+ * @param  integer $product_id    The product ID being viewed.
+ * @param  string  $include_hash  Whether to append a hash to the URL.
+ *
+ * @return string
+ */
+function get_review_action_link( $product_id = 0, $include_hash = '' ) {
+
+	// Bail without the product ID.
+	if ( empty( $product_id ) ) {
+		return false;
+	}
+
+	// Get my permalink from the product ID.
+	$permalink  = get_permalink( $product_id );
+
+	// Remove any trailing slash.
+	$link_setup = trailingslashit( $permalink );
+
+	// Now return the link, with or with a hash.
+	return ! empty( $include_hash ) ? $link_setup . '#' . esc_attr( $include_hash ) : $link_setup;
+}
+
+/**
  * Get the attributes to display on a form.
  *
  * @param  integer $product_id  The product ID being viewed.

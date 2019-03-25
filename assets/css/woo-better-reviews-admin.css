@@ -37,6 +37,10 @@ form.woo-better-reviews-admin-edit-single-item-form {
   line-height: 1; }
   .woo-better-reviews-admin-table-review-score .woo-better-reviews-list-total-score .woo-better-reviews-single-star {
     line-height: 1; }
+    .woo-better-reviews-admin-table-review-score .woo-better-reviews-list-total-score .woo-better-reviews-single-star.woo-better-reviews-single-star-full {
+      color: #ffd700; }
+    .woo-better-reviews-admin-table-review-score .woo-better-reviews-list-total-score .woo-better-reviews-single-star.woo-better-reviews-single-star-empty {
+      color: #ccc; }
 
 .woo-better-reviews-admin-table-display.woo-better-reviews-admin-table-review-product .woo-better-reviews-admin-table-product-name {
   margin-right: 5px; }

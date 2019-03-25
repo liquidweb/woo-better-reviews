@@ -14,9 +14,13 @@
 
 			line-height: 1;
 
-			&.woo-better-reviews-single-star-full {}
+			&.woo-better-reviews-single-star-full {
+				color: #ffd700;
+			}
 
-			&.woo-better-reviews-single-star-empty {}
+			&.woo-better-reviews-single-star-empty {
+				color: #ccc;
+			}
 		}
 
 	}
