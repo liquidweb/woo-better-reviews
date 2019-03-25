@@ -26,7 +26,17 @@ form.woo-better-reviews-admin-edit-single-item-form {
 
 .column-wbr-count .wbr-review-col-count {
   padding: 1px 3px;
-  font-size: 16px; }
+  font-size: 14px; }
+
+.woo-better-reviews-admin-table-review-score .woo-better-reviews-list-total-score {
+  margin: 0;
+  display: inline-block;
+  vertical-align: middle;
+  width: auto;
+  font-size: 20px;
+  line-height: 1; }
+  .woo-better-reviews-admin-table-review-score .woo-better-reviews-list-total-score .woo-better-reviews-single-star {
+    line-height: 1; }
 
 .woo-better-reviews-admin-table-display.woo-better-reviews-admin-table-review-product .woo-better-reviews-admin-table-product-name {
   margin-right: 5px; }

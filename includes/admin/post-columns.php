@@ -87,7 +87,7 @@ function load_product_column_data( $column, $post_id ) {
 			$maybe_display  = ! empty( $maybe_average ) ? $maybe_average : '<em>' . __( 'none','woo-better-reviews' ) . '</em>';
 
 			// Show it.
-			echo '<span class="wbr-review-col-average">' . $maybe_display . '</span>';
+			echo '<span class="wbr-review-col-average woo-better-reviews-admin-table-display woo-better-reviews-admin-table-review-score">' . $maybe_display . '</span>';
 
 			// And be done.
 			break;
