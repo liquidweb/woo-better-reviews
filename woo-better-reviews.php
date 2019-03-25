@@ -107,4 +107,4 @@ require_once __DIR__ . '/includes/deactivate.php';
 require_once __DIR__ . '/includes/uninstall.php';
 
 // And my testing.
-require_once __DIR__ . '/includes/testing.php';
+// require_once __DIR__ . '/includes/testing.php';

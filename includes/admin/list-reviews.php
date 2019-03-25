@@ -106,6 +106,7 @@ class WooBetterReviews_ListReviews extends WP_List_Table {
 			'review_title'   => __( 'Title', 'woo-better-reviews' ),
 			'review_product' => __( 'Product', 'woo-better-reviews' ),
 			'review_date'    => __( 'Date', 'woo-better-reviews' ),
+			'review_score'   => __( 'Rating', 'woo-better-reviews' ),
 			'review_author'  => __( 'Author', 'woo-better-reviews' ),
 			'review_status'  => __( 'Status', 'woo-better-reviews' ),
 		);
@@ -432,6 +433,7 @@ class WooBetterReviews_ListReviews extends WP_List_Table {
 			'review_title'   => array( 'review_title', false ),
 			'review_product' => array( 'review_product', false ),
 			'review_date'    => array( 'review_date', true ),
+			'review_score'   => array( 'review_score', true ),
 			'review_status'  => array( 'review_status', true ),
 		);
 
@@ -799,6 +801,27 @@ class WooBetterReviews_ListReviews extends WP_List_Table {
 	}
 
 	/**
+	 * The review score column.
+	 *
+	 * @param  array  $item  The item from the data array.
+	 *
+	 * @return string
+	 */
+	protected function column_review_score( $item ) {
+
+		// Build my markup.
+		$setup  = '';
+
+		// Wrap the span and do the stars.
+		$setup .= '<span class="woo-better-reviews-admin-table-display woo-better-reviews-admin-table-review-score">';
+			$setup .= Helpers\get_average_scoring_display( $item['product_id'], false );
+		$setup .= '</span>';
+
+		// Return my formatted product name.
+		return apply_filters( Core\HOOK_PREFIX . 'review_table_column_review_score', $setup, $item );
+	}
+
+	/**
 	 * The review author column.
 	 *
 	 * @param  array  $item  The item from the data array.
@@ -907,12 +930,15 @@ class WooBetterReviews_ListReviews extends WP_List_Table {
 		// Now loop each customer info.
 		foreach ( $review_objects as $index => $review_object ) {
 
+			// Set my product ID.
+			$product_id = absint( $review_object->product_id );
+
 			// Set up some custom args to include.
 			$custom = array(
 				'id'             => absint( $review_object->review_id ),
 				'review_stamp'   => strtotime( $review_object->review_date ),
-				'review_product' => get_post_field( 'post_name', absint( $review_object->product_id ), 'raw' ),
-				'product_data'   => Helpers\get_admin_product_data( absint( $review_object->product_id ) ),
+				'review_product' => get_post_field( 'post_name', $product_id, 'raw' ),
+				'product_data'   => Helpers\get_admin_product_data( $product_id ),
 			);
 
 			// Set the base array of the data we want.
@@ -1039,6 +1065,9 @@ class WooBetterReviews_ListReviews extends WP_List_Table {
 			case 'review_author' :
 			case 'review_status' :
 				return ! empty( $dataset[ $column_name ] ) ? $dataset[ $column_name ] : '';
+
+			case 'review_score' :
+				return ! empty( $dataset[ 'rating_total_score' ] ) ? $dataset[ 'rating_total_score' ] : '';
 
 			default :
 				return apply_filters( Core\HOOK_PREFIX . 'review_table_column_default', '', $dataset, $column_name );

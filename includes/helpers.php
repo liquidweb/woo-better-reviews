@@ -286,11 +286,12 @@ function get_admin_review_count( $product_id = 0, $set_zero = true ) {
 /**
  * Get the review score from post meta.
  *
- * @param  integer $product_id  The product ID we are checking review counts for.
+ * @param  integer $product_id   The product ID we are checking review counts for.
+ * @param  boolean $include_div  Wrap the div on it (or not).
  *
  * @return integer
  */
-function get_average_scoring_display( $product_id = 0 ) {
+function get_average_scoring_display( $product_id = 0, $include_div = true ) {
 
 	// Bail without a product ID.
 	if ( empty( $product_id ) ) {
@@ -316,7 +317,7 @@ function get_average_scoring_display( $product_id = 0 ) {
 	$setup  = '';
 
 	// Wrap the whole thing in a div.
-	$setup .= '<div class="woo-better-reviews-list-title-score-wrapper">';
+	$setup .= false !== $include_div ? '<div class="woo-better-reviews-list-title-score-wrapper">' : '';
 
 		// Wrap it in a span.
 		$setup  .= '<span class="woo-better-reviews-list-total-score" aria-label="' . esc_attr( $aria_label ) . '">';
@@ -333,7 +334,7 @@ function get_average_scoring_display( $product_id = 0 ) {
 		$setup  .= '</span>';
 
 	// Close the div.
-	$setup  .= '</div>';
+	$setup .= false !== $include_div ? '</div>' : '';
 
 	// Return the setup.
 	return $setup;

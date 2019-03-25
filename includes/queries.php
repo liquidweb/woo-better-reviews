@@ -1083,7 +1083,7 @@ function get_ratings_for_review_attribute( $review_id = 0, $attribute_id = 0, $r
 
 	// Process the query.
 	$query_run  = $wpdb->get_row( $query_args );
-	preprint( $query_run, true );
+
 	// Bail without any results.
 	if ( empty( $query_run ) ) {
 		return false;

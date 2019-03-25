@@ -37,11 +37,14 @@ function modify_product_sort_query( $query ) {
 		return;
 	}
 
-	// If we have our orderby key, modify the query.
-	if ( 'review_count' === $query->get( 'orderby' ) ) {
+	// If we have one of our orderby keys, modify the query.
+	if ( ! empty( $query->get( 'orderby' ) ) && in_array( $query->get( 'orderby' ), array( 'review_count', 'average_rating' ) ) ) {
+
+		// Determine the query key.
+		$query_key  = esc_attr( $query->get( 'orderby' ) );
 
 		// Set the key itself, enforce the type, and the number key.
-		$query->set( 'meta_key', Core\META_PREFIX . 'review_count' );
+		$query->set( 'meta_key', $query_key );
 		$query->set( 'meta_type', 'NUMERIC' );
 		$query->set( 'orderby', 'meta_value_num' );
 	}
@@ -74,6 +77,21 @@ function load_product_column_data( $column, $post_id ) {
 			// And be done.
 			break;
 
+		// Handle the average score.
+		case 'wbr-average' :
+
+			// Grab the layout (or pull the n/a).
+			$maybe_average  = Helpers\get_average_scoring_display( $post_id, false );
+
+			// Now the display.
+			$maybe_display  = ! empty( $maybe_average ) ? $maybe_average : '<em>' . __( 'none','woo-better-reviews' ) . '</em>';
+
+			// Show it.
+			echo '<span class="wbr-review-col-average">' . $maybe_display . '</span>';
+
+			// And be done.
+			break;
+
 		// End all case breaks.
 	}
 }
@@ -87,24 +105,32 @@ function load_product_column_data( $column, $post_id ) {
  */
 function add_product_column_display( $columns ) {
 
-	// Add our column if it hasn't already been.
+	// Blank my holder first.
+	$date_hold  = '';
+
+	// Begin part of the shifting of the date column.
+	if ( isset( $columns['date'] ) ) {
+
+		// Set a holder for the date.
+		$date_hold  = $columns['date'];
+
+		// And remove the date.
+		unset( $columns['date'] );
+	}
+
+	// Add our count column if it hasn't already been.
 	if ( ! isset( $columns['wbr-count'] ) ) {
+		$columns['wbr-count'] = __( 'Review Count','woo-better-reviews' );
+	}
 
-		// Add our column.
-		$columns['wbr-count'] = __( 'Reviews','woo-better-reviews' );
+	// Add our average column if it hasn't already been.
+	if ( ! isset( $columns['wbr-average'] ) ) {
+		$columns['wbr-average'] = __( 'Average Rating','woo-better-reviews' );
+	}
 
-		// Now do the shifting of the date column.
-		if ( isset( $columns['date'] ) ) {
-
-			// Set a holder for the date.
-			$date_hold  = $columns['date'];
-
-			// And remove the date.
-			unset( $columns['date'] );
-
-			// Now add back the date.
-			$columns['date'] = $date_hold;
-		}
+	// Now add back the date.
+	if ( ! empty( $date_hold ) ) {
+		$columns['date'] = $date_hold;
 	}
 
 	// Return our array of columns.
@@ -125,6 +151,13 @@ function add_product_column_sortable( $sortable_columns ) {
 
 		// Add our column.
 		$sortable_columns['wbr-count'] = 'review_count';
+	}
+
+	// Add our column if it hasn't already been.
+	if ( ! isset( $sortable_columns['wbr-average'] ) ) {
+
+		// Add our column.
+		$sortable_columns['wbr-average'] = 'average_rating';
 	}
 
 	// Return our array of columns.
