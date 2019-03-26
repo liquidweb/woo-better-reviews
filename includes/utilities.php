@@ -35,11 +35,11 @@ function check_constants_for_process( $include_ajax = true ) {
 	}
 
 	// Include the possible Ajax check.
-	if ( ! empty( $include_ajax ) && defined( 'DOING_AJAX' ) && DOING_AJAX ) {
+	if ( ! empty( $include_ajax ) && wp_doing_ajax() ) {
 		return false;
 	}
 
-	// Passed them all. Return true.
+	// Hit none of the checks. Proceed.
 	return true;
 }
 

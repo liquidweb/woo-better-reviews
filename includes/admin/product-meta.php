@@ -118,6 +118,9 @@ function attribute_metabox( $post, $callback ) {
 	// Close up the markup.
 	echo '</ul>';
 
+	// Include a blank trigger field.
+	echo '<input type="hidden" name="wbr-product-meta-trigger" value="1">';
+
 	// Gimme some sweet nonce action.
 	echo wp_nonce_field( 'wbr_save_product_meta_action', 'wbr_save_product_meta_nonce', false, false );
 }
@@ -136,7 +139,7 @@ function save_product_attributes( $post_id, $post ) {
 	$check_constant = Utilities\check_constants_for_process();
 
 	// Bail out if we hit a constant.
-	if ( ! $check_constant ) {
+	if ( false === $check_constant ) {
 		return;
 	}
 
@@ -144,7 +147,7 @@ function save_product_attributes( $post_id, $post ) {
 	$maybe_enabled  = Helpers\maybe_reviews_enabled();
 
 	// Bail if we aren't enabled.
-	if ( ! $maybe_enabled ) {
+	if ( false === $maybe_enabled ) {
 		return;
 	}
 
@@ -153,6 +156,11 @@ function save_product_attributes( $post_id, $post ) {
 
 	// If we are global, send the whole bunch.
 	if ( false !== $maybe_global ) {
+		return;
+	}
+
+	// Check for the triggr.
+	if ( empty( $_POST['wbr-product-meta-trigger'] ) ) {
 		return;
 	}
 
