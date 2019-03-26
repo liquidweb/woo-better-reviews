@@ -309,22 +309,41 @@ function get_admin_review_count( $product_id = 0, $set_zero = true ) {
 }
 
 /**
- * Get the review score from post meta.
+ * Get the review count from query count, or post meta.
  *
- * @param  integer $product_id   The product ID we are checking review counts for.
- * @param  boolean $include_div  Wrap the div on it (or not).
+ * @param  integer $product_id  The product ID we are checking review counts for.
  *
  * @return integer
  */
-function get_average_scoring_display( $product_id = 0, $include_div = true ) {
+function get_front_review_count( $product_id = 0 ) {
 
-	// Bail without a product ID.
-	if ( empty( $product_id ) ) {
+	// Check for a sorting request.
+	$filtered_ids   = maybe_sorted_reviews();
+
+	// Return the count of filtered or the total.
+	return false !== $filtered_ids ? count( $filtered_ids ) : get_admin_review_count( $product_id, false );
+}
+
+/**
+ * Get the review score from post meta.
+ *
+ * @param  integer $product_id    The product ID we are checking review counts for.
+ * @param  integer $review_score  An absolute score to use instead of a product.
+ * @param  boolean $include_div   Wrap the div on it (or not).
+ *
+ * @return integer
+ */
+function get_scoring_stars_display( $product_id = 0, $review_score = 0, $include_div = true ) {
+
+	// Bail without a product ID and score.
+	if ( empty( $product_id ) && empty( $review_score ) ) {
 		return false;
 	}
 
-	// Get the count.
-	$review_score   = get_post_meta( $product_id, Core\META_PREFIX . 'average_rating', true );
+	// Attempt to get a score if we don't have one.
+	if ( empty( $review_score ) ) {
+		$review_score   = get_post_meta( $product_id, Core\META_PREFIX . 'average_rating', true );
+	}
 
 	// Bail with no score.
 	if ( empty( $review_score ) ) {
@@ -332,11 +351,11 @@ function get_average_scoring_display( $product_id = 0, $include_div = true ) {
 	}
 
 	// Determine the score parts.
-	$score_had  = absint( $review_score );
-	$score_left = $score_had < 7 ? 7 - $score_had : 0;
+	$score_show = absint( $review_score );
+	$score_left = $score_show < 7 ? 7 - $score_show : 0;
 
 	// Set the aria label.
-	$aria_label = sprintf( __( 'Overall Score: %s', 'woo-better-reviews' ), absint( $score_had ) );
+	$aria_label = sprintf( __( 'Overall Score: %s', 'woo-better-reviews' ), absint( $score_show ) );
 
 	// Set the empty.
 	$setup  = '';
@@ -348,7 +367,7 @@ function get_average_scoring_display( $product_id = 0, $include_div = true ) {
 		$setup  .= '<span class="woo-better-reviews-list-total-score" aria-label="' . esc_attr( $aria_label ) . '">';
 
 			// Output the full stars.
-			$setup  .= str_repeat( '<span class="woo-better-reviews-single-star woo-better-reviews-single-star-full">&#9733;</span>', $score_had );
+			$setup  .= str_repeat( '<span class="woo-better-reviews-single-star woo-better-reviews-single-star-full">&#9733;</span>', $score_show );
 
 			// Output the empty stars.
 			if ( $score_left > 0 ) {

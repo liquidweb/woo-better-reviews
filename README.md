@@ -12,18 +12,11 @@ Like reviews, only way better.
 
 ### To-Do List
 
-* connect product attributes  DONE
 * set other field types
-* modify review status   DONE
-* add / delete / modify reviews  (ALMOST)
-* edit single reviews
-* transient purging
 * front-end messages
 * anonymous reviews
 * single attribute scoring
-* show read-only scoring on edit
-* kill summary field
-* check for return to reviews
+
 
 add visual summary to aggregate reviews
 scoring breakdown

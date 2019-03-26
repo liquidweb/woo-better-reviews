@@ -81,7 +81,7 @@ function load_product_column_data( $column, $post_id ) {
 		case 'wbr-average' :
 
 			// Grab the layout (or pull the n/a).
-			$maybe_average  = Helpers\get_average_scoring_display( $post_id, false );
+			$maybe_average  = Helpers\get_scoring_stars_display( $post_id, 0, false );
 
 			// Now the display.
 			$maybe_display  = ! empty( $maybe_average ) ? $maybe_average : '<em>' . __( 'none','woo-better-reviews' ) . '</em>';

@@ -530,7 +530,6 @@ function format_review_db_args( $posted_args = array() ) {
 	$review_date    = ! empty( $stripped_args['date'] ) ? trim( $stripped_args['date'] ) : '';
 	$review_title   = ! empty( $stripped_args['title'] ) ? trim( $stripped_args['title'] ) : '';
 	$review_slug    = ! empty( $review_title ) ? sanitize_title_with_dashes( $review_title, null, 'save' ) : '';
-	$review_summary = ! empty( $stripped_args['summary'] ) ? trim( $stripped_args['summary'] ) : '';
 	$review_content = ! empty( $stripped_args['content'] ) ? trim( $stripped_args['content'] ) : '';
 	$review_status  = ! empty( $stripped_args['status'] ) ? trim( $stripped_args['status'] ) : '';
 
@@ -539,7 +538,6 @@ function format_review_db_args( $posted_args = array() ) {
 		'review_date'         => $review_date,
 		'review_title'        => $review_title,
 		'review_slug'         => $review_slug,
-		'review_summary'      => $review_summary,
 		'review_content'      => $review_content,
 		'review_status'       => $review_status,
 	);

@@ -264,7 +264,6 @@ function format_submitted_review_content( $form_data = array(), $product_id = 0,
 	$author_name    = ! empty( $form_data['author-name'] ) ? $form_data['author-name'] : '';
 	$author_email   = ! empty( $form_data['author-email'] ) ? $form_data['author-email'] : '';
 	$review_title   = ! empty( $form_data['review-title'] ) ? $form_data['review-title'] : $default_title;
-	$review_summary = ! empty( $form_data['review-summary'] ) ? $form_data['review-summary'] : '';
 
 	// Set up the insert data array.
 	$insert_setup   = array(
@@ -275,7 +274,6 @@ function format_submitted_review_content( $form_data = array(), $product_id = 0,
 		'review_date'        => date( 'Y-m-d H:i:s', $set_timestamp ),
 		'review_title'       => sanitize_text_field( $review_title ),
 		'review_slug'        => sanitize_title_with_dashes( $review_title, null, 'save' ),
-		'review_summary'     => esc_textarea( $review_summary ),
 		'review_content'     => wp_kses_post( $form_data['review-content'] ),
 		'review_status'      => apply_filters( Core\HOOK_PREFIX . 'initial_review_status', 'pending' ), // 'approved',
 		'is_verified'        => 0,

@@ -1,6 +1,7 @@
 // All the front-end parts will be pulled in.
 
 // The pieces tied to the general list setup.
+@import "review-list/visual-aggregate";
 @import "review-list/header";
 @import "review-list/sorting";
 @import "review-list/wrapper";

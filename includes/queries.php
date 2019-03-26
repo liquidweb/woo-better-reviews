@@ -182,10 +182,10 @@ function get_all_reviews( $return_type = 'objects', $date_order = true, $purge =
 			return $query_list;
 			break;
 
-		case 'summaries' :
+		case 'content' :
 
 			// Set my query list.
-			$query_list = wp_list_pluck( $cached_dataset, 'review_summary', 'review_id' );
+			$query_list = wp_list_pluck( $cached_dataset, 'review_content', 'review_id' );
 
 			// Sort my list assuming we didn't want date order.
 			if ( ! $date_order ) {
@@ -349,10 +349,10 @@ function get_reviews_for_product( $product_id = 0, $return_type = 'objects', $da
 			return $query_list;
 			break;
 
-		case 'summaries' :
+		case 'content' :
 
 			// Set my query list.
-			$query_list = wp_list_pluck( $cached_dataset, 'review_summary', 'review_id' );
+			$query_list = wp_list_pluck( $cached_dataset, 'review_content', 'review_id' );
 
 			// Sort my list assuming we didn't want date order.
 			if ( ! $date_order ) {
@@ -501,10 +501,10 @@ function get_approved_reviews_for_product( $product_id = 0, $return_type = 'obje
 			return $query_list;
 			break;
 
-		case 'summaries' :
+		case 'content' :
 
 			// Set my query list.
-			$query_list = wp_list_pluck( $cached_dataset, 'review_summary', 'review_id' );
+			$query_list = wp_list_pluck( $cached_dataset, 'review_content', 'review_id' );
 
 			// Sort my list assuming we didn't want date order.
 			if ( ! $date_order ) {
@@ -682,10 +682,10 @@ function get_reviews_for_author( $author_id = 0, $return_type = 'objects', $date
 			return $query_list;
 			break;
 
-		case 'summaries' :
+		case 'content' :
 
 			// Set my query list.
-			$query_list = wp_list_pluck( $cached_dataset, 'review_summary', 'review_id' );
+			$query_list = wp_list_pluck( $cached_dataset, 'review_content', 'review_id' );
 
 			// Sort my list assuming we didn't want date order.
 			if ( ! $date_order ) {
@@ -829,10 +829,10 @@ function get_verified_reviews( $return_type = 'objects', $date_order = true, $pu
 			return $query_list;
 			break;
 
-		case 'summaries' :
+		case 'content' :
 
 			// Set my query list.
-			$query_list = wp_list_pluck( $cached_dataset, 'review_summary', 'review_id' );
+			$query_list = wp_list_pluck( $cached_dataset, 'review_content', 'review_id' );
 
 			// Sort my list assuming we didn't want date order.
 			if ( ! $date_order ) {
@@ -948,7 +948,11 @@ function get_single_review( $review_id = 0, $return_type = 'objects', $purge = f
 			break;
 
 		case 'display' :
-			return merge_review_object_taxonomies( $cached_dataset );
+
+			// Set the weird array for the merge.
+			$review_list[ $review_id ] = $cached_dataset;
+
+			return merge_review_object_taxonomies( $review_list );
 			break;
 
 		case 'product' :
@@ -1436,11 +1440,12 @@ function get_attributes_for_product( $product_id = 0, $return_type = 'objects', 
  * Get the data for a single attribute.
  *
  * @param  integer $attribute_id  The ID we are checking for.
+ * @param  string  $return_type   What type of return we want. Accepts various fields.
  * @param  boolean $purge         Optional to purge the cache'd version before looking up.
  *
  * @return mixed
  */
-function get_single_attribute( $attribute_id = 0, $purge = false ) {
+function get_single_attribute( $attribute_id = 0, $return_type = 'dataset', $purge = false ) {
 
 	// Make sure we have an attribute ID.
 	if ( empty( $attribute_id ) ) {
@@ -1489,8 +1494,46 @@ function get_single_attribute( $attribute_id = 0, $purge = false ) {
 		$cached_dataset = $query_run;
 	}
 
-	// Return the dataset.
-	return $cached_dataset;
+	// Now switch between my return types.
+	switch ( sanitize_text_field( $return_type ) ) {
+
+		case 'dataset' :
+			return $cached_dataset;
+			break;
+
+		case 'name' :
+
+			// Return the single bit.
+			return $cached_dataset['attribute_name'];
+			break;
+
+		case 'slug' :
+
+			// Return the single bit.
+			return $cached_dataset['attribute_slug'];
+			break;
+
+		case 'description' :
+
+			// Return the single bit.
+			return $cached_dataset['attribute_desc'];
+			break;
+
+		case 'labels' :
+
+			// Get each set of labels.
+			$min_label  = $cached_dataset['min_label'];
+			$max_label  = $cached_dataset['max_label'];
+
+			// Return my list, plucked.
+			return array( 'min' => $min_label, 'max' => $max_label );
+			break;
+
+		// No more case breaks, no more return types.
+	}
+
+	// No reason we should get down this far but here we go.
+	return false;
 }
 
 /**

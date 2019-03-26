@@ -29,7 +29,7 @@ function set_single_review_scoring_total_view() {
  *
  * @return HTML
  */
-function set_single_review_title_summary_view( $review = array() ) {
+function set_single_review_title_view( $review = array() ) {
 
 	// Bail without the parts we want.
 	if ( empty( $review ) ) {
@@ -44,13 +44,8 @@ function set_single_review_title_summary_view( $review = array() ) {
 		$display_view  .= '<h4 class="woo-better-reviews-single-title">' . esc_html( $review['title'] ) . '</h4>';
 	}
 
-	// Now set up our summary.
-	if ( ! empty( $review['summary'] ) ) {
-		$display_view  .= '<p class="woo-better-reviews-single-summary">' . wptexturize( $review['summary'] ) . '</p>';
-	}
-
 	// Return it, filtered.
-	return apply_filters( Core\HOOK_PREFIX . 'single_review_title_summary_view', $display_view, $review );
+	return apply_filters( Core\HOOK_PREFIX . 'single_review_title_view', $display_view, $review );
 }
 
 /**
@@ -72,27 +67,7 @@ function set_single_review_ratings_view( $review = array() ) {
 
 	// Output the total score part.
 	if ( ! empty( $review['total_score'] ) ) {
-
-		// Determine the score parts.
-		$score_had  = absint( $review['total_score'] );
-		$score_left = $score_had < 7 ? 7 - $score_had : 0;
-
-		// Set the aria label.
-		$aria_label = sprintf( __( 'Overall Score: %s', 'woo-better-reviews' ), absint( $score_had ) );
-
-		// Wrap it in a span.
-		$display_view  .= '<span class="woo-better-reviews-single-total-score" aria-label="' . esc_attr( $aria_label ) . '">';
-
-			// Output the full stars.
-			$display_view  .= str_repeat( '<span class="woo-better-reviews-single-star woo-better-reviews-single-star-full">&#9733;</span>', $score_had );
-
-			// Output the empty stars.
-			if ( $score_left > 0 ) {
-				$display_view  .= str_repeat( '<span class="woo-better-reviews-single-star woo-better-reviews-single-star-empty">&#9734;</span>', $score_left );
-			}
-
-		// Close the span.
-		$display_view  .= '</span>';
+		$display_view  .= Helpers\get_scoring_stars_display( $review['total_score'], 0, false );
 	}
 
 	//  Handle displaying each attribute.

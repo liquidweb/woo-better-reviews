@@ -133,10 +133,6 @@ function set_review_form_rating_attributes_view( $product_id = 0 ) {
 			$set_max_label  = ! empty( $attribute_args['max_label'] ) ? esc_attr( $attribute_args['max_label'] ) : __( 'Max.', 'woo-better-reviews' );
 			$min_max_class  = 'woo-better-reviews-rating-attribute-label woo-better-reviews-rating-attribute-label-';
 
-			// Set (and reverse) my score range.
-			$initial_range  = range( 1, 7, 1 );
-			$setscore_range = array_reverse( $initial_range );
-
 			// Wrap the whole thing in a big div. Yes, this is many divs.
 			$display_view  .= '<div class="woo-better-reviews-rating-attribute-field-block">';
 
@@ -150,7 +146,7 @@ function set_review_form_rating_attributes_view( $product_id = 0 ) {
 						$display_view  .= '<legend class="woo-better-reviews-rating-fieldset-intro woo-better-reviews-rating-form-single-attribute-intro">' . esc_html( $attribute_args['name'] ) . '</legend>';
 
 						// Loop my scoring range.
-						foreach ( $setscore_range as $setscore ) {
+						for ( $setscore = 7; $setscore >= 1; $setscore-- ) {
 
 							// Set the field ID and name.
 							$field_id   = 'woo-better-reviews-rating-content-attributes-' . esc_attr( $attribute_args['slug'] ) . '-' . absint( $setscore );

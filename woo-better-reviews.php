@@ -99,6 +99,7 @@ if ( ! is_admin() ) {
 	require_once __DIR__ . '/includes/display/layout-form.php';
 	require_once __DIR__ . '/includes/display/layout-reviews.php';
 	require_once __DIR__ . '/includes/display/view-output.php';
+	require_once __DIR__ . '/includes/display/woo-filters.php';
 }
 
 // Load the triggered file loads.

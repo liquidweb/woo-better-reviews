@@ -96,7 +96,6 @@ function calculate_total_review_scoring( $product_id = 0 ) {
 	}
 
 	// And calculate the average.
-	// @@todo round up / down?
 	$review_avg_score   = array_sum( $approved_totals ) / count( $approved_totals );
 
 	// Update the Woo postmeta key.
@@ -104,6 +103,71 @@ function calculate_total_review_scoring( $product_id = 0 ) {
 
 	// Update our own post meta key as well.
 	update_post_meta( $product_id, Core\META_PREFIX . 'average_rating', round( $review_avg_score, 0 ) );
+}
+
+/**
+ * Take the set of attribute scoring data from a product and get totals.
+ *
+ * @param  array  $attribute_set  The array of attribute data we have.
+ *
+ * @return array
+ */
+function calculate_average_attribute_scoring( $attribute_set = array() ) {
+
+	// Bail without an attribute set.
+	if ( empty( $attribute_set ) || ! is_array( $attribute_set ) ) {
+		return;
+	}
+
+	// Parse out some labels.
+	$label_set  = wp_list_pluck( $attribute_set[0], 'label', 'id' );
+
+	// Set up two empty returns.
+	$setup  = array();
+	$build  = array();
+
+	// Loop my scoring.
+	foreach ( $attribute_set as $attribute_scoring ) {
+
+		// Grab the score set.
+		$score_set  = wp_list_pluck( $attribute_scoring, 'value', 'id' );
+
+		// Loop again.
+		foreach ( $score_set as $attribute_id => $score_value ) {
+
+			// Determine if we have one or not.
+			$setup_arg_var  = array_key_exists( $attribute_id, $setup ) ? $setup[ $attribute_id ] . ',' . $score_value : $score_value;
+
+			// Set my new argument variable.
+			$setup[ $attribute_id ] = $setup_arg_var;
+		}
+
+		// Nothing left with the sets.
+	}
+
+	// Now loop my setup and do the maths.
+	foreach ( $setup as $attribute_id => $score_string ) {
+
+		// Get my attribute data.
+
+		// Set my scoring array up.
+		$scoring_array  = explode( ',', $score_string );
+
+		// And calculate the average.
+		$attribute_avg  = array_sum( $scoring_array ) / count( $scoring_array );
+
+		// Add my two values.
+		$build[ $attribute_id ] = array(
+			'id'      => absint( $attribute_id ),
+			'average' => round( $attribute_avg, 0 ),
+			'total'   => count( $scoring_array ),
+			'title'   => $label_set[ $attribute_id ],
+			'labels'  => Queries\get_single_attribute( $attribute_id, 'labels' ),
+		);
+	}
+
+	// Return my resulting build.
+	return array_values( $build );
 }
 
 /**
@@ -338,7 +402,6 @@ function format_review_content_data( $review ) {
 		'review_date',
 		'review_slug',
 		'review_title',
-		'review_summary',
 		'review_content',
 		'review_status',
 	);
@@ -368,11 +431,12 @@ function format_review_content_data( $review ) {
 /**
  * Pull out the scoring data and make it nice.
  *
- * @param  array $review  The review from the query.
+ * @param  array   $review   The review from the query.
+ * @param  boolean $discard  Option to discard the rest of the data.
  *
  * @return array
  */
-function format_review_scoring_data( $review ) {
+function format_review_scoring_data( $review, $discard = false ) {
 
 	// Bail without a review.
 	if ( empty( $review ) ) {
@@ -421,7 +485,7 @@ function format_review_scoring_data( $review ) {
 	}
 
 	// Return the array.
-	return wp_parse_args( $setup, $review );
+	return false !== $discard ? $setup : wp_parse_args( $setup, $review );
 }
 
 /**

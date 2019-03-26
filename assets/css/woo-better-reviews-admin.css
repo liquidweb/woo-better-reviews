@@ -15,6 +15,13 @@
 form.woo-better-reviews-admin-edit-single-item-form {
   max-width: 800px; }
 
+.woo-better-reviews-form-inside-list-wrap {
+  margin: 0;
+  padding: 7px 0 0; }
+  .woo-better-reviews-form-inside-list-wrap .woo-better-reviews-form-inside-list-label {
+    min-width: 120px;
+    display: inline-block; }
+
 .edit-single-item-actions .cancel-edit-link-wrap {
   line-height: 28px;
   vertical-align: middle;

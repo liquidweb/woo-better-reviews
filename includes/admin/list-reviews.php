@@ -102,13 +102,14 @@ class WooBetterReviews_ListReviews extends WP_List_Table {
 
 		// Build our array of column setups.
 		$setup  = array(
-			'cb'             => '<input type="checkbox" />',
-			'review_title'   => __( 'Title', 'woo-better-reviews' ),
-			'review_product' => __( 'Product', 'woo-better-reviews' ),
-			'review_date'    => __( 'Date', 'woo-better-reviews' ),
-			'review_score'   => __( 'Rating', 'woo-better-reviews' ),
-			'review_author'  => __( 'Author', 'woo-better-reviews' ),
-			'review_status'  => __( 'Status', 'woo-better-reviews' ),
+			'cb'                => '<input type="checkbox" />',
+			'review_title'      => __( 'Title', 'woo-better-reviews' ),
+			'review_product'    => __( 'Product', 'woo-better-reviews' ),
+			'review_date'       => __( 'Date', 'woo-better-reviews' ),
+			'review_score'      => __( 'Total Score', 'woo-better-reviews' ),
+			'attribute_ratings' => __( 'Attribute Ratings', 'woo-better-reviews' ),
+			'review_author'     => __( 'Author', 'woo-better-reviews' ),
+			'review_status'     => __( 'Status', 'woo-better-reviews' ),
 		);
 
 		// Return filtered.
@@ -727,7 +728,7 @@ class WooBetterReviews_ListReviews extends WP_List_Table {
 	protected function column_cb( $item ) {
 
 		// Set my ID.
-		$id = absint( $item['id'] );
+		$id = absint( $item['review_id'] );
 
 		// Return my checkbox.
 		return '<input type="checkbox" name="review-ids[]" class="woo-better-reviews-admin-checkbox" id="cb-' . $id . '" value="' . $id . '" /><label for="cb-' . $id . '" class="screen-reader-text">' . __( 'Select review', 'woo-better-reviews' ) . '</label>';
@@ -743,7 +744,7 @@ class WooBetterReviews_ListReviews extends WP_List_Table {
 	protected function column_review_title( $item ) {
 
 		// Get the edit link.
-		$edit_link  = $this->get_single_review_action_link( $item['id'], 'edit' );
+		$edit_link  = $this->get_single_review_action_link( $item['review_id'], 'edit' );
 
 		// Build my markup.
 		$setup  = '';
@@ -814,11 +815,55 @@ class WooBetterReviews_ListReviews extends WP_List_Table {
 
 		// Wrap the span and do the stars.
 		$setup .= '<span class="woo-better-reviews-admin-table-display woo-better-reviews-admin-table-review-score">';
-			$setup .= Helpers\get_average_scoring_display( $item['product_id'], false );
+			$setup .= Helpers\get_scoring_stars_display( 0, $item['review_score'], false );
 		$setup .= '</span>';
 
 		// Return my formatted product name.
 		return apply_filters( Core\HOOK_PREFIX . 'review_table_column_review_score', $setup, $item );
+	}
+
+	/**
+	 * The review attribute column.
+	 *
+	 * @param  array  $item  The item from the data array.
+	 *
+	 * @return string
+	 */
+	protected function column_attribute_ratings( $item ) {
+
+		// Build my markup.
+		$setup  = '';
+
+		// Wrap the span and do the stars.
+		$setup .= '<span class="woo-better-reviews-admin-table-display woo-better-reviews-admin-table-review-attribute-rating">';
+
+			// Set this in a list.
+			$setup .= '<ul class="woo-better-reviews-form-inside-list-wrap">';
+
+			// Loop my individual attribute scores.
+			foreach ( $item['attribute_ratings'] as $single_attribute ) {
+
+				// Set a list item.
+				$setup .= '<li class="woo-better-reviews-form-inside-list-single woo-better-reviews-form-inside-list-total-score">';
+
+					// Do the label.
+					$setup .= '<span class="woo-better-reviews-form-inside-list-label">' . esc_html( $single_attribute['label'] ) . ': </span>';
+
+					// Do the value.
+					$setup .= '<span class="woo-better-reviews-form-inside-list-value">';
+						$setup .= sprintf( __( '%s out of 7', 'woo-better-reviews' ), absint( $single_attribute['value'] ) );
+					$setup .= '</span>';
+
+				// Close the list item for total score.
+				$setup .= '</li>';
+			}
+
+			$setup .= '</ul>';
+
+		$setup .= '</span>';
+
+		// Return my formatted product name.
+		return apply_filters( Core\HOOK_PREFIX . 'review_table_column_attribute_ratings', $setup, $item );
 	}
 
 	/**
@@ -933,16 +978,20 @@ class WooBetterReviews_ListReviews extends WP_List_Table {
 			// Set my product ID.
 			$product_id = absint( $review_object->product_id );
 
+			// Parse out the scoring data.
+			$score_data = Utilities\format_review_scoring_data( (array) $review_object, true );
+
 			// Set up some custom args to include.
 			$custom = array(
-				'id'             => absint( $review_object->review_id ),
-				'review_stamp'   => strtotime( $review_object->review_date ),
-				'review_product' => get_post_field( 'post_name', $product_id, 'raw' ),
-				'product_data'   => Helpers\get_admin_product_data( $product_id ),
+				'review_stamp'      => strtotime( $review_object->review_date ),
+				'review_product'    => get_post_field( 'post_name', $product_id, 'raw' ),
+				'product_data'      => Helpers\get_admin_product_data( $product_id ),
+				'review_score'      => $score_data['total_score'],
+				'attribute_ratings' => $score_data['rating_attributes'],
 			);
 
 			// Set the base array of the data we want.
-			$setup  = wp_parse_args( (array) $review_object, $custom );
+			$setup  = wp_parse_args( $custom, (array) $review_object );
 
 			// Run it through a filter.
 			$data[] = apply_filters( Core\HOOK_PREFIX . 'review_table_data_item', $setup, $review_object );
@@ -1064,10 +1113,9 @@ class WooBetterReviews_ListReviews extends WP_List_Table {
 			case 'review_date' :
 			case 'review_author' :
 			case 'review_status' :
-				return ! empty( $dataset[ $column_name ] ) ? $dataset[ $column_name ] : '';
-
 			case 'review_score' :
-				return ! empty( $dataset[ 'rating_total_score' ] ) ? $dataset[ 'rating_total_score' ] : '';
+			case 'attribute_ratings' :
+				return ! empty( $dataset[ $column_name ] ) ? $dataset[ $column_name ] : '';
 
 			default :
 				return apply_filters( Core\HOOK_PREFIX . 'review_table_column_default', '', $dataset, $column_name );
@@ -1096,7 +1144,7 @@ class WooBetterReviews_ListReviews extends WP_List_Table {
 		$settings_link  = Helpers\get_admin_menu_link( Core\REVIEWS_ANCHOR );
 
 		// Set my review ID.
-		$review_id      = absint( $item['id'] );
+		$review_id      = absint( $item['review_id'] );
 
 		// Create the array of action items.
 		$action_dataset = $this->get_row_action_dataset( $review_id );

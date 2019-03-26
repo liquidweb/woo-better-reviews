@@ -84,8 +84,11 @@ function load_edit_single_review_form( $action ) {
 		wp_die( __( 'You are not permitted to view this page.', 'woo-better-reviews' ) );
 	}
 
-	// Get the review data.
+	// Get the overall review data.
 	$review_data    = Queries\get_single_review( $_GET['wbr-item-id'] );
+
+	// Parse out the scoring data.
+	$review_scoring = Utilities\format_review_scoring_data( (array) $review_data, true );
 
 	// Set an empty.
 	$build  = '';
@@ -124,22 +127,6 @@ function load_edit_single_review_form( $action ) {
 				// Close the title field.
 				$build .= '</tr>';
 
-				// Set the summary field.
-				$build .= '<tr class="form-field woo-better-reviews-form-field review-summary-wrap">';
-
-					// Output the label.
-					$build .= '<th scope="row">';
-						$build .= '<label for="review-summary">' . esc_html__( 'Summary', 'woo-better-reviews' ) . '</label>';
-					$build .= '</th>';
-
-					// Output the actual field.
-					$build .= '<td>';
-						$build .= '<textarea name="review-args[summary]" id="review-summary" rows="5" cols="40">' . esc_textarea( $review_data->review_summary ) . '</textarea>';
-					$build .= '</td>';
-
-				// Close the summary field.
-				$build .= '</tr>';
-
 				// Set the main content field.
 				$build .= '<tr class="form-field woo-better-reviews-form-field review-content-wrap">';
 
@@ -153,10 +140,10 @@ function load_edit_single_review_form( $action ) {
 						$build .= Utilities\set_review_form_editor( 'review-content', 'review-args[content]', 'edit-review-content', $review_data->review_content );
 					$build .= '</td>';
 
-				// Close the summary field.
+				// Close the main content field.
 				$build .= '</tr>';
 
-				// Set the type field.
+				// Set the review status field.
 				$build .= '<tr class="form-field woo-better-reviews-form-field review-status-wrap">';
 
 					// Output the label.
@@ -169,7 +156,62 @@ function load_edit_single_review_form( $action ) {
 						$build .= set_admin_data_dropdown( Helpers\get_review_statuses(), 'review-args[status]', 'review-status', $review_data->review_status );
 					$build .= '</td>';
 
-				// Close the values field.
+				// Close the review status field.
+				$build .= '</tr>';
+
+				// Set the read-only scoring fields.
+				$build .= '<tr class="form-field woo-better-reviews-form-field review-scoring-wrap">';
+
+					// Output the label.
+					$build .= '<th scope="row">';
+						$build .= '<label for="review-status">' . esc_html__( 'Scoring', 'woo-better-reviews' ) . '</label>';
+					$build .= '</th>';
+
+					// Output the actual field.
+					$build .= '<td>';
+
+						// Wrap it in an unordered list.
+						$build .= '<ul class="woo-better-reviews-form-inside-list-wrap">';
+
+							// Set a list item.
+							$build .= '<li class="woo-better-reviews-form-inside-list-single woo-better-reviews-form-inside-list-total-score">';
+
+								// Do the label.
+								$build .= '<span class="woo-better-reviews-form-inside-list-label">' . esc_html__( 'Total Rating:', 'woo-better-reviews' ) . ' </span>';
+
+								// Do the value.
+								$build .= '<span class="woo-better-reviews-form-inside-list-value">';
+									$build .= set_admin_star_display( $review_scoring['total_score'] );
+								$build .= '</span>';
+
+							// Close the list item for total score.
+							$build .= '</li>';
+
+							// Loop my individual attribute scores.
+							foreach ( $review_scoring['rating_attributes'] as $single_attribute ) {
+
+								// Set a list item.
+								$build .= '<li class="woo-better-reviews-form-inside-list-single woo-better-reviews-form-inside-list-total-score">';
+
+									// Do the label.
+									$build .= '<span class="woo-better-reviews-form-inside-list-label">' . esc_html( $single_attribute['label'] ) . ': </span>';
+
+									// Do the value.
+									$build .= '<span class="woo-better-reviews-form-inside-list-value">';
+										$build .= sprintf( __( '%s out of 7', 'woo-better-reviews' ), absint( $single_attribute['value'] ) );
+									$build .= '</span>';
+
+								// Close the list item for total score.
+								$build .= '</li>';
+							}
+
+						// Close up the list.
+						$build .= '</ul>';
+
+					// Close the td.
+					$build .= '</td>';
+
+				// Close the review scoring fields.
 				$build .= '</tr>';
 
 			// Close up the table body.
@@ -932,6 +974,8 @@ function load_edit_single_charstcs_form( $action ) {
 
 /**
  * Set up the dropdown some data.
+ *
+ * @return HTML
  */
 function set_admin_data_dropdown( $dropdown_data = array(), $field_name = '', $field_id = '', $selected ) {
 
@@ -956,6 +1000,43 @@ function set_admin_data_dropdown( $dropdown_data = array(), $field_name = '', $f
 
 	// Close out my select.
 	$setup .= '</select>';
+
+	// Return the setup.
+	return $setup;
+}
+
+/**
+ * Set the admin stars to show.
+ *
+ * @param integer $total_score  The total score applied.
+ *
+ * @return HTML
+ */
+function set_admin_star_display( $total_score = 0 ) {
+
+	// Determine the score parts.
+	$score_had  = absint( $total_score );
+	$score_left = $score_had < 7 ? 7 - $score_had : 0;
+
+	// Set the aria label.
+	$aria_label = sprintf( __( 'Overall Score: %s', 'woo-better-reviews' ), absint( $score_had ) );
+
+	// Set up my empty.
+	$setup  = '';
+
+	// Wrap it in a span.
+	$setup .= '<span class="woo-better-reviews-single-total-score" aria-label="' . esc_attr( $aria_label ) . '">';
+
+		// Output the full stars.
+		$setup .= str_repeat( '<span class="woo-better-reviews-single-star woo-better-reviews-single-star-full">&#9733;</span>', $score_had );
+
+		// Output the empty stars.
+		if ( $score_left > 0 ) {
+			$setup .= str_repeat( '<span class="woo-better-reviews-single-star woo-better-reviews-single-star-empty">&#9734;</span>', $score_left );
+		}
+
+	// Close the span.
+	$setup .= '</span>';
 
 	// Return the setup.
 	return $setup;

@@ -43,14 +43,14 @@ function render_final_output( $markup, $echo = true ) {
 }
 
 /**
- * Build and display the header.
+ * Build and display the visual aggregated review data.
  *
  * @param  integer $product_id  The product ID we are leaving a review for.
  * @param  boolean $echo        Whether to echo it out or return it.
  *
  * @return HTML
  */
-function display_review_template_header( $product_id = 0, $echo = true ) {
+function display_review_template_title( $product_id = 0, $echo = true ) {
 
 	// Bail without a product ID.
 	if ( empty( $product_id ) ) {
@@ -58,7 +58,7 @@ function display_review_template_header( $product_id = 0, $echo = true ) {
 	}
 
 	// Check for an override.
-	$maybe_override = apply_filters( Core\HOOK_PREFIX . 'display_review_template_header_override', null, $product_id );
+	$maybe_override = apply_filters( Core\HOOK_PREFIX . 'display_review_template_title', null, $product_id );
 
 	// Return the override if we have it.
 	if ( ! empty( $maybe_override ) ) {
@@ -66,10 +66,13 @@ function display_review_template_header( $product_id = 0, $echo = true ) {
 	}
 
 	// Get some variables based on the product ID.
-	$leave_review   = get_permalink( $product_id ) . '#review_form_wrapper';
+	$leave_review   = Helpers\get_review_action_link( $product_id, 'review_form_wrapper' );
 	$product_title  = get_the_title( $product_id );
-	$review_count   = Helpers\get_admin_review_count( $product_id );
-	$score_display  = Helpers\get_average_scoring_display( $product_id );
+	$review_count   = Helpers\get_front_review_count( $product_id );
+
+	// Set some text strings.
+	$count_wrapper  = '<span class="woo-better-reviews-template-title-review-count">' . esc_html( $review_count ) . '</span>';
+	$title_wrapper  = '<span class="woo-better-reviews-template-title-product-name">' . esc_html( $product_title ) . '</span>';
 
 	// Set our empty.
 	$build  = '';
@@ -80,10 +83,8 @@ function display_review_template_header( $product_id = 0, $echo = true ) {
 		// Wrap the title with our H2.
 		$build .= '<h2 class="woocommerce-Reviews-title woo-better-reviews-template-title">';
 
-			$build .= $score_display;
-
 			/* translators: 1: reviews count 2: product name */
-			$build .= sprintf( esc_html( _n( '%1$s review for %2$s', '%1$s reviews for %2$s', $review_count, 'woo-better-reviews' ) ), esc_html( $review_count ), '<span class="woo-better-reviews-template-title-product-name">' . esc_html( $product_title ) . '</span>' );
+			$build .= sprintf( esc_html( _n( '%1$s review for %2$s', '%1$s reviews for %2$s', $review_count, 'woo-better-reviews' ) ), $count_wrapper, $title_wrapper );
 
 			// Include the "leave a review" inline link if we have reviews.
 			if ( ! empty( $review_count ) ) {
@@ -92,6 +93,153 @@ function display_review_template_header( $product_id = 0, $echo = true ) {
 
 		// Close up the H2 tag.
 		$build .= '</h2>';
+
+	// Close up the div tag.
+	$build .= '</div>';
+
+	// Do the return or echo based on the call.
+	return render_final_output( $build, $echo );
+}
+
+/**
+ * Build and display the visual aggregated review data.
+ *
+ * @param  integer $product_id  The product ID we are leaving a review for.
+ * @param  boolean $echo        Whether to echo it out or return it.
+ *
+ * @return HTML
+ */
+function display_review_template_visual_aggregate( $product_id = 0, $echo = true ) {
+
+	// Bail without a product ID.
+	if ( empty( $product_id ) ) {
+		return;
+	}
+
+	// Check for an override.
+	$maybe_override = apply_filters( Core\HOOK_PREFIX . 'display_review_template_visual_aggregate', null, $product_id );
+
+	// Return the override if we have it.
+	if ( ! empty( $maybe_override ) ) {
+		return render_final_output( $maybe_override, $echo );
+	}
+
+	// Get some variables based on the product ID.
+	$average_score  = get_post_meta( $product_id, Core\META_PREFIX . 'average_rating', true );
+	$average_stars  = Helpers\get_scoring_stars_display( 0, $average_score, false );
+	/*
+	// Check for a sorting request.
+	$filtered_ids   = Helpers\maybe_sorted_reviews();
+
+	// Fetch any existing reviews we may have.
+	$fetch_reviews  = false !== $filtered_ids ? Queries\get_review_batch( $filtered_ids ) : Queries\get_reviews_for_product( $product_id, 'display' );
+	$review_count   = count( $fetch_reviews );
+	*/
+
+	// Fetch any existing reviews we may have.
+	$fetch_reviews  = Queries\get_reviews_for_product( $product_id, 'display' );
+	$total_scores   = wp_list_pluck( $fetch_reviews, 'total_score' );
+
+	// Get various counts.
+	$review_count   = count( $fetch_reviews );
+	$range_counts   = array_count_values( $total_scores );
+
+	// Do the attribute modeling.
+	$attribute_args = wp_list_pluck( $fetch_reviews, 'rating_attributes' );
+	$attribute_set  = Utilities\calculate_average_attribute_scoring( array_values( $attribute_args ) );
+
+	// preprint( $fetch_reviews, true );
+	// preprint( $attribute_set, true );
+	// preprint( $total_scores, true );
+
+	// Set some text strings.
+	$score_wrapper  = '<span class="woo-better-reviews-scoring-number woo-better-reviews-scoring-value">' . absint( $average_score ) . '</span>';
+	$total_wrapper  = '<span class="woo-better-reviews-scoring-number woo-better-reviews-scoring-total">' . absint( 7 ) . '</span>';
+
+	// Set our empty.
+	$build  = '';
+
+	// Set the div wrapper.
+	$build .= '<div class="woo-better-reviews-list-visual-aggregate-wrapper">';
+
+		// Set the group for the average rating score.
+		$build .= '<div class="woo-better-reviews-list-aggregate-group woo-better-reviews-list-aggregate-average-rating">';
+
+			// Set a group title.
+			$build .= '<h4 class="woo-better-reviews-list-aggregate-group-title">' . esc_html__( 'Average Rating:', 'woo-better-reviews' ) . '</h4>';
+
+			// Wrap the group content in a div.
+			$build .= '<div class="woo-better-reviews-list-aggregate-group-content">';
+
+				// Output my total stars.
+				$build .= '<p class="woo-better-reviews-list-aggregate-group-content-item woo-better-reviews-list-aggregate-group-content-stars">' . $average_stars . '</p>';
+
+				// Output the text version.
+				$build .= '<p class="woo-better-reviews-list-aggregate-group-content-item woo-better-reviews-list-aggregate-group-content-average-text">' . sprintf( __( '%1$s of %2$s', 'woo-better-reviews' ), $score_wrapper, $total_wrapper ) . '</p>';
+
+				// Output the total version.
+				$build .= '<p class="woo-better-reviews-list-aggregate-group-content-item woo-better-reviews-list-aggregate-group-content-count-total">' . sprintf( __( '%d reviews total', 'woo-better-reviews' ), absint( $review_count ) ) . '</p>';
+
+			// Close the group content div.
+			$build .= '</div>';
+
+		// Close the overall score group.
+		$build .= '</div>';
+
+		// Set the group for the rating breakdown score.
+		$build .= '<div class="woo-better-reviews-list-aggregate-group woo-better-reviews-list-aggregate-rating-breakdown">';
+
+			// Set a group title.
+			$build .= '<h4 class="woo-better-reviews-list-aggregate-group-title">' . esc_html__( 'Rating Breakdown:', 'woo-better-reviews' ) . '</h4>';
+
+			// Wrap the group content in a div.
+			$build .= '<div class="woo-better-reviews-list-aggregate-group-content">';
+
+				// Output my score breakdown.
+				$build .= '<ul class="woo-better-reviews-list-aggregate-group-content-list">';
+
+				// Output each count, going in reverse.
+				for ( $i = 7; $i >= 1; $i-- ) {
+
+					// Check for some instances of that.
+					$maybe_has  = array_key_exists( $i, $range_counts ) ? $range_counts[ $i ] : 0;
+
+					// Output the list.
+					$build .= '<li class="woo-better-reviews-list-aggregate-group-content-list-item">' . $i . ' Stars: ' . $maybe_has . '</li>';
+				}
+
+				// Close the list.
+				$build .= '</ul>';
+
+			// Close the group content div.
+			$build .= '</div>';
+
+		// Close the overall score group.
+		$build .= '</div>';
+
+		// Set the group for the rating summary score.
+		$build .= '<div class="woo-better-reviews-list-aggregate-group woo-better-reviews-list-aggregate-rating-summary">';
+
+			// Set a group title.
+			$build .= '<h4 class="woo-better-reviews-list-aggregate-group-title">' . esc_html__( 'Rating Summary:', 'woo-better-reviews' ) . '</h4>';
+
+			// Wrap the group content in a div.
+			$build .= '<div class="woo-better-reviews-list-aggregate-group-content">';
+
+				// Output my score breakdown.
+				$build .= '<ul class="woo-better-reviews-list-aggregate-group-content-list">';
+
+				// Output the list.
+				// $build .= '<li class="woo-better-reviews-list-aggregate-group-content-list-item">' . $i . ' Stars: ' . $maybe_has . '</li>';
+
+				// Close the list.
+				$build .= '</ul>';
+
+			// Close the group content div.
+			$build .= '</div>';
+
+		// Close the overall score group.
+		$build .= '</div>';
 
 	// Close up the div tag.
 	$build .= '</div>';
@@ -260,7 +408,7 @@ function display_existing_reviews( $product_id = 0, $echo = true ) {
 		$build .= '<div id="' . sanitize_html_class( 'woo-better-reviews-single-' . absint( $single_review['review_id'] ) ) . '" class="' . esc_attr( $class ) . '">';
 
 			// Output the title.
-			$build .= LayoutReviews\set_single_review_title_summary_view( $single_review );
+			$build .= LayoutReviews\set_single_review_title_view( $single_review );
 
 			// Output our date and author view.
 			$build .= LayoutReviews\set_single_review_date_author_view( $single_review );

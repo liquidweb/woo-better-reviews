@@ -33,15 +33,6 @@ function get_review_content_form_fields( $keys = false ) {
 			'description' => __( 'Example: This product has great features!', 'woo-better-reviews' ),
 		),
 
-		'review-summary' => array(
-			'label'       => __( 'Review Summary', 'woo-better-reviews' ),
-			'type'        => 'textarea',
-			'required'    => false,
-			'min-count'   => 30,
-			'max-count'   => 500,
-			'description' => '',
-		),
-
 		'review-content' => array(
 			'label'       => __( 'Full Review', 'woo-better-reviews' ),
 			'type'        => 'editor-minimal',
