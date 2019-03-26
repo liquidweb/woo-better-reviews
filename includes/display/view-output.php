@@ -21,6 +21,28 @@ use LiquidWeb\WooBetterReviews\Display\LayoutReviews as LayoutReviews;
 use WP_Error;
 
 /**
+ * Handle the last-step output of echoing or returning.
+ *
+ * @param  mixed   $markup  The markup we are going to render.
+ * @param  boolean $echo    Whether to echo it out or return it.
+ *
+ * @return HTML
+ */
+function render_final_output( $markup, $echo = true ) {
+
+	// Return if requested.
+	if ( empty( $echo ) ) {
+		return $markup;
+	}
+
+	// Just echo it.
+	echo $markup;
+
+	// And be done.
+	return;
+}
+
+/**
  * Build and display the header.
  *
  * @param  integer $product_id  The product ID we are leaving a review for.
@@ -40,17 +62,7 @@ function display_review_template_header( $product_id = 0, $echo = true ) {
 
 	// Return the override if we have it.
 	if ( ! empty( $maybe_override ) ) {
-
-		// Return if requested.
-		if ( empty( $echo ) ) {
-			return $maybe_override;
-		}
-
-		// Just echo it.
-		echo $maybe_override;
-
-		// And be done, since we skipped it.
-		return;
+		return render_final_output( $maybe_override, $echo );
 	}
 
 	// Get some variables based on the product ID.
@@ -84,13 +96,8 @@ function display_review_template_header( $product_id = 0, $echo = true ) {
 	// Close up the div tag.
 	$build .= '</div>';
 
-	// Return if requested.
-	if ( empty( $echo ) ) {
-		return $build;
-	}
-
-	// Just echo it.
-	echo $build;
+	// Do the return or echo based on the call.
+	return render_final_output( $build, $echo );
 }
 
 /**
@@ -113,17 +120,7 @@ function display_review_template_sorting( $product_id = 0, $echo = true ) {
 
 	// Return the override if we have it.
 	if ( ! empty( $maybe_override ) ) {
-
-		// Return if requested.
-		if ( empty( $echo ) ) {
-			return $maybe_override;
-		}
-
-		// Just echo it.
-		echo $maybe_override;
-
-		// And be done, since we skipped it.
-		return;
+		return render_final_output( $maybe_override, $echo );
 	}
 
 	// Get all the characteristics we have.
@@ -191,13 +188,8 @@ function display_review_template_sorting( $product_id = 0, $echo = true ) {
 	// Close up the div tag.
 	$build .= '</div>';
 
-	// Return if requested.
-	if ( empty( $echo ) ) {
-		return $build;
-	}
-
-	// Just echo it.
-	echo $build;
+	// Do the return or echo based on the call.
+	return render_final_output( $build, $echo );
 }
 
 /**
@@ -220,17 +212,7 @@ function display_existing_reviews( $product_id = 0, $echo = true ) {
 
 	// Return the override if we have it.
 	if ( ! empty( $maybe_override ) ) {
-
-		// Return if requested.
-		if ( empty( $echo ) ) {
-			return $maybe_override;
-		}
-
-		// Just echo it.
-		echo $maybe_override;
-
-		// And be done, since we skipped it.
-		return;
+		return render_final_output( $maybe_override, $echo );
 	}
 
 	// Check for a sorting request.
@@ -239,7 +221,7 @@ function display_existing_reviews( $product_id = 0, $echo = true ) {
 	// Fetch any existing reviews we may have.
 	$fetch_reviews  = false !== $filtered_ids ? Queries\get_review_batch( $filtered_ids ) : Queries\get_reviews_for_product( $product_id, 'display' );
 
-	// Set my content.
+	// If we have no reviews, return a message of some kind.
 	if ( empty( $fetch_reviews ) ) {
 
 		// Determine the text based on whether we have a filter sort request.
@@ -248,16 +230,8 @@ function display_existing_reviews( $product_id = 0, $echo = true ) {
 		// Set our single line return.
 		$notext = '<p class="woocommerce-noreviews woo-better-reviews-no-reviews">' . esc_html( $no_msg ) . '</p>';
 
-		// Return if requested.
-		if ( empty( $echo ) ) {
-			return $notext;
-		}
-
-		// Just echo it.
-		echo $notext;
-
 		// And be done.
-		return;
+		return render_final_output( $notext, $echo );
 	}
 
 	// Set a simple counter.
@@ -310,13 +284,8 @@ function display_existing_reviews( $product_id = 0, $echo = true ) {
 	// Close the large div wrapper.
 	$build .= '</div>';
 
-	// Return if requested.
-	if ( empty( $echo ) ) {
-		return $build;
-	}
-
-	// Just echo it.
-	echo $build;
+	// Do the return or echo based on the call.
+	return render_final_output( $build, $echo );
 }
 
 /**
@@ -339,17 +308,7 @@ function display_new_review_form( $product_id = 0, $echo = true ) {
 
 	// Return the override if we have it.
 	if ( ! empty( $maybe_override ) ) {
-
-		// Return if requested.
-		if ( empty( $echo ) ) {
-			return $maybe_override;
-		}
-
-		// Just echo it.
-		echo $maybe_override;
-
-		// And be done, since we skipped it.
-		return;
+		return render_final_output( $maybe_override, $echo );
 	}
 
 	// Set my action link.
@@ -397,11 +356,6 @@ function display_new_review_form( $product_id = 0, $echo = true ) {
 	// Close up the div.
 	$build .= '</div>';
 
-	// Return if requested.
-	if ( empty( $echo ) ) {
-		return $build;
-	}
-
-	// Just echo it.
-	echo $build;
+	// Do the return or echo based on the call.
+	return render_final_output( $build, $echo );
 }
