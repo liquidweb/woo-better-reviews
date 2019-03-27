@@ -1025,13 +1025,11 @@ function get_reviews_for_sorting( $product_id = 0, $charstcs_id = 0, $charstcs_v
 /**
  * Get a batch of reviews from a sort or filter.
  *
- * @param  array   $review_ids   The IDs we want.
- * @param  string  $return_type  What type of return we want. Accepts "counts", "objects", "display", or single fields.
- * @param  boolean $purge        Optional to purge the cache'd version before looking up.
+ * @param  array $review_ids  The IDs we want.
  *
  * @return mixed
  */
-function get_review_batch( $review_ids = array(), $return_type = 'objects', $purge = false ) {
+function get_review_batch( $review_ids = array() ) {
 
 	// If we have a 'none', return false right away.
 	if ( 'none' === sanitize_text_field( $review_ids ) ) {

@@ -16,6 +16,9 @@ Like reviews, only way better.
 * front-end messages
 * anonymous reviews
 * single attribute scoring
+* paginate review list
+
+
 
 
 add visual summary to aggregate reviews
@@ -24,6 +27,7 @@ scoring breakdown
 move stars to single row above title
 move attributes under title
 move author name to bottom, above author stuff
+
 
 stars / title same line
 date

@@ -1,13 +1,17 @@
 
 .woo-better-reviews-list-sorting-wrapper {
 
-	margin: 0 0 10px;
+	margin: 0 0 25px;
+	padding: 10px;
+	border: 1px solid #ccc;
+	background-color: #efefef;
 
 	.woo-better-reviews-list-group {
 
 		margin: 0;
 		padding: 0;
 		list-style: none;
+		text-align: center;
 
 		.woo-better-reviews-list-single {
 			display: inline-block;
@@ -17,8 +21,12 @@
 			padding: 0;
 
 			label {
+				/*
 				font-size: 12px;
 				margin-right: 3px;
+				*/
+				visibility: hidden;
+				display: none;
 			}
 
 			select {
@@ -33,6 +41,15 @@
 
 			&.woo-better-reviews-list-single-submit {
 				margin-right: 0;
+			}
+
+			.woo-better-reviews-single-button {
+				padding: 5px 20px;
+				height: 26px;
+				font-size: 12px;
+				line-height: 1;
+				font-weight: 700;
+				text-transform: uppercase;
 			}
 
 		}

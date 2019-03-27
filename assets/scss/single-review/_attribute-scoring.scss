@@ -1,0 +1,91 @@
+
+
+.woo-better-reviews-single-attributes-scoring-wrap {}
+
+.woo-better-reviews-single-attribute-scoring-block {
+
+	display: inline-block;
+	vertical-align: top;
+	width: 31%;
+	margin: 0 2% 10px 0;
+	padding: 0 0 10px;
+
+	p {
+		margin: 0;
+	}
+
+	.woo-better-reviews-list-attribute-summary-title {
+		font-size: 11px;
+		font-weight: 700;
+		line-height: 1;
+		text-transform: uppercase;
+		margin-bottom: 2px;
+	}
+
+	.woo-better-reviews-list-attribute-summary-squares {
+
+		line-height: 16px;
+		margin-bottom: 4px;
+		text-align: center;
+
+		.woo-better-reviews-list-attribute-summary-square {
+
+			display: inline-block;
+			vertical-align: middle;
+			height: 12px;
+			width: 13%;
+			border: 1px solid;
+			margin: 0 1% 0 0;
+
+			&.woo-better-reviews-list-attribute-summary-square-empty {
+				border-color: #efefef;
+				background-color: #efefef;
+			}
+
+			&.woo-better-reviews-list-attribute-summary-square-fill {
+				border-color: #111;
+				background-color: #111;
+			}
+
+			&:last-child {
+				margin-right: 0;
+			}
+
+		}
+
+	}
+
+	.woo-better-reviews-list-attribute-summary-labelset {
+		font-size: 10px;
+		line-height: 1;
+	}
+
+	.woo-better-reviews-list-attribute-summary-label {
+		display: inline-block;
+		vertical-align: top;
+		width: 50%;
+		padding: 0;
+
+		&.woo-better-reviews-list-attribute-summary-label-min {
+			text-align: left;
+			padding-left: 3%;
+		}
+
+		&.woo-better-reviews-list-attribute-summary-label-max {
+			text-align: right;
+			padding-right: 3%;
+		}
+	}
+
+	&:last-of-type {
+		margin-right: 0;
+	}
+
+}
+
+
+@media only screen and (max-width: 782px) {}
+
+
+@media only screen and (max-width: 600px) {}
+

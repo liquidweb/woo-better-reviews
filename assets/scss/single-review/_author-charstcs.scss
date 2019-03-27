@@ -1,16 +1,33 @@
 
+.woo-better-reviews-single-charstcs-wrap {
+
+	.woo-better-reviews-single-author {
+		margin: 0 0 3px;
+		text-align: center;
+		font-weight: 300;
+
+		.woo-better-reviews-single-author-val {
+			font-weight: 400;
+		}
+	}
+
+}
+
 .woo-better-reviews-author-charstcs {
 
 	margin: 0;
 	padding: 0;
 	list-style: none;
+	font-size: 14px;
+	line-height: 18px;
+	text-align: center;
 
 	.woo-better-reviews-single-author-charstc {
 		display: inline-block;
 		vertical-align: middle;
 		width: auto;
 		margin: 0;
-		padding: 2px 10px 2px 0;
+		padding: 0 10px 0 0;
 
 		&:after {
 			content: "|";

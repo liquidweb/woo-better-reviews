@@ -1,7 +1,7 @@
 
 .woo-better-reviews-list-visual-aggregate-wrapper {
-	margin: 0 0 20px;
-	padding: 7px;
+	margin: 0 0 15px;
+	padding: 10px;
 	border: 1px solid #ccc;
 	background-color: #efefef;
 }
@@ -31,6 +31,12 @@
 		list-style: none;
 	}
 
+	.woo-better-reviews-list-total-score {
+
+		.woo-better-reviews-single-star-full { color: #FFD700; }
+
+		.woo-better-reviews-single-star-empty { color: #999; }
+	}
 }
 
 .woo-better-reviews-list-aggregate-group {

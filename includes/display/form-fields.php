@@ -514,7 +514,8 @@ function get_review_sorting_dropdown_field( $field_args = array(), $field_key = 
 	$set_field_name     = ! empty( $field_name ) ? $field_name : 'woo-better-reviews-sorting[charstcs][' . sanitize_html_class( $field_key ) . ']';
 
 	// Check for the empty to be included in the data array.
-	$set_select_options = array( '0' => __( '(Select)', 'woo-better-reviews' ) ) + $field_args['options'];
+	$set_select_none    = '(' . $field_args['label'] . ')';
+	$set_select_options = array( '0' => esc_attr( $set_select_none ) ) + $field_args['options'];
 
 	// Attempt to check for a POSTed value.
 	$set_posted_char_id = ! empty( $field_args['id'] ) ? $field_args['id'] : 0;

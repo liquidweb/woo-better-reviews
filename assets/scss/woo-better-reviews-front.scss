@@ -2,16 +2,17 @@
 
 // The pieces tied to the general list setup.
 @import "review-list/visual-aggregate";
-@import "review-list/header";
-@import "review-list/sorting";
-@import "review-list/wrapper";
+@import "review-list/title-wrapper";
+@import "review-list/sorting-fields";
+
 
 // Our single review parts.
 @import "single-review/display-wrap";
-@import "single-review/header";
+@import "single-review/title-date-stars";
+@import "single-review/attribute-scoring";
+@import "single-review/review-body";
 @import "single-review/author-charstcs";
-@import "single-review/ratings";
-@import "single-review/content";
+
 
 // The new review form.
 @import "new-review/display-wrap";

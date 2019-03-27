@@ -114,7 +114,7 @@ function set_review_aggregate_rating_breakdown_view( $product_id = 0, $range_cou
 				$display_view  .= '<li class="woo-better-reviews-list-aggregate-group-content-list-item woo-better-reviews-list-rating-breakdown-item">';
 
 					// Output the label portion.
-					$display_view  .= '<span class="woo-better-reviews-list-breakdown-label">' . sprintf( __( '%d Stars:', 'woo-better-reviews' ), absint( $i ) ) . '</span>';
+					$display_view  .= '<span class="woo-better-reviews-list-breakdown-label">' . sprintf( _n( '%d Star:', '%d Stars:', absint( $i ), 'woo-better-reviews' ), absint( $i ) ) . '</span>';
 
 					// Handle the bar graph output.
 					$display_view  .= '<span class="' . esc_attr( $bar_class ) . '"></span>';

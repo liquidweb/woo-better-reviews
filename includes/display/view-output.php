@@ -22,28 +22,6 @@ use LiquidWeb\WooBetterReviews\Display\LayoutReviewAggregate as LayoutReviewAggr
 use WP_Error;
 
 /**
- * Handle the last-step output of echoing or returning.
- *
- * @param  mixed   $markup  The markup we are going to render.
- * @param  boolean $echo    Whether to echo it out or return it.
- *
- * @return HTML
- */
-function render_final_output( $markup, $echo = true ) {
-
-	// Return if requested.
-	if ( empty( $echo ) ) {
-		return $markup;
-	}
-
-	// Just echo it.
-	echo $markup;
-
-	// And be done.
-	return;
-}
-
-/**
  * Build and display the visual aggregated review data.
  *
  * @param  integer $product_id  The product ID we are leaving a review for.
@@ -231,7 +209,7 @@ function display_review_template_sorting( $product_id = 0, $echo = true ) {
 
 				// Set the submit piece.
 				$build .= '<li class="woo-better-reviews-list-single woo-better-reviews-list-single-submit">';
-					$build .= '<button name="wbr-single-sort-submit" type="submit" class="button" value="1">' . __( 'Filter', 'woo-better-reviews' ) . '</button>';
+					$build .= '<button name="wbr-single-sort-submit" type="submit" class="button woo-better-reviews-single-button" value="1">' . __( 'Filter', 'woo-better-reviews' ) . '</button>';
 				$build .= '</li>';
 
 			// Close up the list.
@@ -293,6 +271,9 @@ function display_existing_reviews( $product_id = 0, $echo = true ) {
 		return render_final_output( $notext, $echo );
 	}
 
+	// Reset the array keys.
+	$fetch_reviews  = array_values( $fetch_reviews );
+
 	// Set a simple counter.
 	$i  = 0;
 
@@ -303,7 +284,7 @@ function display_existing_reviews( $product_id = 0, $echo = true ) {
 	$build .= '<div class="woo-better-reviews-list-display-wrapper">';
 
 	// Now begin to loop the reviews and do the thing.
-	foreach ( $fetch_reviews as $single_review ) {
+	foreach ( (array) $fetch_reviews as $single_review ) {
 		// preprint( $single_review, true );
 
 		// Skip the non-approved ones for now.
@@ -319,16 +300,13 @@ function display_existing_reviews( $product_id = 0, $echo = true ) {
 		$build .= '<div id="' . sanitize_html_class( 'woo-better-reviews-single-' . absint( $single_review['review_id'] ) ) . '" class="' . esc_attr( $class ) . '">';
 
 			// Output the title.
-			$build .= LayoutSingleReview\set_single_review_title_view( $single_review );
-
-			// Output our date and author view.
-			$build .= LayoutSingleReview\set_single_review_date_author_view( $single_review );
-
-			// Output the actual content of the review.
-			$build .= LayoutSingleReview\set_single_review_content_view( $single_review );
+			$build .= LayoutSingleReview\set_single_review_header_view( $single_review );
 
 			// Do the scoring output.
-			$build .= LayoutSingleReview\set_single_review_ratings_view( $single_review );
+			$build .= LayoutSingleReview\set_single_review_attributes_scoring_view( $single_review );
+
+			// Output the actual content of the review.
+			$build .= LayoutSingleReview\set_single_review_content_body_view( $single_review );
 
 			// Output the author characteristics.
 			$build .= LayoutSingleReview\set_single_review_author_charstcs_view( $single_review );
@@ -417,4 +395,26 @@ function display_new_review_form( $product_id = 0, $echo = true ) {
 
 	// Do the return or echo based on the call.
 	return render_final_output( $build, $echo );
+}
+
+/**
+ * Handle the last-step output of echoing or returning.
+ *
+ * @param  mixed   $markup  The markup we are going to render.
+ * @param  boolean $echo    Whether to echo it out or return it.
+ *
+ * @return HTML
+ */
+function render_final_output( $markup, $echo = true ) {
+
+	// Return if requested.
+	if ( empty( $echo ) ) {
+		return $markup;
+	}
+
+	// Just echo it.
+	echo $markup;
+
+	// And be done.
+	return;
 }

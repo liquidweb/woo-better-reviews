@@ -138,6 +138,14 @@ function maybe_sorted_reviews() {
 		return false;
 	}
 
+	// Check for any actual values.
+	$charstcs_unique    = array_filter( $_POST['woo-better-reviews-sorting']['charstcs'] );
+
+	// If they don't have unique items (meaning all zeros), bail.
+	if ( empty( $charstcs_unique ) ) {
+		return false;
+	}
+
 	// Set an empty for our return.
 	$requested_ids      = array();
 
@@ -357,6 +365,9 @@ function get_scoring_stars_display( $product_id = 0, $review_score = 0, $include
 	// Set the aria label.
 	$aria_label = sprintf( __( 'Overall Score: %s', 'woo-better-reviews' ), absint( $score_show ) );
 
+	// Set the base class for a star.
+	$star_class = 'dashicons dashicons-star-filled woo-better-reviews-single-star';
+
 	// Set the empty.
 	$setup  = '';
 
@@ -367,11 +378,11 @@ function get_scoring_stars_display( $product_id = 0, $review_score = 0, $include
 		$setup  .= '<span class="woo-better-reviews-list-total-score" aria-label="' . esc_attr( $aria_label ) . '">';
 
 			// Output the full stars.
-			$setup  .= str_repeat( '<span class="woo-better-reviews-single-star woo-better-reviews-single-star-full">&#9733;</span>', $score_show );
+			$setup  .= str_repeat( '<i class="' . esc_attr( $star_class ) . ' woo-better-reviews-single-star-full"></i>', $score_show );
 
 			// Output the empty stars.
 			if ( $score_left > 0 ) {
-				$setup  .= str_repeat( '<span class="woo-better-reviews-single-star woo-better-reviews-single-star-empty">&#9734;</span>', $score_left );
+				$setup  .= str_repeat( '<i class="' . esc_attr( $star_class ) . ' woo-better-reviews-single-star-empty"></i>', $score_left );
 			}
 
 		// Close the span.

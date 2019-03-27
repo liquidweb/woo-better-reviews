@@ -16,29 +16,53 @@ use LiquidWeb\WooBetterReviews\Queries as Queries;
 use LiquidWeb\WooBetterReviews\Display\FormFields as FormFields;
 
 /**
- * Set the display view for the review post date.
+ * Build and return the header portion for a single review.
  *
  * @param  array $review  The data tied to the review.
  *
  * @return HTML
  */
-function set_single_review_title_view( $review = array() ) {
+function set_single_review_header_view( $review = array() ) {
 
 	// Bail without the parts we want.
 	if ( empty( $review ) ) {
 		return;
 	}
 
+	// Check for the verified part to add our icon.
+	$show_verified  = ! empty( $review['is_verified'] ) ? '<span aria-label="' . esc_attr__( 'This review is verified.', 'woo-better-reviews' ) . '" class="woo-better-reviews-single-verified-check"></span>' : '';
+
 	// First set the empty.
 	$display_view   = '';
 
-	// Now set up our date view display.
+	// Set a div around it.
+	$display_view  .= '<div class="woo-better-reviews-single-header-wrap">';
+
+	// Output the stars.
+	if ( ! empty( $review['total_score'] ) ) {
+		$display_view  .= '<span class="woo-better-reviews-single-stars-wrap">' . Helpers\get_scoring_stars_display( 0, $review['total_score'], false ) . '</span>';
+	}
+
+	// Output the actual title.
 	if ( ! empty( $review['title'] ) ) {
 		$display_view  .= '<h4 class="woo-better-reviews-single-title">' . esc_html( $review['title'] ) . '</h4>';
 	}
 
+	// Now set up our date view display.
+	if ( ! empty( $review['date'] ) ) {
+
+		// Format my date.
+		$formatted_date = date( get_option( 'date_format' ), strtotime( $review['date'] ) );
+
+		// And add it to my view.
+		$display_view  .= '<p class="woo-better-reviews-single-date">' . sprintf( __( 'Posted on %s', 'woo-better-reviews' ), '<span class="woo-better-reviews-single-date-val">' . esc_attr( $formatted_date ) . '</span>' ) . $show_verified . '</p>';
+	}
+
+	// Close out the div.
+	$display_view  .= '</div>';
+
 	// Return it, filtered.
-	return apply_filters( Core\HOOK_PREFIX . 'single_review_title_view', $display_view, $review );
+	return apply_filters( Core\HOOK_PREFIX . 'single_review_header_view', $display_view, $review );
 }
 
 /**
@@ -48,52 +72,72 @@ function set_single_review_title_view( $review = array() ) {
  *
  * @return HTML
  */
-function set_single_review_ratings_view( $review = array() ) {
+function set_single_review_attributes_scoring_view( $review = array() ) {
 
 	// Bail without the parts we want.
-	if ( empty( $review ) || empty( $review['total_score'] ) && empty( $review['rating_attributes'] ) ) {
+	if ( empty( $review ) || empty( $review['rating_attributes'] ) ) {
 		return;
 	}
 
 	// First set the empty.
 	$display_view   = '';
 
-	// Output the total score part.
-	if ( ! empty( $review['total_score'] ) ) {
-		$display_view  .= Helpers\get_scoring_stars_display( $review['total_score'], 0, false );
-	}
+	// Loop my characteristics.
+	foreach ( $review['rating_attributes'] as $attribute_data ) {
+		// preprint( $attribute_data, true );
+		// Set my attribute score.
+		$single_score   = ! empty( $attribute_data['value'] ) ? absint( $attribute_data['value'] ) : 0;
 
-	//  Handle displaying each attribute.
-	if ( ! empty( $review['rating_attributes'] ) ) {
+		// Get my labels for the box.
+		$attribute_lbls = Queries\get_single_attribute( $attribute_data['id'], 'labels' );
 
-		// Set an unordered list.
-		$display_view  .= '<ul class="woo-better-reviews-single-rating-attributes">';
+		// Set my various classes and labels.
+		$set_min_label  = ! empty( $attribute_lbls['min'] ) ? esc_attr( $attribute_lbls['min'] ) : __( 'Min.', 'woo-better-reviews' );
+		$set_max_label  = ! empty( $attribute_lbls['max'] ) ? esc_attr( $attribute_lbls['max'] ) : __( 'Max.', 'woo-better-reviews' );
+		$min_max_class  = 'woo-better-reviews-list-attribute-summary-label woo-better-reviews-list-attribute-summary-label-';
 
-		// Loop my characteristics.
-		foreach ( $review['rating_attributes'] as $attribute ) {
+		// Set it inside a div.
+		$display_view  .= '<div class="woo-better-reviews-single-attribute-scoring-block">';
 
-			// Set the list item.
-			$display_view  .= '<li class="woo-better-reviews-single-rating-attribute">';
+			// Output the title portion.
+			$display_view  .= '<p class="woo-better-reviews-list-attribute-summary-title">' . esc_html( $attribute_data['label'] ) . '</p>';
 
-				// Set the label.
-				$display_view  .= '<span class="woo-better-reviews-rating-attribute-item woo-better-reviews-rating-attribute-label">' . esc_html( $attribute['label'] ) . ': </span>';
+			// Wrap the span blocks in a paragraph.
+			$display_view  .= '<p class="woo-better-reviews-list-attribute-summary-squares">';
 
-				// Set the value.
-				$display_view  .= '<span class="woo-better-reviews-rating-attribute-item woo-better-reviews-rating-attribute-value">' . esc_html( $attribute['value'] ) . ' / <small>7</small></span>';
+			// Now output each count block with a class applied on the match.
+			for ( $i = 1; $i <= 7; $i++ ) {
 
-			// Close the list item.
-			$display_view  .= '</li>';
-		}
+				// Set a class if it matches.
+				$square_class   = 'woo-better-reviews-list-attribute-summary-square woo-better-reviews-list-attribute-summary-square-' . absint( $i );
+				$square_class  .= absint( $single_score ) === absint( $i ) ? ' woo-better-reviews-list-attribute-summary-square-fill' : ' woo-better-reviews-list-attribute-summary-square-empty';
 
-		// Close up the unordered list.
-		$display_view  .= '</ul>';
+				// Make my span.
+				$display_view  .= '<span class="' . esc_attr( $square_class ) . '"></span>';
+			}
+
+			// Close the paragraph.
+			$display_view  .= '</p>';
+
+			// Handle my min-max labeling.
+			$display_view  .= '<p class="woo-better-reviews-list-attribute-summary-labelset">';
+
+				// Set the min and max.
+				$display_view  .= '<span class="' . esc_attr( $min_max_class . 'min' ) . '">' . $set_min_label . '</span>';
+				$display_view  .= '<span class="' . esc_attr( $min_max_class . 'max' ) . '">' . $set_max_label . '</span>';
+
+			// Close the label group.
+			$display_view  .= '</p>';
+
+		// Close up the div.
+		$display_view  .= '</div>';
 	}
 
 	// Wrap it in a div tag.
-	$display_wrap   = '<div class="woo-better-reviews-single-scoring-wrap">' . $display_view . '</div>';
+	$display_wrap   = '<div class="woo-better-reviews-single-attributes-scoring-wrap">' . $display_view . '</div>';
 
 	// Return it, filtered.
-	return apply_filters( Core\HOOK_PREFIX . 'single_review_ratings_view', $display_wrap, $review );
+	return apply_filters( Core\HOOK_PREFIX . 'single_review_attribute_scoring_view', $display_wrap, $review );
 }
 
 /**
@@ -103,7 +147,7 @@ function set_single_review_ratings_view( $review = array() ) {
  *
  * @return HTML
  */
-function set_single_review_content_view( $review = array() ) {
+function set_single_review_content_body_view( $review = array() ) {
 
 	// Bail without the parts we want.
 	if ( empty( $review ) || empty( $review['review'] ) ) {
@@ -118,67 +162,11 @@ function set_single_review_content_view( $review = array() ) {
 
 	// Set a div around it.
 	$display_view  .= '<div class="woo-better-reviews-single-content-wrap">';
-
-	// Output.
-	$display_view  .= wpautop( wp_kses_post( $texturize_text ) );
-
-	// Close up the div.
+		$display_view  .= wpautop( wp_kses_post( $texturize_text ) );
 	$display_view  .= '</div>';
 
 	// Return it, filtered.
-	return apply_filters( Core\HOOK_PREFIX . 'single_review_content_view', $display_view, $review );
-}
-
-/**
- * Set the display view for the review post date.
- *
- * @param  array $review  The data tied to the review.
- *
- * @return HTML
- */
-function set_single_review_date_author_view( $review = array() ) {
-
-	// Bail without the parts we want.
-	if ( empty( $review ) ) {
-		return;
-	}
-
-	// Set my class prefix.
-	$class_prefix   = 'woo-better-reviews-inline-item woo-better-reviews-inline';
-
-	// First set the empty.
-	$display_view   = array();
-
-	// Now set up our date view display.
-	if ( ! empty( $review['date'] ) ) {
-
-		// Format my date.
-		$formatted_date = date( get_option( 'date_format' ), strtotime( $review['date'] ) );
-
-		// And add it to my view.
-		$display_view[] = sprintf( __( 'Posted on %s', 'woo-better-reviews' ), '<span class="' . esc_attr( $class_prefix ) . '-review-date">' . esc_attr( $formatted_date ) . '</span>' );
-	}
-
-	// Now set up our author view display.
-	if ( ! empty( $review['author_name'] ) ) {
-		$display_view[] = sprintf( __( 'by %s', 'woo-better-reviews' ), '<span class="' . esc_attr( $class_prefix ) . '-author-name">' . esc_attr( $review['author_name'] ) . '</span>' );
-	}
-
-	// Check for the verified part to add our icon.
-	if ( ! empty( $review['verified'] ) ) {
-		$display_view[] = '<span aria-label="' . esc_attr__( 'This review is verified.', 'woo-better-reviews' ) . '" class="' . esc_attr( $class_prefix ) . '-verified-check"></span>';
-	}
-
-	// Return the empty filtered version.
-	if ( empty( $display_view ) ) {
-		return apply_filters( Core\HOOK_PREFIX . 'single_review_date_author_view', '', $review );
-	}
-
-	// Wrap it in a paragraph tag.
-	$display_wrap   = '<p class="woo-better-reviews-single-date-author">' . implode( ' ', $display_view ) . '</p>';
-
-	// Return it, filtered.
-	return apply_filters( Core\HOOK_PREFIX . 'single_review_date_author_view', $display_wrap, $review );
+	return apply_filters( Core\HOOK_PREFIX . 'single_review_content_body_view', $display_view, $review );
 }
 
 /**
@@ -197,6 +185,11 @@ function set_single_review_author_charstcs_view( $review = array() ) {
 
 	// First set the empty.
 	$display_view   = '';
+
+	// Now set up our author view display.
+	if ( ! empty( $review['author_name'] ) ) {
+		$display_view  .= '<p class="woo-better-reviews-single-author">' . sprintf( __( 'by %s', 'woo-better-reviews' ), '<span class="woo-better-reviews-single-author-val">' . esc_attr( $review['author_name'] ) . '</span>' ) . '</p>';
+	}
 
 	// Set an unordered list.
 	$display_view  .= '<ul class="woo-better-reviews-author-charstcs">';
@@ -220,6 +213,9 @@ function set_single_review_author_charstcs_view( $review = array() ) {
 	// Close up the unordered list.
 	$display_view  .= '</ul>';
 
+	// Set the whole thing inside a div.
+	$display_wrap   = '<div class="woo-better-reviews-single-charstcs-wrap">' . $display_view . '</div>';
+
 	// Return it, filtered.
-	return apply_filters( Core\HOOK_PREFIX . 'single_review_author_charstcs_view', $display_view, $review );
+	return apply_filters( Core\HOOK_PREFIX . 'single_review_author_charstcs_view', $display_wrap, $review );
 }
