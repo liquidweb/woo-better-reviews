@@ -96,8 +96,9 @@ if ( ! is_admin() ) {
 	require_once __DIR__ . '/includes/display/form-data.php';
 	require_once __DIR__ . '/includes/display/form-fields.php';
 	require_once __DIR__ . '/includes/display/form-process.php';
-	require_once __DIR__ . '/includes/display/layout-form.php';
-	require_once __DIR__ . '/includes/display/layout-reviews.php';
+	require_once __DIR__ . '/includes/display/layout-new-review-form.php';
+	require_once __DIR__ . '/includes/display/layout-single-review.php';
+	require_once __DIR__ . '/includes/display/layout-review-aggregate.php';
 	require_once __DIR__ . '/includes/display/view-output.php';
 	require_once __DIR__ . '/includes/display/woo-filters.php';
 }

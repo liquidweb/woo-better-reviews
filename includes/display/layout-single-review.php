@@ -6,7 +6,7 @@
  */
 
 // Declare our namespace.
-namespace LiquidWeb\WooBetterReviews\Display\LayoutReviews;
+namespace LiquidWeb\WooBetterReviews\Display\LayoutSingleReview;
 
 // Set our aliases.
 use LiquidWeb\WooBetterReviews as Core;
@@ -14,13 +14,6 @@ use LiquidWeb\WooBetterReviews\Helpers as Helpers;
 use LiquidWeb\WooBetterReviews\Utilities as Utilities;
 use LiquidWeb\WooBetterReviews\Queries as Queries;
 use LiquidWeb\WooBetterReviews\Display\FormFields as FormFields;
-
-/**
- * [set_single_review_scoring_total_view description]
- */
-function set_single_review_scoring_total_view() {
-
-}
 
 /**
  * Set the display view for the review post date.
@@ -230,4 +223,3 @@ function set_single_review_author_charstcs_view( $review = array() ) {
 	// Return it, filtered.
 	return apply_filters( Core\HOOK_PREFIX . 'single_review_author_charstcs_view', $display_view, $review );
 }
-

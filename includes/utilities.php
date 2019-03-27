@@ -148,13 +148,14 @@ function calculate_average_attribute_scoring( $attribute_set = array() ) {
 	// Now loop my setup and do the maths.
 	foreach ( $setup as $attribute_id => $score_string ) {
 
-		// Get my attribute data.
-
 		// Set my scoring array up.
 		$scoring_array  = explode( ',', $score_string );
 
 		// And calculate the average.
 		$attribute_avg  = array_sum( $scoring_array ) / count( $scoring_array );
+
+		// Get my labels if possible.
+		$attribute_lbls = Queries\get_single_attribute( $attribute_id, 'labels' );
 
 		// Add my two values.
 		$build[ $attribute_id ] = array(
@@ -162,7 +163,8 @@ function calculate_average_attribute_scoring( $attribute_set = array() ) {
 			'average' => round( $attribute_avg, 0 ),
 			'total'   => count( $scoring_array ),
 			'title'   => $label_set[ $attribute_id ],
-			'labels'  => Queries\get_single_attribute( $attribute_id, 'labels' ),
+			'slug'    => sanitize_title_with_dashes( $label_set[ $attribute_id ], '', 'save' ),
+			'labels'  => $attribute_lbls,
 		);
 	}
 
@@ -531,6 +533,44 @@ function format_review_author_charstcs( $review ) {
 
 	// Return the array.
 	return wp_parse_args( $setup, $review );
+}
+
+/**
+ * Set up the class to create a single bar chart.
+ *
+ * @param integer $rating_count  The count of how many ratings this has.
+ * @param integer $review_count  The total count of reviews.
+ */
+function set_single_bar_graph_class( $rating_count = 0, $review_count = 0 ) {
+
+	// Set the base class for the bar chart.
+	$bar_class  = 'woo-better-reviews-list-breakdown-bar';
+
+	// Bail without a review count since we can't do the maths.
+	if ( empty( $review_count ) ) {
+		return $bar_class;
+	}
+
+	// If we have no rating, add the zero class and go about it.
+	if ( empty( $rating_count ) ) {
+		$bar_class .= ' woo-better-reviews-list-breakdown-bar-zero';
+	}
+
+	// If we have a rating, do some maths.
+	if ( ! empty( $rating_count ) ) {
+
+		// Calculate the average.
+		$rating_avg = absint( $rating_count ) / absint( $review_count );
+
+		// Get the formatted number string.
+		$rating_str = number_format( $rating_avg * 100, 0 );
+
+		// And add it.
+		$bar_class .= ' woo-better-reviews-list-breakdown-bar-fill woo-better-reviews-list-breakdown-bar-fill-' . esc_attr( $rating_str );
+	}
+
+	// Return the entire string.
+	return $bar_class;
 }
 
 /**

@@ -14,8 +14,9 @@ use LiquidWeb\WooBetterReviews\Helpers as Helpers;
 use LiquidWeb\WooBetterReviews\Utilities as Utilities;
 use LiquidWeb\WooBetterReviews\Queries as Queries;
 use LiquidWeb\WooBetterReviews\Display\FormFields as FormFields;
-use LiquidWeb\WooBetterReviews\Display\LayoutForm as LayoutForm;
-use LiquidWeb\WooBetterReviews\Display\LayoutReviews as LayoutReviews;
+use LiquidWeb\WooBetterReviews\Display\LayoutNewReviewForm as LayoutNewReviewForm;
+use LiquidWeb\WooBetterReviews\Display\LayoutSingleReview as LayoutSingleReview;
+use LiquidWeb\WooBetterReviews\Display\LayoutReviewAggregate as LayoutReviewAggregate;
 
 // And pull in any other namespaces.
 use WP_Error;
@@ -124,18 +125,6 @@ function display_review_template_visual_aggregate( $product_id = 0, $echo = true
 		return render_final_output( $maybe_override, $echo );
 	}
 
-	// Get some variables based on the product ID.
-	$average_score  = get_post_meta( $product_id, Core\META_PREFIX . 'average_rating', true );
-	$average_stars  = Helpers\get_scoring_stars_display( 0, $average_score, false );
-	/*
-	// Check for a sorting request.
-	$filtered_ids   = Helpers\maybe_sorted_reviews();
-
-	// Fetch any existing reviews we may have.
-	$fetch_reviews  = false !== $filtered_ids ? Queries\get_review_batch( $filtered_ids ) : Queries\get_reviews_for_product( $product_id, 'display' );
-	$review_count   = count( $fetch_reviews );
-	*/
-
 	// Fetch any existing reviews we may have.
 	$fetch_reviews  = Queries\get_reviews_for_product( $product_id, 'display' );
 	$total_scores   = wp_list_pluck( $fetch_reviews, 'total_score' );
@@ -148,14 +137,6 @@ function display_review_template_visual_aggregate( $product_id = 0, $echo = true
 	$attribute_args = wp_list_pluck( $fetch_reviews, 'rating_attributes' );
 	$attribute_set  = Utilities\calculate_average_attribute_scoring( array_values( $attribute_args ) );
 
-	// preprint( $fetch_reviews, true );
-	// preprint( $attribute_set, true );
-	// preprint( $total_scores, true );
-
-	// Set some text strings.
-	$score_wrapper  = '<span class="woo-better-reviews-scoring-number woo-better-reviews-scoring-value">' . absint( $average_score ) . '</span>';
-	$total_wrapper  = '<span class="woo-better-reviews-scoring-number woo-better-reviews-scoring-total">' . absint( 7 ) . '</span>';
-
 	// Set our empty.
 	$build  = '';
 
@@ -163,83 +144,13 @@ function display_review_template_visual_aggregate( $product_id = 0, $echo = true
 	$build .= '<div class="woo-better-reviews-list-visual-aggregate-wrapper">';
 
 		// Set the group for the average rating score.
-		$build .= '<div class="woo-better-reviews-list-aggregate-group woo-better-reviews-list-aggregate-average-rating">';
-
-			// Set a group title.
-			$build .= '<h4 class="woo-better-reviews-list-aggregate-group-title">' . esc_html__( 'Average Rating:', 'woo-better-reviews' ) . '</h4>';
-
-			// Wrap the group content in a div.
-			$build .= '<div class="woo-better-reviews-list-aggregate-group-content">';
-
-				// Output my total stars.
-				$build .= '<p class="woo-better-reviews-list-aggregate-group-content-item woo-better-reviews-list-aggregate-group-content-stars">' . $average_stars . '</p>';
-
-				// Output the text version.
-				$build .= '<p class="woo-better-reviews-list-aggregate-group-content-item woo-better-reviews-list-aggregate-group-content-average-text">' . sprintf( __( '%1$s of %2$s', 'woo-better-reviews' ), $score_wrapper, $total_wrapper ) . '</p>';
-
-				// Output the total version.
-				$build .= '<p class="woo-better-reviews-list-aggregate-group-content-item woo-better-reviews-list-aggregate-group-content-count-total">' . sprintf( __( '%d reviews total', 'woo-better-reviews' ), absint( $review_count ) ) . '</p>';
-
-			// Close the group content div.
-			$build .= '</div>';
-
-		// Close the overall score group.
-		$build .= '</div>';
+		$build .= LayoutReviewAggregate\set_review_aggregate_average_rating_view( $product_id, $review_count );
 
 		// Set the group for the rating breakdown score.
-		$build .= '<div class="woo-better-reviews-list-aggregate-group woo-better-reviews-list-aggregate-rating-breakdown">';
-
-			// Set a group title.
-			$build .= '<h4 class="woo-better-reviews-list-aggregate-group-title">' . esc_html__( 'Rating Breakdown:', 'woo-better-reviews' ) . '</h4>';
-
-			// Wrap the group content in a div.
-			$build .= '<div class="woo-better-reviews-list-aggregate-group-content">';
-
-				// Output my score breakdown.
-				$build .= '<ul class="woo-better-reviews-list-aggregate-group-content-list">';
-
-				// Output each count, going in reverse.
-				for ( $i = 7; $i >= 1; $i-- ) {
-
-					// Check for some instances of that.
-					$maybe_has  = array_key_exists( $i, $range_counts ) ? $range_counts[ $i ] : 0;
-
-					// Output the list.
-					$build .= '<li class="woo-better-reviews-list-aggregate-group-content-list-item">' . $i . ' Stars: ' . $maybe_has . '</li>';
-				}
-
-				// Close the list.
-				$build .= '</ul>';
-
-			// Close the group content div.
-			$build .= '</div>';
-
-		// Close the overall score group.
-		$build .= '</div>';
+		$build .= LayoutReviewAggregate\set_review_aggregate_rating_breakdown_view( $product_id, $range_counts, $review_count );
 
 		// Set the group for the rating summary score.
-		$build .= '<div class="woo-better-reviews-list-aggregate-group woo-better-reviews-list-aggregate-rating-summary">';
-
-			// Set a group title.
-			$build .= '<h4 class="woo-better-reviews-list-aggregate-group-title">' . esc_html__( 'Rating Summary:', 'woo-better-reviews' ) . '</h4>';
-
-			// Wrap the group content in a div.
-			$build .= '<div class="woo-better-reviews-list-aggregate-group-content">';
-
-				// Output my score breakdown.
-				$build .= '<ul class="woo-better-reviews-list-aggregate-group-content-list">';
-
-				// Output the list.
-				// $build .= '<li class="woo-better-reviews-list-aggregate-group-content-list-item">' . $i . ' Stars: ' . $maybe_has . '</li>';
-
-				// Close the list.
-				$build .= '</ul>';
-
-			// Close the group content div.
-			$build .= '</div>';
-
-		// Close the overall score group.
-		$build .= '</div>';
+		$build .= LayoutReviewAggregate\set_review_aggregate_attribute_summary_view( $product_id, $attribute_set );
 
 	// Close up the div tag.
 	$build .= '</div>';
@@ -408,19 +319,19 @@ function display_existing_reviews( $product_id = 0, $echo = true ) {
 		$build .= '<div id="' . sanitize_html_class( 'woo-better-reviews-single-' . absint( $single_review['review_id'] ) ) . '" class="' . esc_attr( $class ) . '">';
 
 			// Output the title.
-			$build .= LayoutReviews\set_single_review_title_view( $single_review );
+			$build .= LayoutSingleReview\set_single_review_title_view( $single_review );
 
 			// Output our date and author view.
-			$build .= LayoutReviews\set_single_review_date_author_view( $single_review );
+			$build .= LayoutSingleReview\set_single_review_date_author_view( $single_review );
 
 			// Output the actual content of the review.
-			$build .= LayoutReviews\set_single_review_content_view( $single_review );
+			$build .= LayoutSingleReview\set_single_review_content_view( $single_review );
 
 			// Do the scoring output.
-			$build .= LayoutReviews\set_single_review_ratings_view( $single_review );
+			$build .= LayoutSingleReview\set_single_review_ratings_view( $single_review );
 
 			// Output the author characteristics.
-			$build .= LayoutReviews\set_single_review_author_charstcs_view( $single_review );
+			$build .= LayoutSingleReview\set_single_review_author_charstcs_view( $single_review );
 
 		// Close the single review div.
 		$build .= '</div>';
@@ -471,32 +382,32 @@ function display_new_review_form( $product_id = 0, $echo = true ) {
 		// Set our form wrapper.
 		$build .= '<form class="woo-better-reviews-form-container" name="woo-better-reviews-rating-form" action="' . esc_url( $action_link ) . '" method="post">';
 
-			// Add filterable fields.
-			$build .= apply_filters( Core\HOOK_PREFIX . 'before_display_new_review_form', null, $product_id );
+			// Add actions for before and after fields.
+			$build .= do_action( Core\HOOK_PREFIX . 'before_display_new_review_form', $product_id );
 
 			// Add the title.
-			$build .= LayoutForm\set_review_form_rating_title_view( $product_id );
+			$build .= LayoutNewReviewForm\set_review_form_rating_title_view( $product_id );
 
 			// Output the rating input.
-			$build .= LayoutForm\set_review_form_rating_stars_view( $product_id );
+			$build .= LayoutNewReviewForm\set_review_form_rating_stars_view( $product_id );
 
 			// Set the attributes.
-			$build .= LayoutForm\set_review_form_rating_attributes_view( $product_id );
+			$build .= LayoutNewReviewForm\set_review_form_rating_attributes_view( $product_id );
 
 			// Handle the inputs themselves.
-			$build .= LayoutForm\set_review_form_content_fields_view( $product_id );
+			$build .= LayoutNewReviewForm\set_review_form_content_fields_view( $product_id );
 
 			// Now get the author fields.
-			$build .= LayoutForm\set_review_form_author_fields_view( get_current_user_id() );
+			$build .= LayoutNewReviewForm\set_review_form_author_fields_view( get_current_user_id() );
 
 			// Output the submit actions.
-			$build .= LayoutForm\set_review_form_submit_action_fields_view( $product_id );
+			$build .= LayoutNewReviewForm\set_review_form_submit_action_fields_view( $product_id );
 
 			// Output the hidden stuff.
-			$build .= LayoutForm\set_review_form_hidden_meta_fields_view( $product_id, get_current_user_id() );
+			$build .= LayoutNewReviewForm\set_review_form_hidden_meta_fields_view( $product_id, get_current_user_id() );
 
-			// Add filterable fields.
-			$build .= apply_filters( Core\HOOK_PREFIX . 'after_new_review_form_after', null, $product_id );
+			// Add actions for before and after fields.
+			$build .= do_action( Core\HOOK_PREFIX . 'after_new_review_form_after', $product_id );
 
 		// Close out the form.
 		$build .= '</form>';

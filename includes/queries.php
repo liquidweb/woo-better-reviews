@@ -1525,8 +1525,11 @@ function get_single_attribute( $attribute_id = 0, $return_type = 'dataset', $pur
 			$min_label  = $cached_dataset['min_label'];
 			$max_label  = $cached_dataset['max_label'];
 
-			// Return my list, plucked.
-			return array( 'min' => $min_label, 'max' => $max_label );
+			// Get my label set as an array.
+			$label_arr  = array( 'min' => $min_label, 'max' => $max_label );
+
+			// Return my array, cleaned out.
+			return array_filter( $label_arr );
 			break;
 
 		// No more case breaks, no more return types.
