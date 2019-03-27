@@ -27,11 +27,8 @@ add_action( 'init', __NAMESPACE__ . '\process_review_submission' );
  */
 function process_review_submission() {
 
-	// Run the check if we're enabled or not.
-	$maybe_enabled  = Helpers\maybe_reviews_enabled();
-
-	// Bail if we aren't aren't enabled, on admin, or don't have our posted key.
-	if ( is_admin() || empty( $_POST['woo-better-reviews-add-new'] ) || ! $maybe_enabled ) {
+	// Bail if we aren't on admin, or don't have our posted key.
+	if ( is_admin() || empty( $_POST['woo-better-reviews-add-new'] ) ) {
 		return;
 	}
 
@@ -58,6 +55,14 @@ function process_review_submission() {
 
 	// Create my base redirect link.
 	$base_redirect  = get_permalink( $product_id );
+
+	// Run the check if we're enabled or not.
+	$maybe_enabled  = Helpers\maybe_reviews_enabled( $product_id );
+
+	// Bail if we aren't aren't enabled.
+	if ( ! $maybe_enabled ) {
+		redirect_front_submit_result( $base_redirect, 'reviews-not-enabled' );
+	}
 
 	// If we don't have the data pieces, bail.
 	if ( empty( $_POST['woo-better-reviews-rating'] ) ) {

@@ -73,7 +73,6 @@ require_once __DIR__ . '/includes/tables/tax-characteristics.php';
 
 // Load the files loaded plugin-wide.
 require_once __DIR__ . '/includes/queries.php';
-require_once __DIR__ . '/includes/woo-settings.php';
 require_once __DIR__ . '/includes/woo-class.php';
 
 // Load the admin specific files.
@@ -88,6 +87,7 @@ if ( is_admin() ) {
 	require_once __DIR__ . '/includes/admin/list-attributes.php';
 	require_once __DIR__ . '/includes/admin/list-charstcs.php';
 	require_once __DIR__ . '/includes/admin/product-meta.php';
+	require_once __DIR__ . '/includes/admin/woo-settings.php';
 }
 
 // Load the front-end specific files.

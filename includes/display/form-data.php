@@ -34,7 +34,7 @@ function get_review_content_form_fields( $keys = false ) {
 		),
 
 		'review-content' => array(
-			'label'       => __( 'Full Review', 'woo-better-reviews' ),
+			'label'       => __( 'Review Content', 'woo-better-reviews' ),
 			'type'        => 'editor-minimal',
 			'required'    => true,
 			'description' => '',

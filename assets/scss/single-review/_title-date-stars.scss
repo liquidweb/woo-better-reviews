@@ -7,7 +7,7 @@
 		display: inline-block;
 		vertical-align: middle;
 		width: auto;
-		margin: 0 10px 0 0;
+		margin: 0 20px 0 0;
 		line-height: 30px;
 
 		.woo-better-reviews-single-star {
@@ -23,6 +23,14 @@
 		margin: 0;
 		font-size: 24px;
 		line-height: 30px;
+
+		&:before {
+			content: open-quote;
+		}
+
+		&:after {
+			content: close-quote;
+		}
 	}
 
 	.woo-better-reviews-single-date {

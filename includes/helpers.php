@@ -59,15 +59,25 @@ function maybe_valid_table( $table_name = '' ) {
 /**
  * Check to see if reviews are enabled.
  *
+ * @param  integer $product_id  The ID of the individual product.
+ *
  * @return boolean
  */
-function maybe_reviews_enabled() {
+function maybe_reviews_enabled( $product_id = 0 ) {
 
-	// Check the Woo setting.
+	// Check the Woo setting first.
 	$woo_enable = get_option( 'woocommerce_enable_reviews', 0 );
 
-	// Return a basic boolean.
-	return ! empty( $woo_enable ) && 'yes' === sanitize_text_field( $woo_enable ) ? true : false;
+	// Return a basic boolean if no product ID was provided.
+	if ( empty( $product_id ) ) {
+		return ! empty( $woo_enable ) && 'yes' === sanitize_text_field( $woo_enable ) ? true : false;
+	}
+
+	// Now check the single product.
+	$is_enabled = comments_open( $product_id );
+
+	// Return this boolean.
+	return false !== $is_enabled ? true : false;
 }
 
 /**
@@ -77,7 +87,7 @@ function maybe_reviews_enabled() {
  */
 function maybe_attributes_global() {
 
-	// Check the Woo setting.
+	// Check the Woo setting first.
 	$are_global = get_option( 'woocommerce_wbr_global_attributes', 0 );
 
 	// Return a basic boolean.
@@ -146,6 +156,9 @@ function maybe_sorted_reviews() {
 		return false;
 	}
 
+	// Set my single product ID.
+	$single_product_id  = absint( $_POST['wbr-single-sort-product-id'] );
+
 	// Set an empty for our return.
 	$requested_ids      = array();
 
@@ -159,7 +172,7 @@ function maybe_sorted_reviews() {
 	foreach ( $sorting_charstcs as $charstcs_id => $charstcs_value ) {
 
 		// Attempt reviews.
-		$maybe_found_items = Queries\get_reviews_for_sorting( absint( $_POST['wbr-single-sort-product-id'] ), $charstcs_id, $charstcs_value );
+		$maybe_found_items = Queries\get_reviews_for_sorting( $single_product_id, $charstcs_id, $charstcs_value );
 
 		// If no items are found, just bail because we don't have a match.
 		if ( empty( $maybe_found_items ) || is_wp_error( $maybe_found_items ) ) {

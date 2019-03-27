@@ -15,24 +15,11 @@ Like reviews, only way better.
 * set other field types
 * front-end messages
 * anonymous reviews
-* single attribute scoring
 * paginate review list
+* check single disable
+* trigger verified purchase
+* add review list inside product editor
+* list reviews on my account page
 
-
-
-
-add visual summary to aggregate reviews
-scoring breakdown
-
-move stars to single row above title
-move attributes under title
-move author name to bottom, above author stuff
-
-
-stars / title same line
-date
-attributes
-content
-author info
 
 https://www.underarmour.com/en-us/ua-curry-6-basketball-shoes/pid3020612-405

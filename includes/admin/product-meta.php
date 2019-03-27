@@ -33,7 +33,7 @@ add_action( 'save_post_product', __NAMESPACE__ . '\save_product_attributes', 10,
 function load_attribute_metabox( $post ) {
 
 	// Run the check if we're enabled or not.
-	$maybe_enabled  = Helpers\maybe_reviews_enabled();
+	$maybe_enabled  = Helpers\maybe_reviews_enabled( $post->ID );
 
 	// Bail if we aren't enabled.
 	if ( ! $maybe_enabled ) {
@@ -144,7 +144,7 @@ function save_product_attributes( $post_id, $post ) {
 	}
 
 	// Run the check if we're enabled or not.
-	$maybe_enabled  = Helpers\maybe_reviews_enabled();
+	$maybe_enabled  = Helpers\maybe_reviews_enabled( $post_id );
 
 	// Bail if we aren't enabled.
 	if ( false === $maybe_enabled ) {

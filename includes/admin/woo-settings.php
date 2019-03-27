@@ -20,40 +20,8 @@ use WP_Error;
 /**
  * Start our engines.
  */
-//add_action( 'load-post.php', __NAMESPACE__ . '\update_product_review_count_meta', 88 );
 add_action( 'add_meta_boxes_product', __NAMESPACE__ . '\filter_default_review_metaboxes', 11 );
 add_filter( 'woocommerce_products_general_settings', __NAMESPACE__ . '\filter_woo_admin_review_settings', 99 );
-
-/**
- * Make sure the review count stored in the post meta key is up to date.
- *
- * @return void
- */
-function update_product_review_count_meta() {
-
-	// Make sure we have the product ID and it exists.
-	if ( empty( $_GET['post'] ) || 'product' !== get_post_type( $_GET['post'] ) ) {
-		return;
-	}
-
-	// Set my product ID.
-	$product_id = absint( $_GET['post'] );
-
-	// Get the total count of reviews we have, making sure to purge.
-	$total_num  = Queries\get_review_count_for_product( $product_id, true );
-
-	// Set the count with some error checking.
-	$count_num  = ! empty( $total_num ) && ! is_wp_error( $total_num ) ? absint( $total_num ) : 0;
-
-	// Update the Woo postmeta key.
-	update_post_meta( $product_id, '_wc_review_count', $count_num );
-
-	// Update our own post meta key as well.
-	update_post_meta( $product_id, Core\META_PREFIX . 'review_count', $count_num );
-
-	// And return.
-	return;
-}
 
 /**
  * Removes the default reviews metabox in leiu of our own.
@@ -84,7 +52,11 @@ function filter_woo_admin_review_settings( $settings ) {
 	// preprint( $settings, true );
 
 	// Set my removes.
-	$removals   = array( 'woocommerce_enable_review_rating', 'woocommerce_review_rating_required' );
+	$removals   = array(
+		'woocommerce_enable_review_rating',
+		'woocommerce_review_rating_verification_required',
+		'woocommerce_review_rating_required',
+	);
 
 	// Now loop our settings and modify the items we want.
 	foreach ( $settings as $index => $field_args ) {
@@ -105,6 +77,20 @@ function filter_woo_admin_review_settings( $settings ) {
 		}
 	}
 
+	// Set the anonymous flag for leaving reviews.
+	$anon_args  = array(
+		'title'           => __( 'Anonymous Reviews', 'woo-better-reviews' ),
+		'desc'            => __( 'Allow non-logged in users to leave product reviews.', 'woo-better-reviews' ),
+		'id'              => 'woocommerce_wbr_allow_anonymous',
+		'default'         => 'yes',
+		'type'            => 'checkbox',
+		'checkboxgroup'   => '',
+		'show_if_checked' => 'yes',
+	);
+
+	// Add our custom setting for the anonymous option.
+	$settings   = Utilities\array_insert_after( 11, $settings, 'anons', $anon_args );
+
 	// Set the attributes for the product global.
 	$prod_args  = array(
 		'title'           => __( 'Product Attributes', 'woo-better-reviews' ),
@@ -117,7 +103,7 @@ function filter_woo_admin_review_settings( $settings ) {
 	);
 
 	// Add our custom setting for the global attributes.
-	$settings   = Utilities\array_insert_after( 11, $settings, 'attrib', $prod_args );
+	$settings   = Utilities\array_insert_after( 12, $settings, 'attrib', $prod_args );
 
 	// Return our settings, resetting the indexes.
 	return array_values( $settings );

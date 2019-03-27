@@ -372,7 +372,7 @@
     display: inline-block;
     vertical-align: middle;
     width: auto;
-    margin: 0 10px 0 0;
+    margin: 0 20px 0 0;
     line-height: 30px; }
     .woo-better-reviews-single-header-wrap .woo-better-reviews-single-stars-wrap .woo-better-reviews-single-star {
       font-size: 22px;
@@ -384,6 +384,10 @@
     margin: 0;
     font-size: 24px;
     line-height: 30px; }
+    .woo-better-reviews-single-header-wrap .woo-better-reviews-single-title:before {
+      content: open-quote; }
+    .woo-better-reviews-single-header-wrap .woo-better-reviews-single-title:after {
+      content: close-quote; }
   .woo-better-reviews-single-header-wrap .woo-better-reviews-single-date {
     margin: 5px 0 0;
     font-size: 14px;
@@ -512,7 +516,7 @@
 
 .woo-better-reviews-single-charstcs-wrap .woo-better-reviews-single-author {
   margin: 0 0 3px;
-  text-align: center;
+  text-align: left;
   font-weight: 300; }
   .woo-better-reviews-single-charstcs-wrap .woo-better-reviews-single-author .woo-better-reviews-single-author-val {
     font-weight: 400; }
@@ -523,7 +527,7 @@
   list-style: none;
   font-size: 14px;
   line-height: 18px;
-  text-align: center; }
+  text-align: left; }
   .woo-better-reviews-author-charstcs .woo-better-reviews-single-author-charstc {
     display: inline-block;
     vertical-align: middle;
