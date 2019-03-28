@@ -86,5 +86,8 @@ form.woo-better-reviews-admin-edit-single-item-form {
   margin: 0 1em;
   overflow: hidden;
   text-overflow: ellipsis; }
+.woo-better-reviews-admin-table-display .woo-better-reviews-admin-attribute-list {
+  margin: 0;
+  padding: 0; }
 
 /*# sourceMappingURL=woo-better-reviews-admin.css.map */

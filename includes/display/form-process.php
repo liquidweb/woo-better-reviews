@@ -270,6 +270,9 @@ function format_submitted_review_content( $form_data = array(), $product_id = 0,
 	$author_email   = ! empty( $form_data['author-email'] ) ? $form_data['author-email'] : '';
 	$review_title   = ! empty( $form_data['review-title'] ) ? $form_data['review-title'] : $default_title;
 
+	// Check the verification.
+	$maybe_verified = Helpers\maybe_review_verified( $author_id, $author_email, $product_id );
+
 	// Set up the insert data array.
 	$insert_setup   = array(
 		'author_id'          => absint( $author_id ),
@@ -281,7 +284,7 @@ function format_submitted_review_content( $form_data = array(), $product_id = 0,
 		'review_slug'        => sanitize_title_with_dashes( $review_title, null, 'save' ),
 		'review_content'     => wp_kses_post( $form_data['review-content'] ),
 		'review_status'      => apply_filters( Core\HOOK_PREFIX . 'initial_review_status', 'pending' ), // 'approved',
-		'is_verified'        => 0,
+		'is_verified'        => $maybe_verified,
 		'rating_total_score' => '',
 		'rating_attributes'  => '',
 		'author_charstcs'    => '',

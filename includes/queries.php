@@ -1859,3 +1859,37 @@ function merge_review_object_taxonomies( $reviews ) {
 	// Return our large merged data.
 	return $merged;
 }
+
+/**
+ * Take a big group of product IDs and merge into one.
+ *
+ * @param  array  $dataset  The dataset I wanna flatten.
+ *
+ * @return array
+ */
+function merge_order_product_ids( $dataset = array() ){
+
+	// Bail without a dataset.
+	if ( empty( $dataset ) ) {
+		return false;
+	}
+
+	// Set my flat empty.
+	$set_ids    = array();
+
+	// Loop the
+	foreach( new \RecursiveIteratorIterator( new \RecursiveArrayIterator( $dataset ) ) as $value ) {
+		$set_ids[]  = $value;
+	}
+
+	// Bail without a flat array.
+	if ( empty( $set_ids ) ) {
+		return false;
+	}
+
+	// Set my array up unique.
+	$unique_ids = array_unique( $set_ids, SORT_NUMERIC );
+
+	// Return the flattened array.
+	return array_values( $unique_ids );
+}

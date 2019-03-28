@@ -105,6 +105,13 @@ function display_review_template_visual_aggregate( $product_id = 0, $echo = true
 
 	// Fetch any existing reviews we may have.
 	$fetch_reviews  = Queries\get_reviews_for_product( $product_id, 'display' );
+
+	// Bail without reviews.
+	if ( empty( $fetch_reviews ) ) {
+		return;
+	}
+
+	// Calculate out the scores.
 	$total_scores   = wp_list_pluck( $fetch_reviews, 'total_score' );
 
 	// Get various counts.
@@ -158,6 +165,14 @@ function display_review_template_sorting( $product_id = 0, $echo = true ) {
 	// Return the override if we have it.
 	if ( ! empty( $maybe_override ) ) {
 		return render_final_output( $maybe_override, $echo );
+	}
+
+	// Check the review count.
+	$review_count   = Helpers\get_front_review_count( $product_id );
+
+	// Bail without reviews.
+	if ( empty( $review_count ) ) {
+		return;
 	}
 
 	// Get all the characteristics we have.

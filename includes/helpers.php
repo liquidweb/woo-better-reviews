@@ -81,6 +81,90 @@ function maybe_reviews_enabled( $product_id = 0 ) {
 }
 
 /**
+ * Check to see if a review is verified.
+ *
+ * @param  integer $author_id     The ID of the author posting the review.
+ * @param  string  $author_email  The email address that the author provided.
+ * @param  integer $product_id    The product the review is being left on.
+ *
+ * @return boolean
+ */
+function maybe_review_verified( $author_id = 0, $author_email = '', $product_id = 0 ) {
+
+	// Return false if either part is missing.
+	if ( empty( $author_id ) && empty( $author_email ) || empty( $product_id ) ) {
+		return false;
+	}
+
+	// Set the args for getting orders.
+	if ( ! empty( $author_email ) ) {
+		$set_order_args = array( 'return' => 'ids', 'customer' => sanitize_email( $author_email ) );
+	} else {
+		$set_order_args = array( 'return' => 'ids', 'customer_id' => absint( $author_id ) );
+	}
+
+	// Look up to see if orders exist.
+	$maybe_orders   = wc_get_orders( $set_order_args );
+
+	// Bail if no orders exist at all.
+	if ( empty( $maybe_orders ) ) {
+		return false;
+	}
+
+	// Set an empty array.
+	$setup  = array();
+
+	// Set a basic counter.
+	$i  = 0;
+
+	// Loop my found order IDs.
+	foreach ( $maybe_orders as $order_id ) {
+
+		// Pull the order object.
+		$order_object   = wc_get_order( $order_id );
+
+		// Try to pull out the items.
+		$order_items    = $order_object->get_items();
+
+		// Skip if we don't have items.
+		if ( empty( $order_items ) ) {
+			continue;
+		}
+
+		// Loop the items inside the order data.
+		foreach ( $order_items as $item_id => $item_values ) {
+
+			// Pull out the product ID.
+			$order_prod_id  = $item_values->get_product_id();
+
+			// Add the single ID.
+			$setup[ $i ][]  = $order_prod_id;
+		}
+
+		// Increment the counter.
+		$i++;
+
+		// Nothing left inside.
+	}
+
+	// Bail if no product IDs set up at all.
+	if ( empty( $setup ) ) {
+		return false;
+	}
+
+	// Pull out and flatten my unique product IDs.
+	$product_ids    = Queries\merge_order_product_ids( $setup );
+
+	// Bail if no product IDs exist at all.
+	if ( empty( $product_ids ) ) {
+		return false;
+	}
+
+	// Now return if we have it or not.
+	return in_array( $product_id, $product_ids ) ? true : false;
+}
+
+/**
  * Check to see if product attributes are globally enabled.
  *
  * @return boolean

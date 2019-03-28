@@ -34,7 +34,7 @@ function install_table() {
 	$char_coll  = $wpdb->get_charset_collate();
 
 	// Set our table name.
-	$table_name = $wpdb->prefix . Core\TABLE_PREFIX .  'charstcs';
+	$table_name = $wpdb->prefix . Core\TABLE_PREFIX . 'charstcs';
 
 	// Setup the SQL syntax.
 	//

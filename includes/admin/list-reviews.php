@@ -105,7 +105,7 @@ class WooBetterReviews_ListReviews extends WP_List_Table {
 			'cb'                => '<input type="checkbox" />',
 			'review_title'      => __( 'Title', 'woo-better-reviews' ),
 			'review_product'    => __( 'Product', 'woo-better-reviews' ),
-			'review_date'       => __( 'Date', 'woo-better-reviews' ),
+			'review_date'       => __( 'Review Date', 'woo-better-reviews' ),
 			'review_score'      => __( 'Total Score', 'woo-better-reviews' ),
 			'attribute_ratings' => __( 'Attribute Ratings', 'woo-better-reviews' ),
 			'review_author'     => __( 'Author', 'woo-better-reviews' ),
@@ -838,7 +838,7 @@ class WooBetterReviews_ListReviews extends WP_List_Table {
 		$setup .= '<span class="woo-better-reviews-admin-table-display woo-better-reviews-admin-table-review-attribute-rating">';
 
 			// Set this in a list.
-			$setup .= '<ul class="woo-better-reviews-form-inside-list-wrap">';
+			$setup .= '<ul class="woo-better-reviews-admin-attribute-list">';
 
 			// Loop my individual attribute scores.
 			foreach ( $item['attribute_ratings'] as $single_attribute ) {
@@ -851,7 +851,7 @@ class WooBetterReviews_ListReviews extends WP_List_Table {
 
 					// Do the value.
 					$setup .= '<span class="woo-better-reviews-form-inside-list-value">';
-						$setup .= sprintf( __( '%s out of 7', 'woo-better-reviews' ), absint( $single_attribute['value'] ) );
+						$setup .= sprintf( __( '%s / 7', 'woo-better-reviews' ), absint( $single_attribute['value'] ) );
 					$setup .= '</span>';
 
 				// Close the list item for total score.
