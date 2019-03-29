@@ -959,6 +959,10 @@ function get_single_review( $review_id = 0, $return_type = 'objects', $purge = f
 			return $cached_dataset->product_id;
 			break;
 
+		case 'status' :
+			return $cached_dataset->review_status;
+			break;
+
 		// No more case breaks, no more return types.
 	}
 

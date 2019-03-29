@@ -1128,7 +1128,141 @@ class WooBetterReviews_ListReviews extends WP_List_Table {
 	 * @return void
 	 */
 	protected function process_single_action() {
-		// There will likely be something here.
+
+		// Confirm we're on the right place.
+		if ( empty( $_GET['page'] ) || empty( $_GET['wbr-action-name'] ) || Core\REVIEWS_ANCHOR !== sanitize_text_field( $_GET['page'] ) ) {
+			return;
+		}
+
+		// Create my base redirect link.
+		$base_redirect  = Helpers\get_admin_menu_link( Core\REVIEWS_ANCHOR );
+
+		// Confirm we have an ID, which is sorta critical.
+		if ( empty( $_GET['wbr-item-id'] ) || empty( $_GET['wbr-item-type'] ) || 'review' !== sanitize_text_field( $_GET['wbr-item-type'] ) ) {
+
+			// Set my error return args.
+			$redirect_args  = array(
+				'success'           => false,
+				'wbr-action-result' => 'failed',
+				'wbr-error-code'    => 'missing-item-id',
+			);
+
+			// And do the redirect.
+			Helpers\admin_page_redirect( $redirect_args, Core\REVIEWS_ANCHOR );
+		}
+
+		// Set my review item ID.
+		$review_id  = absint( $_GET['wbr-item-id'] );
+
+		// Get my product ID before going forward.
+		$product_id = ! empty( $_GET['wbr-product-id'] ) ? absint( $_GET['wbr-product-id'] ) : Queries\get_single_review( $review_id, 'product' );
+
+		// Set a blank success return code.
+		$success_cd = '';
+
+		// Handle a single approval.
+		if ( 'approval' === sanitize_text_field( $_GET['wbr-action-name'] ) ) {
+
+			// Handle the nonce check.
+			if ( empty( $_GET['wbr-nonce'] ) || ! wp_verify_nonce( $_GET['wbr-nonce'], 'wbr_approve_single_' . $review_id ) ) {
+				wp_die( __( 'Your security nonce failed.', 'woo-better-reviews' ) );
+			}
+
+			// Run the update.
+			$maybe_updated  = Database\update( 'content', absint( $review_id ), array( 'review_status' => 'approved' ) );
+
+			// Check for some error return or blank.
+			if ( empty( $maybe_updated ) || false === $maybe_updated || is_wp_error( $maybe_updated ) ) {
+
+				// Figure out the error code.
+				$error_code     = is_wp_error( $maybe_updated ) ? $maybe_updated->get_error_code() : 'review-update-failed';
+
+				// Set my error return args.
+				$redirect_args  = array(
+					'success'           => false,
+					'wbr-action-result' => 'failed',
+					'wbr-error-code'    => $error_code,
+				);
+
+				// And redirect.
+				Helpers\admin_page_redirect( $redirect_args, Core\REVIEWS_ANCHOR );
+			}
+
+			// Set my success code.
+			$success_cd = 'review-approved-single';
+		}
+
+		// Handle a single delete.
+		if ( 'delete' === sanitize_text_field( $_GET['wbr-action-name'] ) ) {
+
+			// Handle the nonce check.
+			if ( empty( $_GET['wbr-nonce'] ) || ! wp_verify_nonce( $_GET['wbr-nonce'], 'wbr_delete_single_' . $review_id ) ) {
+				wp_die( __( 'Your security nonce failed.', 'woo-better-reviews' ) );
+			}
+
+			// Run the delete.
+			$maybe_deleted  = Database\delete( 'content', $review_id );
+
+			// Check for some error return or blank.
+			if ( empty( $maybe_deleted ) || false === $maybe_deleted || is_wp_error( $maybe_deleted ) ) {
+
+				// Figure out the error code.
+				$error_code = is_wp_error( $maybe_deleted ) ? $maybe_deleted->get_error_code() : 'review-delete-failed';
+
+				// Set my error return args.
+				$redirect_args  = array(
+					'success'           => false,
+					'wbr-action-result' => 'failed',
+					'wbr-error-code'    => $error_code,
+				);
+
+				// And do the redirect.
+				Helpers\admin_page_redirect( $redirect_args, Core\REVIEWS_ANCHOR );
+			}
+
+			// Run my related cleanup.
+			Utilities\delete_related_review_data( $review_id );
+
+			// Purge my grouping related transients.
+			Utilities\purge_transients( null, 'taxonomies' );
+
+			// Set my success code.
+			$success_cd = 'review-deleted';
+		}
+
+		// @@todo more single actions?
+
+		// If it worked, handle additional cleanup and recalculations, then redirect.
+		if ( ! empty( $success_cd ) ) {
+
+			// Handle the transients tied to the single review and groups.
+			Utilities\purge_transients( Core\HOOK_PREFIX . 'single_review_' . $review_id, 'reviews' );
+
+			// Update the product review count.
+			Utilities\update_product_review_count( $product_id );
+
+			// Update the overall score.
+			Utilities\calculate_total_review_scoring( $product_id );
+
+			// Set my success args.
+			$redirect_args  = array(
+				'success'           => 1,
+				'wbr-action-result' => $success_cd,
+			);
+
+			// And do the redirect.
+			Helpers\admin_page_redirect( $redirect_args, Core\REVIEWS_ANCHOR );
+		}
+
+		// Set the 'catch-all' error return args.
+		$redirect_args  = array(
+			'success'           => false,
+			'wbr-action-result' => 'failed',
+			'wbr-error-code'    => 'unknown-error',
+		);
+
+		// And do the redirect.
+		Helpers\admin_page_redirect( $redirect_args, Core\REVIEWS_ANCHOR );
 	}
 
 	/**
@@ -1209,6 +1343,9 @@ class WooBetterReviews_ListReviews extends WP_List_Table {
 	 */
 	protected function get_row_action_dataset( $review_id = 0, $single_action = '' ) {
 
+		// Get my review status to check.
+		$review_data    = Queries\get_single_review( $review_id );
+
 		// Create the array of action items.
 		$action_dataset = array(
 			'edit' => array(
@@ -1216,9 +1353,10 @@ class WooBetterReviews_ListReviews extends WP_List_Table {
 				'label'  => __( 'Edit', 'woo-better-reviews' ),
 				'title'  => __( 'Edit Review', 'woo-better-reviews' ),
 				'data'   => array(
-					'item-id'   => $review_id,
-					'item-type' => 'review',
-					'nonce'     => wp_create_nonce( 'wbr_edit_single_' . $review_id ),
+					'item-id'    => $review_id,
+					'item-type'  => 'review',
+					'product-id' => absint( $review_data->product_id ),
+					'nonce'      => wp_create_nonce( 'wbr_edit_single_' . $review_id ),
 				),
 			),
 
@@ -1227,12 +1365,30 @@ class WooBetterReviews_ListReviews extends WP_List_Table {
 				'label'  => __( 'Delete', 'woo-better-reviews' ),
 				'title'  => __( 'Delete Review', 'woo-better-reviews' ),
 				'data'   => array(
-					'item-id'   => $review_id,
-					'item-type' => 'review',
-					'nonce'     => wp_create_nonce( 'wbr_delete_single_' . $review_id ),
+					'item-id'    => $review_id,
+					'item-type'  => 'review',
+					'product-id' => absint( $review_data->product_id ),
+					'nonce'      => wp_create_nonce( 'wbr_delete_single_' . $review_id ),
 				),
 			),
 		);
+
+		// Add the "approve" if it isn't
+		if ( ! empty( $review_data->review_status ) && 'pending' === sanitize_text_field( $review_data->review_status ) ) {
+
+			// Create the array of action items.
+			$action_dataset['approval'] = array(
+				'nonce'  => wp_create_nonce( 'wbr_approve_single_' . $review_id ),
+				'label'  => __( 'Approve', 'woo-better-reviews' ),
+				'title'  => __( 'Approve Review', 'woo-better-reviews' ),
+				'data'   => array(
+					'item-id'    => $review_id,
+					'item-type'  => 'review',
+					'product-id' => absint( $review_data->product_id ),
+					'nonce'      => wp_create_nonce( 'wbr_approve_single_' . $review_id ),
+				),
+			);
+		}
 
 		// Return the array of data if no single was requested.
 		if ( empty( $single_action ) ) {
@@ -1275,6 +1431,7 @@ class WooBetterReviews_ListReviews extends WP_List_Table {
 			'wbr-action-name' => $action_name,
 			'wbr-item-id'     => absint( $review_id ),
 			'wbr-item-type'   => 'review',
+			'wbr-product-id'  => $action_dataset['data']['product-id'],
 			'wbr-nonce'       => $action_dataset['nonce'],
 		);
 

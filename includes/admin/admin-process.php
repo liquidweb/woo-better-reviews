@@ -22,7 +22,6 @@ use WP_Error;
  * Start our engines.
  */
 add_action( 'admin_init', __NAMESPACE__ . '\update_existing_review' );
-add_action( 'admin_init', __NAMESPACE__ . '\delete_existing_review' );
 add_action( 'admin_init', __NAMESPACE__ . '\add_new_attribute' );
 add_action( 'admin_init', __NAMESPACE__ . '\update_existing_attribute' );
 add_action( 'admin_init', __NAMESPACE__ . '\delete_existing_attribute' );
@@ -104,71 +103,6 @@ function update_existing_review() {
 
 	// Redirect a happy one.
 	redirect_admin_action_result( $edit_redirect, false, 'review-updated', true, Core\REVIEWS_ANCHOR );
-}
-
-/**
- * Check for the delete function of an charstcs.
- *
- * @return void
- */
-function delete_existing_review() {
-
-	// Confirm we're on the right place.
-	if ( empty( $_GET['page'] ) || empty( $_GET['wbr-action-name'] ) || Core\REVIEWS_ANCHOR !== sanitize_text_field( $_GET['page'] ) || 'delete' !== sanitize_text_field( $_GET['wbr-action-name'] ) ) {
-		return;
-	}
-
-	// Create my base redirect link.
-	$base_redirect  = Helpers\get_admin_menu_link( Core\REVIEWS_ANCHOR );
-
-	// Confirm we have an ID, which is sorta critical.
-	if ( empty( $_GET['wbr-item-id'] ) || empty( $_GET['wbr-item-type'] ) || 'review' !== sanitize_text_field( $_GET['wbr-item-type'] ) ) {
-		redirect_admin_action_result( $base_redirect, 'missing-item-id' );
-	}
-
-	// Set my review item ID.
-	$review_id  = absint( $_GET['wbr-item-id'] );
-
-	// Handle the nonce check.
-	if ( empty( $_GET['wbr-nonce'] ) || ! wp_verify_nonce( $_GET['wbr-nonce'], 'wbr_delete_single_' . $review_id ) ) {
-		wp_die( __( 'Your security nonce failed.', 'woo-better-reviews' ) );
-	}
-
-	// Get my product ID before deleting.
-	$old_product_id = Queries\get_single_review( $review_id, 'product' );
-
-	// Run the delete.
-	$maybe_deleted  = Database\delete( 'content', $review_id );
-
-	// Check for some error return or blank.
-	if ( empty( $maybe_deleted ) || false === $maybe_deleted || is_wp_error( $maybe_deleted ) ) {
-
-		// Figure out the error code.
-		$error_code = is_wp_error( $maybe_deleted ) ? $maybe_deleted->get_error_code() : 'review-delete-failed';
-
-		// And redirect.
-		redirect_admin_action_result( $base_redirect, $error_code );
-	}
-
-	// Run my related cleanup.
-	delete_related_review_data( $review_id );
-
-	// Purge my related transients.
-	Utilities\purge_transients( Core\HOOK_PREFIX . 'single_review_' . absint( $_POST['item-id'] ), 'reviews' );
-	Utilities\purge_transients( null, 'taxonomies' );
-
-	// Run the relcalculations with the product ID.
-	if ( ! empty( $old_product_id ) ) {
-
-		// Update the product review count.
-		Utilities\update_product_review_count( $old_product_id );
-
-		// Update the overall score.
-		Utilities\calculate_total_review_scoring( $old_product_id );
-	}
-
-	// Redirect a happy one.
-	redirect_admin_action_result( $base_redirect, false, 'review-deleted', true );
 }
 
 /**
@@ -701,26 +635,4 @@ function redirect_admin_action_result( $redirect = '', $error = '', $result = 'f
 	// Do the redirect.
 	wp_safe_redirect( $redirect_link );
 	exit;
-}
-
-/**
- * Review the related items tied to a review.
- *
- * @param  integer $review_id  The review ID we are checking.
- *
- * @return void
- */
-function delete_related_review_data( $review_id = 0 ) {
-
-	// Bail if we don't have a review ID.
-	if ( empty( $review_id ) ) {
-		return;
-	}
-
-	// Call the global DB.
-	global $wpdb;
-
-	// Run my delete functions.
-	$wpdb->delete( $wpdb->wc_better_rvs_ratings, array( 'review_id' => absint( $review_id ) ), array( '%d' ) );
-	$wpdb->delete( $wpdb->wc_better_rvs_authormeta, array( 'review_id' => absint( $review_id ) ), array( '%d' ) );
 }

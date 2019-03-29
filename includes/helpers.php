@@ -688,6 +688,10 @@ function get_admin_notice_text( $return_code = '' ) {
 			return __( 'The selected reviews have been updated.', 'woo-better-reviews' );
 			break;
 
+		case 'review-approved-single' :
+			return __( 'The selected review has been approved.', 'woo-better-reviews' );
+			break;
+
 		case 'reviews-deleted-bulk' :
 			return __( 'The selected reviews have been deleted.', 'woo-better-reviews' );
 			break;

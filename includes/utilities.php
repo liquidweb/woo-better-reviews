@@ -676,6 +676,29 @@ function set_review_form_editor( $editor_id = '', $editor_name = '', $editor_cla
 }
 
 /**
+ * Review the related items tied to a review.
+ *
+ * @param  integer $review_id  The review ID we are checking.
+ *
+ * @return void
+ */
+function delete_related_review_data( $review_id = 0 ) {
+
+	// Bail if we don't have a review ID.
+	if ( empty( $review_id ) ) {
+		return;
+	}
+
+	// Call the global DB.
+	global $wpdb;
+
+	// Run my delete functions.
+	$wpdb->delete( $wpdb->wc_better_rvs_ratings, array( 'review_id' => absint( $review_id ) ), array( '%d' ) );
+	$wpdb->delete( $wpdb->wc_better_rvs_authormeta, array( 'review_id' => absint( $review_id ) ), array( '%d' ) );
+}
+
+
+/**
  * Purge one or many transients based on what's happening.
  *
  * @param  string $key     A single transient key.
