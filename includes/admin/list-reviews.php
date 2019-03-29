@@ -1138,13 +1138,41 @@ class WooBetterReviews_ListReviews extends WP_List_Table {
 		$base_redirect  = Helpers\get_admin_menu_link( Core\REVIEWS_ANCHOR );
 
 		// Confirm we have an ID, which is sorta critical.
-		if ( empty( $_GET['wbr-item-id'] ) || empty( $_GET['wbr-item-type'] ) || 'review' !== sanitize_text_field( $_GET['wbr-item-type'] ) ) {
+		if ( empty( $_GET['wbr-item-id'] ) ) {
 
 			// Set my error return args.
 			$redirect_args  = array(
 				'success'           => false,
 				'wbr-action-result' => 'failed',
 				'wbr-error-code'    => 'missing-item-id',
+			);
+
+			// And do the redirect.
+			Helpers\admin_page_redirect( $redirect_args, Core\REVIEWS_ANCHOR );
+		}
+
+		// Confirm we have an item type, and it's a review.
+		if ( empty( $_GET['wbr-item-type'] ) || 'review' !== sanitize_text_field( $_GET['wbr-item-type'] ) ) {
+
+			// Set my error return args.
+			$redirect_args  = array(
+				'success'           => false,
+				'wbr-action-result' => 'failed',
+				'wbr-error-code'    => 'invalid-item-type',
+			);
+
+			// And do the redirect.
+			Helpers\admin_page_redirect( $redirect_args, Core\REVIEWS_ANCHOR );
+		}
+
+		// Make sure the action type is allowed.
+		if ( ! in_array( sanitize_text_field( $_GET['wbr-action-name'] ), array( 'approval', 'delete' ) ) ) {
+
+			// Set my error return args.
+			$redirect_args  = array(
+				'success'           => false,
+				'wbr-action-result' => 'failed',
+				'wbr-error-code'    => 'invalid-action-name',
 			);
 
 			// And do the redirect.
