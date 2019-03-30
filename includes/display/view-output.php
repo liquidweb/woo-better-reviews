@@ -286,8 +286,9 @@ function display_existing_reviews( $product_id = 0, $echo = true ) {
 		return render_final_output( $notext, $echo );
 	}
 
-	// Reset the array keys.
-	$fetch_reviews  = array_values( $fetch_reviews );
+	// Run the pagination checks.
+	$build_reviews  = Helpers\maybe_paginate_reviews( $fetch_reviews );
+	preprint( $build_reviews, true );
 
 	// Set a simple counter.
 	$i  = 0;
@@ -299,7 +300,7 @@ function display_existing_reviews( $product_id = 0, $echo = true ) {
 	$build .= '<div class="woo-better-reviews-list-display-wrapper">';
 
 	// Now begin to loop the reviews and do the thing.
-	foreach ( (array) $fetch_reviews as $single_review ) {
+	foreach ( (array) $build_reviews['items'] as $single_review ) {
 		// preprint( $single_review, true );
 
 		// Skip the non-approved ones for now.
@@ -331,6 +332,15 @@ function display_existing_reviews( $product_id = 0, $echo = true ) {
 
 		// And increment the counter.
 		$i++;
+	}
+
+	// If we are paged, build the links.
+	if ( false !== $build_reviews['paged'] ) {
+
+		// Wrap the pagination.
+		$build .= '<p class="woo-better-reviews-display-pagination-wrapper">';
+
+		$build .= '</p>';
 	}
 
 	// Close the large div wrapper.

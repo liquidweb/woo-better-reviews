@@ -697,7 +697,6 @@ function delete_related_review_data( $review_id = 0 ) {
 	$wpdb->delete( $wpdb->wc_better_rvs_authormeta, array( 'review_id' => absint( $review_id ) ), array( '%d' ) );
 }
 
-
 /**
  * Purge one or many transients based on what's happening.
  *

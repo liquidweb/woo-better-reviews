@@ -280,6 +280,60 @@ function maybe_sorted_reviews() {
 }
 
 /**
+ * Check for the query paramaters to paginate the reviews.
+ *
+ * @param  array $reviews  The entire set of reviews.
+ *
+ * @return array
+ */
+function maybe_paginate_reviews( $reviews = array() ) {
+
+	// Bail without our reviews.
+	if ( empty( $reviews ) ) {
+		return false;
+	}
+
+	// Set the per-page number.
+	$items_per_page = apply_filters( Core\HOOK_PREFIX . 'reviews_per_page', 2 );
+
+	// First reset the array keys.
+	$reviews_reset  = array_values( $reviews );
+
+	// If we have equal or less, return the whole thing.
+	if ( count( $reviews_reset ) <= absint( $items_per_page ) ) {
+		return array( 'paged' => false, 'items' => $reviews_reset );
+	}
+
+	// Chunk out the reviews.
+	$reviews_chunkd = array_chunk( $reviews_reset, absint( $items_per_page ) );
+
+	// Determine the page count we are on.
+	if ( empty( $_REQUEST['wbr-paged'] ) || absint( $_REQUEST['wbr-paged'] ) === 1 ) {
+
+		// Set the current page and array chunk key.
+		$current_paged  = 1;
+		$current_chunk  = 0;
+
+	} else {
+
+		// Set the current page and array chunk key.
+		$current_paged  = absint( $_REQUEST['wbr-paged'] );
+		$current_chunk  = absint( $_REQUEST['wbr-paged'] ) - 1;
+	}
+
+	// Set my return args.
+	$review_args    = array(
+		'paged' => true,
+		'page'  => absint( $current_paged ),
+		'total' => count( $reviews_chunkd ),
+		'items' => $reviews_chunkd[ $current_chunk ],
+	);
+
+	// Return all the args.
+	return $review_args;
+}
+
+/**
  * Set and return the array of possible review statuses.
  *
  * @param  boolean $array_keys  Return just the array keys.
