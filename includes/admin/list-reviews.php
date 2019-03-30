@@ -109,6 +109,7 @@ class WooBetterReviews_ListReviews extends WP_List_Table {
 			'review_score'      => __( 'Total Score', 'woo-better-reviews' ),
 			'attribute_ratings' => __( 'Attribute Ratings', 'woo-better-reviews' ),
 			'review_author'     => __( 'Author', 'woo-better-reviews' ),
+			'review_verified'   => __( 'Verified', 'woo-better-reviews' ),
 			'review_status'     => __( 'Status', 'woo-better-reviews' ),
 		);
 
@@ -875,8 +876,9 @@ class WooBetterReviews_ListReviews extends WP_List_Table {
 	 */
 	protected function column_review_author( $item ) {
 
-		// Determine the author name.
+		// Determine the author name and email.
 		$author_name    = ! empty( $item['author_name'] ) ? $item['author_name'] : __( 'Unknown Reviewer', 'woo-better-reviews' );
+		$author_email   = ! empty( $item['author_email'] ) ? $item['author_email'] : __( 'unknown email', 'woo-better-reviews' );
 
 		// Build my markup.
 		$setup  = '';
@@ -884,23 +886,34 @@ class WooBetterReviews_ListReviews extends WP_List_Table {
 		// Set the product name.
 		$setup .= '<span class="woo-better-reviews-admin-table-display woo-better-reviews-admin-table-review-author">';
 
-		// Look for an author ID.
-		if ( empty( $item['author_id'] ) ) {
+			// Look for an author ID.
+			if ( empty( $item['author_id'] ) ) {
 
-			// Make the name.
-			$setup .= '<em>' . esc_html( $author_name ) . '</em>';
+				// Get the email link based on the email.
+				$mail_link  = 'mailto:' . $author_email;
 
-		} else {
+				// Set some text.
+				$mail_text  = __( 'Email this review author.', 'woo-better-reviews' );
 
-			// Get the edit link based on the ID.
-			$edit_link  = get_edit_user_link( absint( $item['author_id'] ) );
+				// And output.
+				$setup .= '<a title="' . esc_attr( $mail_text ) . '" href="' . esc_url( $mail_link ) . '">' . esc_html( $author_name ) . '</a>';
 
-			// Set some text.
-			$edit_text  = __( 'View the user profile', 'woo-better-reviews' );
+			} else {
 
-			// And output.
-			$setup .= '<a title="' . esc_attr( $edit_text ) . '" href="' . esc_url( $edit_link ) . '">' . esc_html( $author_name ) . '</a>';
-		}
+				// Get the edit link based on the ID.
+				$edit_link  = get_edit_user_link( absint( $item['author_id'] ) );
+
+				// Set some text.
+				$edit_text  = __( 'View the user profile', 'woo-better-reviews' );
+
+				// And output.
+				$setup .= '<a title="' . esc_attr( $edit_text ) . '" href="' . esc_url( $edit_link ) . '">' . esc_html( $author_name ) . '</a>';
+			}
+
+			// Include the ID.
+			$setup .= '<span class="woo-better-reviews-admin-table-review-author-id">';
+				$setup .= sprintf( __( 'User ID: %d', 'woo-better-reviews' ), absint( $item['author_id'] ) );
+			$setup .= '</span>';
 
 		// Close the span.
 		$setup .= '</span>';
@@ -921,13 +934,37 @@ class WooBetterReviews_ListReviews extends WP_List_Table {
 		// Build my markup.
 		$setup  = '';
 
-		// Set the product name.
+		// Set the review date markup.
 		$setup .= '<span class="woo-better-reviews-admin-table-display woo-better-reviews-admin-table-review-date">';
 			$setup .= '<abbr title="' . date( 'Y/m/d g:i:s a', $item['review_stamp'] ) . '">' . date( 'Y/m/d', $item['review_stamp'] ) . '</abbr>';
 		$setup .= '</span>';
 
 		// Return my formatted product name.
 		return apply_filters( Core\HOOK_PREFIX . 'review_table_column_review_date', $setup, $item );
+	}
+
+	/**
+	 * The review verified column.
+	 *
+	 * @param  array  $item  The item from the data array.
+	 *
+	 * @return string
+	 */
+	protected function column_review_verified( $item ) {
+
+		// Check for the verified part to add our icon.
+		$maybe  = ! empty( $item['is_verified'] ) ? '<span aria-label="' . esc_attr__( 'This review is verified.', 'woo-better-reviews' ) . '" class="woo-better-reviews-admin-table-display woo-better-reviews-admin-table-review-verified-check"></span>' : '';
+
+		// Build my markup.
+		$setup  = '';
+
+		// Set the review checkmark markup.
+		$setup .= '<span class="woo-better-reviews-admin-table-display woo-better-reviews-admin-table-review-verified">';
+			$setup .= $maybe;
+		$setup .= '</span>';
+
+		// Return my formatted product name.
+		return apply_filters( Core\HOOK_PREFIX . 'review_table_column_review_verified', $setup, $item );
 	}
 
 	/**
@@ -940,7 +977,7 @@ class WooBetterReviews_ListReviews extends WP_List_Table {
 	protected function column_review_status( $item ) {
 
 		// Create my label.
-		$label  = ucwords( $item['review_status'] ); // esc_html( $label )
+		$label  = ucwords( $item['review_status'] );
 
 		// Build my markup.
 		$setup  = '';
@@ -1111,10 +1148,11 @@ class WooBetterReviews_ListReviews extends WP_List_Table {
 			case 'review_title' :
 			case 'review_product' :
 			case 'review_date' :
-			case 'review_author' :
-			case 'review_status' :
 			case 'review_score' :
 			case 'attribute_ratings' :
+			case 'review_author' :
+			case 'is_verified' :
+			case 'review_status' :
 				return ! empty( $dataset[ $column_name ] ) ? $dataset[ $column_name ] : '';
 
 			default :
@@ -1260,33 +1298,35 @@ class WooBetterReviews_ListReviews extends WP_List_Table {
 
 		// @@todo more single actions?
 
-		// If it worked, handle additional cleanup and recalculations, then redirect.
-		if ( ! empty( $success_cd ) ) {
+		// If we don't have a success key code, return unknown failure.
+		if ( empty( $success_cd ) ) {
 
-			// Handle the transients tied to the single review and groups.
-			Utilities\purge_transients( Core\HOOK_PREFIX . 'single_review_' . $review_id, 'reviews' );
-
-			// Update the product review count.
-			Utilities\update_product_review_count( $product_id );
-
-			// Update the overall score.
-			Utilities\calculate_total_review_scoring( $product_id );
-
-			// Set my success args.
+			// Set the 'catch-all' error return args.
 			$redirect_args  = array(
-				'success'           => 1,
-				'wbr-action-result' => $success_cd,
+				'success'           => false,
+				'wbr-action-result' => 'failed',
+				'wbr-error-code'    => 'unknown-error',
 			);
 
 			// And do the redirect.
 			Helpers\admin_page_redirect( $redirect_args, Core\REVIEWS_ANCHOR );
 		}
 
-		// Set the 'catch-all' error return args.
+		// It worked! Let's handle additional cleanup and recalculations, then redirect.
+
+		// Handle the transients tied to the single review and groups.
+		Utilities\purge_transients( Core\HOOK_PREFIX . 'single_review_' . $review_id, 'reviews' );
+
+		// Update the product review count.
+		Utilities\update_product_review_count( $product_id );
+
+		// Update the overall score.
+		Utilities\calculate_total_review_scoring( $product_id );
+
+		// Set my success args.
 		$redirect_args  = array(
-			'success'           => false,
-			'wbr-action-result' => 'failed',
-			'wbr-error-code'    => 'unknown-error',
+			'success'           => 1,
+			'wbr-action-result' => $success_cd,
 		);
 
 		// And do the redirect.

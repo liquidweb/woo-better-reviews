@@ -29,6 +29,8 @@ function admin_removable_args( $args ) {
 	// Set an array of the args we wanna exclude.
 	$remove = array(
 		'wbr-item-type',
+		'wbr-action-name',
+		'wbr-item-id',
 		'wbr-action-complete',
 		'wbr-action-result',
 		'wbr-action-return',

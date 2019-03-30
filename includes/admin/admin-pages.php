@@ -312,11 +312,11 @@ function display_author_characteristics_page() {
 			printf( '<span class="subtitle">' . __( 'Search results for &#8220;%s&#8221;' ) . '</span>', esc_html( $search ) );
 		}
 
-		// Load the proper page.
-		echo ! $isedit ? load_primary_charstcs_display( $action ) : load_edit_single_charstcs_form( $action );
-
 		// Cut off the header.
 		echo '<hr class="wp-header-end">';
+
+		// Load the proper page.
+		echo ! $isedit ? load_primary_charstcs_display( $action ) : load_edit_single_charstcs_form( $action );
 
 	// Close the wrapper.
 	echo '</div>';

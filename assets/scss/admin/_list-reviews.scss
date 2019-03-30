@@ -1,6 +1,13 @@
 
 
-.wp-list-table.productreviews {}
+.wp-list-table.productreviews {
+
+
+	.column-review_verified {
+		width: 80px;
+	}
+
+}
 
 
 .woo-better-reviews-admin-table-display {
@@ -20,7 +27,42 @@
 		}
 	}
 
+	&.woo-better-reviews-admin-table-review-author {
+
+		.woo-better-reviews-admin-table-review-author-id {
+			display: block;
+			width: 100%;
+			color: #999;
+			font-size: 13px;
+		}
+
+	}
+
+	&.woo-better-reviews-admin-table-review-verified {
+
+		padding: 0 10px;
+		display: inline-block;
+
+		.woo-better-reviews-admin-table-review-verified-check {
+
+			font-size: 36px;
+			line-height: 1;
+			color: #0274be;
+
+			&:after {
+				content: "\2714";
+				font-size: inherit;
+				line-height: 1;
+			}
+		}
+
+	}
+
+
 	&.woo-better-reviews-admin-table-review-status {
+
+		display: inline-block;
+		margin: 5px 0 0;
 
 		.review-status {
 			display: -webkit-inline-box;
@@ -30,7 +72,7 @@
 			background: #e5e5e5;
 			border-radius: 4px;
 			border-bottom: 1px solid rgba(0, 0, 0, .05);
-			margin: -.25em 0;
+			margin: 0;
 			cursor: inherit !important;
 			white-space: nowrap;
 			max-width: 100%;
@@ -62,7 +104,7 @@
 
 		}
 
-		.review-status>span {
+		.review-status > span {
 			margin: 0 1em;
 			overflow: hidden;
 			text-overflow: ellipsis;
@@ -73,6 +115,7 @@
 		margin: 0;
 		padding: 0;
 	}
+
 }
 
 

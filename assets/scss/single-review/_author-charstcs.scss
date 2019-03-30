@@ -11,6 +11,21 @@
 		}
 	}
 
+	.woo-better-reviews-single-verified-check {
+
+		position: relative;
+		left: 6px;
+		font-size: 20px;
+		line-height: 1;
+		color: #0274be;
+
+		&:after {
+			content: "\2714";
+			font-size: 20px;
+			line-height: 1;
+		}
+	}
+
 }
 
 .woo-better-reviews-author-charstcs {

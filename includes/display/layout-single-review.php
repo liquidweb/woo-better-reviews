@@ -29,9 +29,6 @@ function set_single_review_header_view( $review = array() ) {
 		return;
 	}
 
-	// Check for the verified part to add our icon.
-	$show_verified  = ! empty( $review['is_verified'] ) ? '<span aria-label="' . esc_attr__( 'This review is verified.', 'woo-better-reviews' ) . '" class="woo-better-reviews-single-verified-check"></span>' : '';
-
 	// First set the empty.
 	$display_view   = '';
 
@@ -55,7 +52,7 @@ function set_single_review_header_view( $review = array() ) {
 		$formatted_date = date( get_option( 'date_format' ), strtotime( $review['date'] ) );
 
 		// And add it to my view.
-		$display_view  .= '<p class="woo-better-reviews-single-date">' . sprintf( __( 'Posted on %s', 'woo-better-reviews' ), '<span class="woo-better-reviews-single-date-val">' . esc_attr( $formatted_date ) . '</span>' ) . $show_verified . '</p>';
+		$display_view  .= '<p class="woo-better-reviews-single-date">' . sprintf( __( 'Posted on %s', 'woo-better-reviews' ), '<span class="woo-better-reviews-single-date-val">' . esc_attr( $formatted_date ) . '</span>' ) . '</p>';
 	}
 
 	// Close out the div.
@@ -188,7 +185,12 @@ function set_single_review_author_charstcs_view( $review = array() ) {
 
 	// Now set up our author view display.
 	if ( ! empty( $review['author_name'] ) ) {
-		$display_view  .= '<p class="woo-better-reviews-single-author">' . sprintf( __( 'by %s', 'woo-better-reviews' ), '<span class="woo-better-reviews-single-author-val">' . esc_attr( $review['author_name'] ) . '</span>' ) . '</p>';
+
+		// Check for the verified part to add our icon.
+		$show_verified  = ! empty( $review['is_verified'] ) ? '<span aria-label="' . esc_attr__( 'This review is verified.', 'woo-better-reviews' ) . '" class="woo-better-reviews-single-verified-check"></span>' : '';
+
+		// And output.
+		$display_view  .= '<p class="woo-better-reviews-single-author">' . sprintf( __( 'by %s', 'woo-better-reviews' ), '<span class="woo-better-reviews-single-author-val">' . esc_attr( $review['author_name'] ) . '</span>' ) . $show_verified . '</p>';
 	}
 
 	// Set an unordered list.
