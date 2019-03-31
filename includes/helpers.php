@@ -294,7 +294,7 @@ function maybe_paginate_reviews( $reviews = array() ) {
 	}
 
 	// Set the per-page number.
-	$items_per_page = apply_filters( Core\HOOK_PREFIX . 'reviews_per_page', 2 );
+	$items_per_page = apply_filters( Core\HOOK_PREFIX . 'reviews_per_page', 10 );
 
 	// First reset the array keys.
 	$reviews_reset  = array_values( $reviews );
