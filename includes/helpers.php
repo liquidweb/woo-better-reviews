@@ -299,9 +299,16 @@ function maybe_paginate_reviews( $reviews = array() ) {
 	// First reset the array keys.
 	$reviews_reset  = array_values( $reviews );
 
-	// If we have equal or less, return the whole thing.
+	// If we have equal or less, return the array not chunked.
 	if ( count( $reviews_reset ) <= absint( $items_per_page ) ) {
-		return array( 'paged' => false, 'items' => $reviews_reset );
+
+		// Set and return the array values.
+		return array(
+			'paged'   => false,
+			'current' => false,
+			'total'   => 1,
+			'items'   => $reviews_reset,
+		);
 	}
 
 	// Chunk out the reviews.
@@ -323,10 +330,10 @@ function maybe_paginate_reviews( $reviews = array() ) {
 
 	// Set my return args.
 	$review_args    = array(
-		'paged' => true,
-		'page'  => absint( $current_paged ),
-		'total' => count( $reviews_chunkd ),
-		'items' => $reviews_chunkd[ $current_chunk ],
+		'paged'   => true,
+		'current' => absint( $current_paged ),
+		'total'   => count( $reviews_chunkd ),
+		'items'   => $reviews_chunkd[ $current_chunk ],
 	);
 
 	// Return all the args.

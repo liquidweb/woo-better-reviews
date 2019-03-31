@@ -1,0 +1,31 @@
+
+.woo-better-reviews-display-pagination-wrapper {
+	clear: both;
+
+	ul.page-numbers {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		text-align: center;
+
+		li {
+			display: inline-block;
+			vertical-align: middle;
+			width: auto;
+		}
+	}
+
+	p.single-page-links {
+		margin: 0;
+		padding: 0;
+		text-align: center;
+	}
+
+}
+
+
+@media only screen and (max-width: 782px) {}
+
+
+@media only screen and (max-width: 600px) {}
+

@@ -14,9 +14,10 @@ use LiquidWeb\WooBetterReviews\Helpers as Helpers;
 use LiquidWeb\WooBetterReviews\Utilities as Utilities;
 use LiquidWeb\WooBetterReviews\Queries as Queries;
 use LiquidWeb\WooBetterReviews\Display\FormFields as FormFields;
+use LiquidWeb\WooBetterReviews\Display\LayoutReviewList as LayoutReviewList;
+use LiquidWeb\WooBetterReviews\Display\LayoutReviewAggregate as LayoutReviewAggregate;
 use LiquidWeb\WooBetterReviews\Display\LayoutNewReviewForm as LayoutNewReviewForm;
 use LiquidWeb\WooBetterReviews\Display\LayoutSingleReview as LayoutSingleReview;
-use LiquidWeb\WooBetterReviews\Display\LayoutReviewAggregate as LayoutReviewAggregate;
 
 // And pull in any other namespaces.
 use WP_Error;
@@ -44,37 +45,8 @@ function display_review_template_title( $product_id = 0, $echo = true ) {
 		return render_final_output( $maybe_override, $echo );
 	}
 
-	// Get some variables based on the product ID.
-	$leave_review   = Helpers\get_review_action_link( $product_id, 'review_form_wrapper' );
-	$product_title  = get_the_title( $product_id );
-	$review_count   = Helpers\get_front_review_count( $product_id );
-
-	// Set some text strings.
-	$count_wrapper  = '<span class="woo-better-reviews-template-title-review-count">' . esc_html( $review_count ) . '</span>';
-	$title_wrapper  = '<span class="woo-better-reviews-template-title-product-name">' . esc_html( $product_title ) . '</span>';
-
-	// Set our empty.
-	$build  = '';
-
-	// Set the div wrapper.
-	$build .= '<div class="woo-better-reviews-list-title-wrapper">';
-
-		// Wrap the title with our H2.
-		$build .= '<h2 class="woocommerce-Reviews-title woo-better-reviews-template-title">';
-
-			/* translators: 1: reviews count 2: product name */
-			$build .= sprintf( esc_html( _n( '%1$s review for %2$s', '%1$s reviews for %2$s', $review_count, 'woo-better-reviews' ) ), $count_wrapper, $title_wrapper );
-
-			// Include the "leave a review" inline link if we have reviews.
-			if ( ! empty( $review_count ) ) {
-				$build .= ' <a class="woo-better-reviews-template-title-form-link" href="' . esc_url( $leave_review ) . '">' . esc_html__( 'Leave a review', 'woo-better-reviews' ) . '</a>';
-			}
-
-		// Close up the H2 tag.
-		$build .= '</h2>';
-
-	// Close up the div tag.
-	$build .= '</div>';
+	// Build out the title / header area.
+	$build  = LayoutReviewList\set_review_list_header_view( $product_id );
 
 	// Do the return or echo based on the call.
 	return render_final_output( $build, $echo );
@@ -167,78 +139,8 @@ function display_review_template_sorting( $product_id = 0, $echo = true ) {
 		return render_final_output( $maybe_override, $echo );
 	}
 
-	// Check the review count.
-	$review_count   = Helpers\get_front_review_count( $product_id );
-
-	// Bail without reviews.
-	if ( empty( $review_count ) ) {
-		return;
-	}
-
-	// Get all the characteristics we have.
-	$all_charstcs   = Queries\get_all_charstcs( 'display' );
-	// preprint( $all_charstcs, true );
-
-	// Show nothing if we have no characteristics.
-	if ( empty( $all_charstcs ) ) {
-		return;
-	}
-
-	// Set my action link.
-	$action_link    = Helpers\get_review_action_link( $product_id, 'tab-reviews' );
-
-	// Set our empty.
-	$build  = '';
-
-	// Set the div wrapper.
-	$build .= '<div class="woo-better-reviews-list-sorting-wrapper">';
-
-		// Set our form wrapper.
-		$build .= '<form class="woo-better-reviews-sorting-container" name="woo-better-reviews-sorting-form" action="' . esc_url( $action_link ) . '" method="post">';
-
-			// Set these in an unordered list.
-			$build .= '<ul class="woo-better-reviews-list-group">';
-
-				// Set the title / intro piece.
-				$build .= '<li class="woo-better-reviews-list-single woo-better-reviews-list-single-intro">' . __( 'Sort By:', 'woo-better-reviews' ) . '</li>';
-
-				// Now loop each characteristic and make a dropdown.
-				foreach ( $all_charstcs as $single_charstc ) {
-
-					// Set my field name.
-					$field_name = 'woo-better-reviews-sorting[charstcs][' . absint( $single_charstc['id'] ) . ']';
-
-					// Set up my field args.
-					$field_args = array(
-						'id'      => $single_charstc['id'],
-						'slug'    => $single_charstc['slug'],
-						'label'   => $single_charstc['name'],
-						'options' => $single_charstc['values'],
-					);
-
-					// And set the markup.
-					$build .= '<li class="woo-better-reviews-list-single woo-better-reviews-list-single-field">';
-					$build .= FormFields\get_review_sorting_dropdown_field( $field_args, $single_charstc['slug'], $field_name );
-					$build .= '</li>';
-				}
-
-				// Set the submit piece.
-				$build .= '<li class="woo-better-reviews-list-single woo-better-reviews-list-single-submit">';
-					$build .= '<button name="wbr-single-sort-submit" type="submit" class="button woo-better-reviews-single-button" value="1">' . __( 'Filter', 'woo-better-reviews' ) . '</button>';
-				$build .= '</li>';
-
-			// Close up the list.
-			$build .= '</ul>';
-
-			// Include some hidden fields for this.
-			$build .= '<input type="hidden" name="wbr-single-sort-product-id" value="' . absint( $product_id ) . '">';
-			$build .= wp_nonce_field( 'wbr_sort_reviews_action', 'wbr_sort_reviews_nonce', true, false );
-
-		// Close out the form.
-		$build .= '</form>';
-
-	// Close up the div tag.
-	$build .= '</div>';
+	// Build out the sorting portion.
+	$build  = LayoutReviewList\set_review_list_sorting_view( $product_id );
 
 	// Do the return or echo based on the call.
 	return render_final_output( $build, $echo );
@@ -288,7 +190,6 @@ function display_existing_reviews( $product_id = 0, $echo = true ) {
 
 	// Run the pagination checks.
 	$build_reviews  = Helpers\maybe_paginate_reviews( $fetch_reviews );
-	preprint( $build_reviews, true );
 
 	// Set a simple counter.
 	$i  = 0;
@@ -301,13 +202,11 @@ function display_existing_reviews( $product_id = 0, $echo = true ) {
 
 	// Now begin to loop the reviews and do the thing.
 	foreach ( (array) $build_reviews['items'] as $single_review ) {
-		// preprint( $single_review, true );
 
 		// Skip the non-approved ones for now.
 		if ( empty( $single_review['status'] ) || 'approved' !== sanitize_text_field( $single_review['status'] ) ) {
 			continue;
 		}
-		// preprint( $single_review, true );
 
 		// Get my div class.
 		$class  = Utilities\set_single_review_div_class( $single_review, $i );
@@ -337,10 +236,8 @@ function display_existing_reviews( $product_id = 0, $echo = true ) {
 	// If we are paged, build the links.
 	if ( false !== $build_reviews['paged'] ) {
 
-		// Wrap the pagination.
-		$build .= '<p class="woo-better-reviews-display-pagination-wrapper">';
-
-		$build .= '</p>';
+		// Output the pagination.
+		$build .= LayoutReviewList\set_review_list_pagination_view( $build_reviews, $product_id );
 	}
 
 	// Close the large div wrapper.

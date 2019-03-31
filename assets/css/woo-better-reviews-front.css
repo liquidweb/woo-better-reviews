@@ -354,6 +354,22 @@
         font-weight: 700;
         text-transform: uppercase; }
 
+.woo-better-reviews-display-pagination-wrapper {
+  clear: both; }
+  .woo-better-reviews-display-pagination-wrapper ul.page-numbers {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    text-align: center; }
+    .woo-better-reviews-display-pagination-wrapper ul.page-numbers li {
+      display: inline-block;
+      vertical-align: middle;
+      width: auto; }
+  .woo-better-reviews-display-pagination-wrapper p.single-page-links {
+    margin: 0;
+    padding: 0;
+    text-align: center; }
+
 .woo-better-reviews-list-display-wrapper {
   clear: both;
   margin: 0 0 25px; }
@@ -363,8 +379,6 @@
   margin: 0 0 20px;
   padding: 0 0 20px;
   border-bottom: 1px solid rgba(0, 0, 0, 0.05); }
-  .woo-better-reviews-single-review-display-block:last-of-type {
-    border-bottom: 0 none; }
 
 .woo-better-reviews-single-header-wrap {
   margin: 0 0 15px; }
