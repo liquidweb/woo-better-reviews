@@ -49,7 +49,6 @@ function filter_woo_admin_review_settings( $settings ) {
 	if ( empty( $settings ) ) {
 		return $settings;
 	}
-	// preprint( $settings, true );
 
 	// Set my removes.
 	$removals   = array(

@@ -1840,19 +1840,15 @@ function merge_review_object_taxonomies( $reviews ) {
 
 		// Cast it as an array.
 		$review = (array) $object;
-		// preprint( $review, true );
 
 		// Pass it into the content setup.
 		$review = Utilities\format_review_content_data( $review );
-		// preprint( $review, true );
 
 		// Pass it into the scoring setup.
 		$review = Utilities\format_review_scoring_data( $review );
-		// preprint( $review, true );
 
 		// Pass it into the author setup.
 		$review = Utilities\format_review_author_charstcs( $review );
-		// preprint( $review, true );
 
 		// And now merge the data.
 		$merged[ $id ] = $review;

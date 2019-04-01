@@ -122,7 +122,6 @@ function set_review_form_rating_attributes_view( $product_id = 0 ) {
 
 		// Loop the attributes to break out each item.
 		foreach ( $attributes as $attribute_args ) {
-			// preprint( $attribute_args, true );
 
 			// Set my field wrapper class.
 			$wrapper_id     = 'woo-better-reviews-rating-attribute-' . sanitize_html_class( $attribute_args['slug'] );
@@ -213,7 +212,6 @@ function set_review_form_content_fields_view( $product_id = 0 ) {
 
 	// Get my form fields.
 	$fieldset_data  = FormData\get_review_content_form_fields();
-	// preprint( $fieldset_data, true );
 
 	// Bail without the fields to display.
 	if ( empty( $fieldset_data ) ) {
@@ -304,7 +302,7 @@ function set_review_form_author_fields_view( $author_id = 0 ) {
 
 	// Get my form fields.
 	$fieldset_data  = FormData\get_review_author_form_fields( $author_id );
-	// preprint( $fieldset_data, true );
+
 	// Bail without the fields to display.
 	if ( empty( $fieldset_data ) ) {
 		return apply_filters( Core\HOOK_PREFIX . 'review_form_author_fields_view', '', null, $author_id );
@@ -469,7 +467,6 @@ function set_review_form_hidden_meta_fields_view( $product_id = 0, $author_id = 
 
 	// Set my hidden field array.
 	$fieldset_data  = FormData\get_review_hidden_meta_fields( $product_id, $author_id );
-	// preprint( $fieldset_data, true );
 
 	// Bail without buttons.
 	if ( empty( $fieldset_data ) ) {

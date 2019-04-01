@@ -279,11 +279,9 @@ function format_attribute_display_data( $attribute_array ) {
 
 	// Loop and check.
 	foreach ( $attribute_array as $index => $attribute_args ) {
-		// preprint( $attribute_args, true );
 
 		// Now we loop each attribute.
 		foreach ( $attribute_args as $attribute_key => $attribute_value ) {
-			// preprint( $attribute_key, true );
 
 			// First check for labels.
 			if ( in_array( $attribute_key, array( 'min_label', 'max_label' ) ) ) {
@@ -327,7 +325,6 @@ function format_charstcs_display_data( $charstcs_array ) {
 
 	// Loop and check.
 	foreach ( $charstcs_array as $index => $charstcs_args ) {
-		// preprint( $charstcs_args, true );
 
 		// Now we loop each attribute.
 		foreach ( $charstcs_args as $charstcs_key => $charstcs_value ) {
@@ -463,14 +460,12 @@ function format_review_scoring_data( $review, $discard = false ) {
 
 		// Pull out the attributes.
 		$attributes = maybe_unserialize( $review['rating_attributes'] );
-		// preprint( $attributes, true );
 
 		// Our scoring data has 3 pieces.
 		foreach ( $attributes as $attribute_id => $attribute_score ) {
 
 			// Pull my attribute data.
 			$attribute_data = Queries\get_single_attribute( $attribute_id );
-			// preprint( $attribute_data, true );
 
 			// Now set the array accordingly.
 			$setup['rating_attributes'][] = array(
@@ -509,7 +504,6 @@ function format_review_author_charstcs( $review ) {
 
 	// Pull out the charstcs.
 	$charstcs   = maybe_unserialize( $review['author_charstcs'] );
-	// preprint( $charstcs, true );
 
 	// Our scoring data has 3 pieces.
 	foreach ( $charstcs as $charstcs_id => $charstcs_slug ) {

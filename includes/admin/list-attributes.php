@@ -442,7 +442,6 @@ class WooBetterReviews_ListAttributes extends WP_List_Table {
 
 		// Get all the attribute data.
 		$attribute_objects  = Queries\get_all_attributes();
-		//preprint( $attribute_objects, true );
 
 		// Bail with no data.
 		if ( ! $attribute_objects ) {
@@ -737,7 +736,6 @@ class WooBetterReviews_ListAttributes extends WP_List_Table {
 
 		// Fetch the dataset for an edit link.
 		$action_dataset = $this->get_row_action_dataset( $attribute_id, $action_name );
-		// preprint( $action_dataset, true );
 
 		// Bail without the action dataset.
 		if ( empty( $action_dataset ) ) {

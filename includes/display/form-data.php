@@ -84,7 +84,6 @@ function get_review_author_form_fields( $author_id = 0, $keys = false ) {
 
 	// Get all my characteristics.
 	$fetch_charstcs = Queries\get_all_charstcs( 'display' );
-	// preprint( $fetch_charstcs, true );
 
 	// If we have the characteristics, add them.
 	if ( ! empty( $fetch_charstcs ) ) {

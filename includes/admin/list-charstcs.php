@@ -476,7 +476,6 @@ class WooBetterReviews_ListCharstcs extends WP_List_Table {
 
 		// Get all the attribute data.
 		$charstcs_objects   = Queries\get_all_charstcs();
-		//preprint( $charstcs_objects, true );
 
 		// Bail with no data.
 		if ( ! $charstcs_objects ) {
@@ -769,7 +768,6 @@ class WooBetterReviews_ListCharstcs extends WP_List_Table {
 
 		// Fetch the dataset for an edit link.
 		$action_dataset = $this->get_row_action_dataset( $charstcs_id, $action_name );
-		// preprint( $action_dataset, true );
 
 		// Bail without the action dataset.
 		if ( empty( $action_dataset ) ) {

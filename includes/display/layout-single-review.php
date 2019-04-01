@@ -81,7 +81,7 @@ function set_single_review_attributes_scoring_view( $review = array() ) {
 
 	// Loop my characteristics.
 	foreach ( $review['rating_attributes'] as $attribute_data ) {
-		// preprint( $attribute_data, true );
+
 		// Set my attribute score.
 		$single_score   = ! empty( $attribute_data['value'] ) ? absint( $attribute_data['value'] ) : 0;
 

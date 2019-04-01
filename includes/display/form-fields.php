@@ -36,7 +36,6 @@ function set_review_editor_required( $editor_markup ) {
  * @return HTML
  */
 function get_review_form_input_field( $field_args = array(), $field_key = '', $field_id = '', $field_name = '' ) {
-	// preprint( $field_args, true );
 
 	// Bail if we don't have the args or the key.
 	if ( empty( $field_args ) || empty( $field_key ) ) {
@@ -119,7 +118,6 @@ function get_review_form_input_field( $field_args = array(), $field_key = '', $f
  * @return HTML
  */
 function get_review_form_scoring_field( $field_args = array(), $field_key = '', $field_id = '', $field_name = '' ) {
-	// preprint( $field_args, true );
 
 	// Bail if we don't have the args or the key.
 	if ( empty( $field_args ) || empty( $field_key ) ) {
@@ -188,7 +186,6 @@ function get_review_form_scoring_field( $field_args = array(), $field_key = '', 
  * @return HTML
  */
 function get_review_form_textarea_field( $field_args = array(), $field_key = '', $field_id = '', $field_name = '' ) {
-	// preprint( $field_args, true );
 
 	// Bail if we don't have the args or the key.
 	if ( empty( $field_args ) || empty( $field_key ) ) {
@@ -204,7 +201,6 @@ function get_review_form_textarea_field( $field_args = array(), $field_key = '',
 
 	// Get the data pieces for the textarea.
 	$set_textarea_data  = Utilities\format_review_textarea_data( $field_args );
-	// preprint( $set_textarea_data, true );
 
 	// Set my empty.
 	$field  = '';
@@ -247,7 +243,6 @@ function get_review_form_textarea_field( $field_args = array(), $field_key = '',
  * @return HTML
  */
 function get_review_form_dropdown_field( $field_args = array(), $field_key = '', $field_id = '', $field_name = '' ) {
-	// preprint( $field_args, true );
 
 	// Bail if we don't have the args, options, or the key.
 	if ( empty( $field_args ) || empty( $field_args['options'] ) || empty( $field_key ) ) {
@@ -313,7 +308,6 @@ function get_review_form_dropdown_field( $field_args = array(), $field_key = '',
  * @return HTML
  */
 function get_review_form_radio_field( $field_args = array(), $field_key = '', $field_id = '', $field_name = '' ) {
-	// preprint( $field_args, true );
 
 	// Bail if we don't have the args or the key.
 	if ( empty( $field_args ) || empty( $field_key ) ) {
@@ -377,7 +371,6 @@ function get_review_form_radio_field( $field_args = array(), $field_key = '', $f
  * @return HTML
  */
 function get_review_form_editor_minimal_field( $field_args = array(), $field_key = '', $field_id = '', $field_name = '' ) {
-	// preprint( $field_args, true );
 
 	// Bail if we don't have the args or the key.
 	if ( empty( $field_args ) || empty( $field_key ) ) {
@@ -436,7 +429,6 @@ function get_review_form_editor_minimal_field( $field_args = array(), $field_key
  * @return HTML
  */
 function get_review_form_button_field( $field_args = array(), $field_key = '', $field_id = '', $field_name = '' ) {
-	// preprint( $field_args, true );
 
 	// Bail if we don't have the args or the key.
 	if ( empty( $field_args ) || empty( $field_key ) ) {
@@ -499,7 +491,6 @@ function get_review_form_button_field( $field_args = array(), $field_key = '', $
  * @return HTML
  */
 function get_review_sorting_dropdown_field( $field_args = array(), $field_key = '', $field_name = '' ) {
-	// preprint( $field_args, true );
 
 	// Bail if we don't have the args, options, or the key.
 	if ( empty( $field_args ) || empty( $field_args['options'] ) || empty( $field_key ) ) {
