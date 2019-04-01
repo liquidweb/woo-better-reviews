@@ -80,8 +80,8 @@ function filter_woo_admin_review_settings( $settings ) {
 	$anon_args  = array(
 		'title'           => __( 'Anonymous Reviews', 'woo-better-reviews' ),
 		'desc'            => __( 'Allow non-logged in users to leave product reviews.', 'woo-better-reviews' ),
-		'id'              => 'woocommerce_wbr_allow_anonymous',
-		'default'         => 'yes',
+		'id'              => Core\OPTION_PREFIX . 'allow_anonymous',
+		'default'         => 'no',
 		'type'            => 'checkbox',
 		'checkboxgroup'   => '',
 		'show_if_checked' => 'yes',
@@ -94,8 +94,8 @@ function filter_woo_admin_review_settings( $settings ) {
 	$prod_args  = array(
 		'title'           => __( 'Product Attributes', 'woo-better-reviews' ),
 		'desc'            => __( 'Apply attributes to every product.', 'woo-better-reviews' ),
-		'id'              => 'woocommerce_wbr_global_attributes',
-		'default'         => 'no',
+		'id'              => Core\OPTION_PREFIX . 'global_attributes',
+		'default'         => 'yes',
 		'type'            => 'checkbox',
 		'checkboxgroup'   => '',
 		'show_if_checked' => 'yes',

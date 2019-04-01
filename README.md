@@ -10,16 +10,4 @@
 Like reviews, only way better.
 
 
-### To-Do List
 
-* set other field types
-* front-end messages
-* anonymous reviews
-* paginate review list
-* check single disable
-* trigger verified purchase
-* add review list inside product editor
-* list reviews on my account page
-
-
-https://www.underarmour.com/en-us/ua-curry-6-basketball-shoes/pid3020612-405

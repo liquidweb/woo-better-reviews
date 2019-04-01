@@ -22,6 +22,9 @@ function uninstall() {
 	// Run the database table deletes.
 	Database\drop_tables();
 
+	// Delete the options we set.
+	delete_initial_options();
+
 	// Include our action so that we may add to this later.
 	do_action( Core\HOOK_PREFIX . 'uninstall_process' );
 
@@ -29,3 +32,13 @@ function uninstall() {
 	flush_rewrite_rules();
 }
 register_uninstall_hook( Core\FILE, __NAMESPACE__ . '\uninstall' );
+
+/**
+ * Delete the initial options we set.
+ *
+ * @return void
+ */
+function delete_initial_options() {
+	delete_option( Core\OPTION_PREFIX . 'allow_anonymous', 'no' );
+	delete_option( Core\OPTION_PREFIX . 'global_attributes', 'yes' );
+}

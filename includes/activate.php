@@ -26,6 +26,9 @@ function activate() {
 	// Handle the meta swap.
 	backup_existing_review_counts();
 
+	// Set our initial options.
+	set_initial_options();
+
 	// Include our action so that we may add to this later.
 	do_action( Core\HOOK_PREFIX . 'activate_process' );
 
@@ -73,4 +76,15 @@ function backup_existing_review_counts( $replace = false ) {
 		// Handle the after action.
 		do_action( Core\HOOK_PREFIX . 'after_legacy_backup', $product_id, $review_count );
 	}
+}
+
+/**
+ * Set the initial options we need.
+ *
+ * @return void
+ */
+function set_initial_options() {
+	update_option( 'woocommerce_enable_reviews', 'yes' );
+	update_option( Core\OPTION_PREFIX . 'allow_anonymous', 'no' );
+	update_option( Core\OPTION_PREFIX . 'global_attributes', 'yes' );
 }

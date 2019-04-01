@@ -172,7 +172,7 @@ function maybe_review_verified( $author_id = 0, $author_email = '', $product_id 
 function maybe_attributes_global() {
 
 	// Check the Woo setting first.
-	$are_global = get_option( 'woocommerce_wbr_global_attributes', 0 );
+	$are_global = get_option( Core\OPTION_PREFIX . 'global_attributes', 'no' );
 
 	// Return a basic boolean.
 	return ! empty( $are_global ) && 'yes' === sanitize_text_field( $are_global ) ? true : false;
