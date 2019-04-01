@@ -46,7 +46,7 @@ function set_review_aggregate_average_rating_view( $product_id = 0, $review_coun
 	$display_view  .= '<div class="woo-better-reviews-list-aggregate-group woo-better-reviews-list-aggregate-average-rating">';
 
 		// Set a group title.
-		$display_view  .= '<h4 class="woo-better-reviews-list-aggregate-group-title">' . esc_html__( 'Average Rating:', 'woo-better-reviews' ) . '</h4>';
+		$display_view  .= '<h4 class="woo-better-reviews-list-aggregate-group-title">' . esc_html__( 'Average Rating', 'woo-better-reviews' ) . '</h4>';
 
 		// Wrap the group content in a div.
 		$display_view  .= '<div class="woo-better-reviews-list-aggregate-group-content woo-better-reviews-list-aggregate-group-scoring-content">';
@@ -93,7 +93,7 @@ function set_review_aggregate_rating_breakdown_view( $product_id = 0, $range_cou
 	$display_view  .= '<div class="woo-better-reviews-list-aggregate-group woo-better-reviews-list-aggregate-rating-breakdown">';
 
 		// Set a group title.
-		$display_view  .= '<h4 class="woo-better-reviews-list-aggregate-group-title">' . esc_html__( 'Rating Breakdown:', 'woo-better-reviews' ) . '</h4>';
+		$display_view  .= '<h4 class="woo-better-reviews-list-aggregate-group-title">' . esc_html__( 'Rating Breakdown', 'woo-better-reviews' ) . '</h4>';
 
 		// Wrap the group content in a div.
 		$display_view  .= '<div class="woo-better-reviews-list-aggregate-group-content">';
@@ -161,7 +161,7 @@ function set_review_aggregate_attribute_summary_view( $product_id = 0, $attribut
 	$display_view  .= '<div class="woo-better-reviews-list-aggregate-group woo-better-reviews-list-aggregate-attribute-summary">';
 
 		// Set a group title.
-		$display_view  .= '<h4 class="woo-better-reviews-list-aggregate-group-title">' . esc_html__( 'Review Summary:', 'woo-better-reviews' ) . '</h4>';
+		$display_view  .= '<h4 class="woo-better-reviews-list-aggregate-group-title">' . esc_html__( 'Review Summary', 'woo-better-reviews' ) . '</h4>';
 
 		// Wrap the group content in a div.
 		$display_view  .= '<div class="woo-better-reviews-list-aggregate-group-content">';
