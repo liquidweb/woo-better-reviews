@@ -53,19 +53,22 @@
 .woo-better-reviews-list-aggregate-group-content-item {
 
 
-	&.woo-better-reviews-list-aggregate-group-content-stars {
-		margin: 0 0 10px;
+	&.woo-better-reviews-list-aggregate-group-content-stars,
+	&.woo-better-reviews-list-aggregate-group-content-average-text,
+	&.woo-better-reviews-list-aggregate-group-content-count-total {
+		margin: 0 0 20px;
 	}
 
 	&.woo-better-reviews-list-aggregate-group-content-average-text,
 	&.woo-better-reviews-list-aggregate-group-content-count-total {
-		margin: 0 0 10px;
 		font-size: 12px;
 		line-height: 18px;
 		font-style: italic;
 	}
 
-	&.woo-better-reviews-list-aggregate-group-content-count-total {}
+	&.woo-better-reviews-list-aggregate-group-content-count-total {
+		margin-bottom: 0;
+	}
 
 	.woo-better-reviews-scoring-value,
 	.woo-better-reviews-scoring-count {
