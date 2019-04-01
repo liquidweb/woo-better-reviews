@@ -291,7 +291,8 @@
     font-weight: 700;
     line-height: 1;
     text-transform: uppercase;
-    margin-bottom: 2px; }
+    margin-bottom: 2px;
+    padding: 0 3px; }
   .woo-better-reviews-list-aggregate-attribute-summary .woo-better-reviews-list-attribute-summary-block .woo-better-reviews-list-attribute-summary-squares {
     line-height: 16px;
     margin-bottom: 4px;
@@ -508,7 +509,8 @@
     font-weight: 700;
     line-height: 1;
     text-transform: uppercase;
-    margin-bottom: 2px; }
+    margin-bottom: 2px;
+    padding: 0 3px; }
   .woo-better-reviews-single-attribute-scoring-block .woo-better-reviews-list-attribute-summary-squares {
     line-height: 16px;
     margin-bottom: 4px;
@@ -630,7 +632,8 @@ div#review_form_wrapper form.woo-better-reviews-form-container {
     font-size: 12px;
     font-weight: 700;
     line-height: 1;
-    text-transform: uppercase; }
+    text-transform: uppercase;
+    padding: 0 3px; }
   .woo-better-reviews-rating-stars-fields .woo-better-reviews-rating-form-stars-row {
     width: 100%;
     display: block;
