@@ -13,12 +13,47 @@
 			vertical-align: middle;
 			width: auto;
 		}
+
 	}
 
 	p.single-page-links {
 		margin: 0;
 		padding: 0;
 		text-align: center;
+	}
+
+	a {
+
+		&.page-numbers {
+			color: #3a3a3a;
+			text-decoration: none;
+			font-size: 15px;
+			line-height: 20px;
+		}
+
+		&.prev {
+			font-size: 11px;
+			margin-right: 15px;
+		}
+
+		&.next {
+			font-size: 11px;
+			margin-left: 15px;
+		}
+
+		.woo-better-reviews-paginate-increment {
+			font-size: 12px;
+			font-weight: 700;
+		}
+
+	}
+
+	.current {
+		color: #3d9970;
+		font-size: 16px;
+		line-height: 20px;
+		font-weight: 700;
+		padding: 0 7px;
 	}
 
 }

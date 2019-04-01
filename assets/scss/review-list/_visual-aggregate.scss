@@ -53,13 +53,48 @@
 .woo-better-reviews-list-aggregate-group-content-item {
 
 
-	&.woo-better-reviews-list-aggregate-group-content-stars {}
+	&.woo-better-reviews-list-aggregate-group-content-stars {
+		margin: 0 0 10px;
+	}
 
-	&.woo-better-reviews-list-aggregate-group-content-average-text {}
+	&.woo-better-reviews-list-aggregate-group-content-average-text,
+	&.woo-better-reviews-list-aggregate-group-content-count-total {
+		margin: 0 0 10px;
+		font-size: 12px;
+		line-height: 18px;
+		font-style: italic;
+	}
 
 	&.woo-better-reviews-list-aggregate-group-content-count-total {}
 
+	.woo-better-reviews-scoring-value,
+	.woo-better-reviews-scoring-count {
+		font-size: 18px;
+		font-style: normal;
+		font-weight: 700;
+	}
+
 }
+
+.woo-better-reviews-list-aggregate-group-content-stars {
+
+	.woo-better-reviews-list-total-score {
+		display: block;
+		width: 100%;
+		text-align: left;
+
+		.woo-better-reviews-single-star {
+			max-width: 14%;
+			margin-left: 0.5%;
+
+			&:first-child {
+				margin-left: 0;
+			}
+		}
+	}
+
+}
+
 
 .woo-better-reviews-list-rating-breakdown-content-list {
 

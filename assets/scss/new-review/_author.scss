@@ -1,4 +1,9 @@
 
+
+.woo-better-reviews-rating-author-fields {
+	margin-bottom: 25px;
+}
+
 .woo-better-reviews-rating-content-field-wrap {
 
 	&.woo-better-reviews-rating-charstcs-field-wrap {
@@ -6,10 +11,12 @@
 
 		.woo-better-reviews-rating-field-label {
 			min-width: 140px;
+			margin: 0 5px 0 0;
 		}
 
 		.woo-better-reviews-rating-dropdown-field {
 			width: 200px;
+			padding: 5px;
 		}
 
 	}

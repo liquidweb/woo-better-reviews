@@ -189,7 +189,7 @@ function display_existing_reviews( $product_id = 0, $echo = true ) {
 	}
 
 	// Run the pagination checks.
-	$build_reviews  = Helpers\maybe_paginate_reviews( $fetch_reviews );
+	$build_reviews  = Helpers\maybe_paginate_reviews( $fetch_reviews, $product_id );
 
 	// Set a simple counter.
 	$i  = 0;

@@ -1,14 +1,35 @@
 
-form.woo-better-reviews-form-container {
+div#review_form_wrapper {
 
-	clear: both;
-	display: block;
 
-	.woo-better-reviews-rating-form-title {}
+	form.woo-better-reviews-form-container {
 
-	.woo-better-reviews-rating-new-review-fields {}
+		clear: both;
+		display: block;
+
+		.woo-better-reviews-rating-form-title,
+		.woo-better-reviews-rating-author-fields-title {
+			font-size: 24px;
+			line-height: 30px;
+			font-weight: 400;
+			margin: 0 0 20px;
+		}
+
+		.woo-better-reviews-rating-new-review-fields {}
+
+		/*
+		.woo-better-reviews-rating-author-fields-title {
+			font-size: 24px;
+			line-height: 30px;
+			font-weight: 400;
+			margin: 0 0 20px;
+		}
+		*/
+
+	}
 
 }
+
 
 
 @media only screen and (max-width: 782px) {}

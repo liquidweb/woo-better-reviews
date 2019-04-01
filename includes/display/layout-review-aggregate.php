@@ -37,7 +37,6 @@ function set_review_aggregate_average_rating_view( $product_id = 0, $review_coun
 
 	// Set some text strings.
 	$score_wrapper  = '<span class="woo-better-reviews-scoring-number woo-better-reviews-scoring-value">' . absint( $average_score ) . '</span>';
-	$total_wrapper  = '<span class="woo-better-reviews-scoring-number woo-better-reviews-scoring-total">' . absint( 7 ) . '</span>';
 	$count_wrapper  = '<span class="woo-better-reviews-scoring-number woo-better-reviews-scoring-count">' . absint( $review_count ) . '</span>';
 
 	// First set the empty.
@@ -56,7 +55,7 @@ function set_review_aggregate_average_rating_view( $product_id = 0, $review_coun
 			$display_view  .= '<p class="woo-better-reviews-list-aggregate-group-content-item woo-better-reviews-list-aggregate-group-content-stars">' . $average_stars . '</p>';
 
 			// Output the text version.
-			$display_view  .= '<p class="woo-better-reviews-list-aggregate-group-content-item woo-better-reviews-list-aggregate-group-content-average-text">' . sprintf( __( '%1$s of %2$s', 'woo-better-reviews' ), $score_wrapper, $total_wrapper ) . '</p>';
+			$display_view  .= '<p class="woo-better-reviews-list-aggregate-group-content-item woo-better-reviews-list-aggregate-group-content-average-text">' . sprintf( __( 'Average Rating: %s stars', 'woo-better-reviews' ), $score_wrapper ) . '</p>';
 
 			// Output the total version.
 			$display_view  .= '<p class="woo-better-reviews-list-aggregate-group-content-item woo-better-reviews-list-aggregate-group-content-count-total">' . sprintf( __( '%s reviews total', 'woo-better-reviews' ), $count_wrapper ) . '</p>';

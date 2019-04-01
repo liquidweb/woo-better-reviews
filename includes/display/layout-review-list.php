@@ -90,7 +90,6 @@ function set_review_list_sorting_view( $product_id = 0 ) {
 
 	// Get all the characteristics we have.
 	$all_charstcs   = Queries\get_all_charstcs( 'display' );
-	// preprint( $all_charstcs, true );
 
 	// Show nothing if we have no characteristics.
 	if ( empty( $all_charstcs ) ) {
@@ -173,6 +172,9 @@ function set_review_list_pagination_view( $review_list_args = array(), $product_
 		return;
 	}
 
+	// Parse out my increment.
+	$increment  = '<span class="woo-better-reviews-paginate-increment">' . absint( $review_list_args['increment'] ) . '</span>';
+
 	// Set my base link for the pagination with the format replacer.
 	$setup_link = get_permalink( $product_id ) . '%_%';
 
@@ -185,8 +187,8 @@ function set_review_list_pagination_view( $review_list_args = array(), $product_
 		'type'         => 'list',
 		'echo'         => false,
 		'add_fragment' => '#tab-reviews',
-		'prev_text'    => '&laquo;',
-		'next_text'    => '&raquo;'
+		'prev_text'    => sprintf( __( '&laquo; Previous %s Reviews', 'woo-better-reviews' ), $increment ),
+		'next_text'    => sprintf( __( 'Next %s Reviews &raquo;', 'woo-better-reviews' ), $increment ),
 	);
 
 	// Filter my pagination args.

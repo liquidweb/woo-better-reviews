@@ -54,7 +54,7 @@ function set_review_form_rating_stars_view( $product_id = 0 ) {
 			$display_view  .= '<fieldset class="woo-better-reviews-rating-form-stars-fieldset">';
 
 			// Add our legend title.
-			$display_view  .= '<legend class="woo-better-reviews-rating-fieldset-intro woo-better-reviews-rating-form-stars-intro">' . esc_html__( 'Overall Rating:', 'woo-better-reviews' ) . '</legend>';
+			$display_view  .= '<legend class="woo-better-reviews-rating-fieldset-intro woo-better-reviews-rating-form-stars-intro">' . esc_html__( 'Overall Rating', 'woo-better-reviews' ) . '</legend>';
 
 			// Set (and reverse) my score range.
 			$initial_range  = range( 1, 7, 1 );

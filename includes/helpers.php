@@ -282,11 +282,12 @@ function maybe_sorted_reviews() {
 /**
  * Check for the query paramaters to paginate the reviews.
  *
- * @param  array $reviews  The entire set of reviews.
+ * @param  array   $reviews     The entire set of reviews.
+ * @param  integer $product_id  The product ID tied to the reviews.
  *
  * @return array
  */
-function maybe_paginate_reviews( $reviews = array() ) {
+function maybe_paginate_reviews( $reviews = array(), $product_id = 0 ) {
 
 	// Bail without our reviews.
 	if ( empty( $reviews ) ) {
@@ -294,7 +295,7 @@ function maybe_paginate_reviews( $reviews = array() ) {
 	}
 
 	// Set the per-page number.
-	$items_per_page = apply_filters( Core\HOOK_PREFIX . 'reviews_per_page', 10 );
+	$items_per_page = apply_filters( Core\HOOK_PREFIX . 'reviews_per_page', 10, $reviews, $product_id );
 
 	// First reset the array keys.
 	$reviews_reset  = array_values( $reviews );
@@ -304,10 +305,11 @@ function maybe_paginate_reviews( $reviews = array() ) {
 
 		// Set and return the array values.
 		return array(
-			'paged'   => false,
-			'current' => false,
-			'total'   => 1,
-			'items'   => $reviews_reset,
+			'paged'     => false,
+			'current'   => false,
+			'total'     => 1,
+			'increment' => absint( $items_per_page ),
+			'items'     => $reviews_reset,
 		);
 	}
 
@@ -328,16 +330,14 @@ function maybe_paginate_reviews( $reviews = array() ) {
 		$current_chunk  = absint( $_REQUEST['wbr-paged'] ) - 1;
 	}
 
-	// Set my return args.
-	$review_args    = array(
-		'paged'   => true,
-		'current' => absint( $current_paged ),
-		'total'   => count( $reviews_chunkd ),
-		'items'   => $reviews_chunkd[ $current_chunk ],
+	// Set and return my return args.
+	return array(
+		'paged'     => true,
+		'current'   => absint( $current_paged ),
+		'total'     => count( $reviews_chunkd ),
+		'increment' => absint( $items_per_page ),
+		'items'     => $reviews_chunkd[ $current_chunk ],
 	);
-
-	// Return all the args.
-	return $review_args;
 }
 
 /**
