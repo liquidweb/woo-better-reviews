@@ -464,6 +464,7 @@ class WooBetterReviews_ListReviews extends WP_List_Table {
 		// Make a basic array of the actions we wanna include.
 		$setup  = array(
 			'wbr_bulk_approve' => __( 'Approve Pending', 'woo-better-reviews' ),
+			'wbr_bulk_delete'  => __( 'Delete Selected', 'woo-better-reviews' ),
 		);
 
 		// Return it filtered.
@@ -508,6 +509,115 @@ class WooBetterReviews_ListReviews extends WP_List_Table {
 
 		// Set my review IDs.
 		$review_ids = array_map( 'absint', $_POST['review-ids'] );
+
+		// Run our action switch.
+		switch ( $this->current_action() ) {
+
+			// Do the approvals.
+			case 'wbr_bulk_approve' :
+				$this->process_bulk_approval( $review_ids );
+				break;
+
+			// Do the delete.
+			case 'wbr_bulk_delete' :
+				$this->process_bulk_delete( $review_ids );
+				break;
+		}
+
+		/*
+		// Set an empty array for updating.
+		$tochange   = array();
+
+		// Now loop my IDs and attempt to update each one.
+		foreach ( $review_ids as $review_id ) {
+
+			// Get my single review data.
+			$single_review  = Queries\get_single_review( $review_id );
+
+			// Check the status so we don't change unneeded.
+			if ( 'approved' === $single_review->review_status ) {
+				continue;
+			}
+
+			// Run the update.
+			$maybe_updated  = Database\update( 'content', absint( $review_id ), array( 'review_status' => 'approved' ) );
+
+			// Check for some error return or blank.
+			if ( empty( $maybe_updated ) || false === $maybe_updated || is_wp_error( $maybe_updated ) ) {
+
+				// Figure out the error code.
+				$error_code     = is_wp_error( $maybe_updated ) ? $maybe_updated->get_error_code() : 'review-update-failed';
+
+				// Set my error return args.
+				$redirect_args  = array(
+					'success'           => false,
+					'wbr-action-result' => 'failed',
+					'wbr-error-code'    => $error_code,
+				);
+
+				// And redirect.
+				Helpers\admin_page_redirect( $redirect_args, Core\REVIEWS_ANCHOR );
+			}
+
+			// Add the ID to the update.
+			$tochange[] = $single_review->product_id;
+
+			// Handle the transient purging.
+			Utilities\purge_transients( null, 'reviews' );
+
+			// Nothing left in the loop to do.
+		}
+
+		// Run the change loop if we have items.
+		if ( ! empty( $tochange ) ) {
+
+			// Get just the individual unique IDs.
+			$update_ids = array_unique( $tochange );
+
+			// Update all my counts.
+			Utilities\update_product_review_count( $update_ids );
+
+			// Recalculate the total score on each.
+			foreach ( $update_ids as $update_id ) {
+				Utilities\calculate_total_review_scoring( $update_id );
+			}
+
+			// Nothing left for the changed items.
+		}
+
+		// Set my success args.
+		$redirect_args  = array(
+			'success'           => 1,
+			'wbr-action-result' => 'reviews-approved-bulk',
+		);
+
+		// And redirect.
+		Helpers\admin_page_redirect( $redirect_args, Core\REVIEWS_ANCHOR );
+		*/
+	}
+
+	/**
+	 * Handle my bulk approval request.
+	 *
+	 * @param  array  $review_ids  All the IDs to delete.
+	 *
+	 * @return void
+	 */
+	private function process_bulk_approval( $review_ids = array() ) {
+
+		// Bail without my review IDs.
+		if ( empty( $review_ids ) ) {
+
+			// Set my error return args.
+			$redirect_args  = array(
+				'success'           => false,
+				'wbr-action-result' => 'failed',
+				'wbr-error-code'    => 'missing-review-ids',
+			);
+
+			// And redirect.
+			Helpers\admin_page_redirect( $redirect_args, Core\REVIEWS_ANCHOR );
+		}
 
 		// Set an empty array for updating.
 		$tochange   = array();
@@ -573,6 +683,74 @@ class WooBetterReviews_ListReviews extends WP_List_Table {
 		$redirect_args  = array(
 			'success'           => 1,
 			'wbr-action-result' => 'reviews-approved-bulk',
+		);
+
+		// And redirect.
+		Helpers\admin_page_redirect( $redirect_args, Core\REVIEWS_ANCHOR );
+	}
+
+	/**
+	 * Handle my bulk delete request.
+	 *
+	 * @param  array  $review_ids  All the IDs to delete.
+	 *
+	 * @return void
+	 */
+	private function process_bulk_delete( $review_ids = array() ) {
+
+		// Bail without my review IDs.
+		if ( empty( $review_ids ) ) {
+
+			// Set my error return args.
+			$redirect_args  = array(
+				'success'           => false,
+				'wbr-action-result' => 'failed',
+				'wbr-error-code'    => 'missing-review-ids',
+			);
+
+			// And redirect.
+			Helpers\admin_page_redirect( $redirect_args, Core\REVIEWS_ANCHOR );
+		}
+
+		// Loop my review IDs and start deleting them.
+		foreach ( $review_ids as $review_id ) {
+
+			// Run the delete.
+			$maybe_deleted  = Database\delete( 'content', $review_id );
+
+			// Check for some error return or blank.
+			if ( empty( $maybe_deleted ) || false === $maybe_deleted || is_wp_error( $maybe_deleted ) ) {
+
+				// Figure out the error code.
+				$error_code = is_wp_error( $maybe_deleted ) ? $maybe_deleted->get_error_code() : 'review-delete-failed';
+
+				// Set my error return args.
+				$redirect_args  = array(
+					'success'           => false,
+					'wbr-action-result' => 'failed',
+					'wbr-error-code'    => $error_code,
+				);
+
+				// And do the redirect.
+				Helpers\admin_page_redirect( $redirect_args, Core\REVIEWS_ANCHOR );
+			}
+
+			// Run my related cleanup.
+			Utilities\delete_related_review_data( $review_id );
+
+			// Handle the transient purging.
+			Utilities\purge_transients( null, 'reviews' );
+
+			// Nothing left in the loop to do.
+		}
+
+		// Purge my grouping related transients.
+		Utilities\purge_transients( null, 'taxonomies' );
+
+		// Set my success args.
+		$redirect_args  = array(
+			'success'           => 1,
+			'wbr-action-result' => 'reviews-deleted-bulk',
 		);
 
 		// And redirect.
