@@ -23,7 +23,46 @@ use LiquidWeb\WooBetterReviews\Display\LayoutSingleReview as LayoutSingleReview;
 use WP_Error;
 
 /**
- * Build and display the visual aggregated review data.
+ * Build and display the potential messages from an action.
+ *
+ * @param  integer $product_id  The product ID we are leaving a review for.
+ * @param  boolean $echo        Whether to echo it out or return it.
+ *
+ * @return HTML
+ */
+function display_review_template_messages( $product_id = 0, $echo = true ) {
+
+	// Bail without a product ID.
+	if ( empty( $product_id ) ) {
+		return;
+	}
+
+	// Check for an override.
+	$maybe_override = apply_filters( Core\HOOK_PREFIX . 'display_review_template_messages', null, $product_id );
+
+	// Return the override if we have it.
+	if ( ! empty( $maybe_override ) ) {
+		return render_final_output( $maybe_override, $echo );
+	}
+
+	// Set our empty.
+	$build  = '';
+
+	// Set the div wrapper.
+	$build .= '<div class="woo-better-reviews-list-messages-wrapper">';
+
+		// Output the message view.
+		$build .= LayoutReviewList\set_review_list_messages_view( $product_id );
+
+	// Close up the div tag.
+	$build .= '</div>';
+
+	// Do the return or echo based on the call.
+	return render_final_output( $build, $echo );
+}
+
+/**
+ * Build and display the title for the reviews.
  *
  * @param  integer $product_id  The product ID we are leaving a review for.
  * @param  boolean $echo        Whether to echo it out or return it.

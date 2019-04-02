@@ -20,6 +20,8 @@ if ( ! comments_open() ) {
 
 <div id="reviews" class="woocommerce-Reviews woo-better-reviews-display-wrapper">
 
+	<?php \LiquidWeb\WooBetterReviews\Display\ViewOutput\display_review_template_messages( $product->get_id() ); ?>
+
 	<div id="comments" class="woo-better-reviews-display-block woo-better-reviews-existing-block">
 
 		<?php \LiquidWeb\WooBetterReviews\Display\ViewOutput\display_review_template_title( $product->get_id() ); ?>

@@ -664,10 +664,18 @@ function get_available_field_types() {
  *
  * @return string
  */
-function get_admin_notice_text( $return_code = '' ) {
+function get_error_notice_text( $return_code = '' ) {
 
 	// Handle my different error codes.
 	switch ( esc_attr( $return_code ) ) {
+
+		case 'review-posted' :
+			return __( 'Your review has been submitted and is pending approval.', 'woo-better-reviews' );
+			break;
+
+		case 'review-post-failed' :
+			return __( 'There was an error attempting to save your review.', 'woo-better-reviews' );
+			break;
 
 		case 'review-updated' :
 			return __( 'The selected review has been updated.', 'woo-better-reviews' );
