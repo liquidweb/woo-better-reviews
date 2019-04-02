@@ -161,6 +161,11 @@ function process_review_submission() {
 	// Now loop and attempt each insert.
 	foreach ( $author_format as $single_author_array ) {
 
+		// Skip the insert if we have no values.
+		if ( empty( $single_author_array['charstcs_value'] ) ) {
+			continue;
+		}
+
 		// Attempt to insert the review author.
 		$insert_author  = Database\insert( 'authormeta', $single_author_array );
 

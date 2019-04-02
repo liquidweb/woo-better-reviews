@@ -176,7 +176,7 @@ function set_single_review_content_body_view( $review = array() ) {
 function set_single_review_author_charstcs_view( $review = array() ) {
 
 	// Bail without the parts we want.
-	if ( empty( $review ) || empty( $review['author_charstcs'] ) ) {
+	if ( empty( $review ) ) {
 		return;
 	}
 
@@ -193,27 +193,34 @@ function set_single_review_author_charstcs_view( $review = array() ) {
 		$display_view  .= '<p class="woo-better-reviews-single-author">' . sprintf( __( 'by %s', 'woo-better-reviews' ), '<span class="woo-better-reviews-single-author-val">' . esc_attr( $review['author_name'] ) . '</span>' ) . $show_verified . '</p>';
 	}
 
-	// Set an unordered list.
-	$display_view  .= '<ul class="woo-better-reviews-author-charstcs">';
+	// Set the list of characteristics if we have them.
+	if ( ! empty( $review['author_charstcs'] ) ) {
 
-	// Loop my characteristics.
-	foreach ( $review['author_charstcs'] as $charstc ) {
+		// Set an unordered list.
+		$display_view  .= '<ul class="woo-better-reviews-author-charstcs">';
 
-		// Set the list item.
-		$display_view  .= '<li class="woo-better-reviews-single-author-charstc">';
+		// Loop my characteristics.
+		foreach ( $review['author_charstcs'] as $charstc ) {
 
-			// Set the label.
-			$display_view  .= '<span class="woo-better-reviews-author-charstc-item woo-better-reviews-author-charstc-label">' . esc_html( $charstc['label'] ) . ': </span>';
+			// Set a base class.
+			$charstc_class  = 'woo-better-reviews-author-charstc-item woo-better-reviews-author-charstc';
 
-			// Set the value.
-			$display_view  .= '<span class="woo-better-reviews-author-charstc-item woo-better-reviews-author-charstc-value">' . esc_html( $charstc['value'] ) . '</span>';
+			// Set the list item.
+			$display_view  .= '<li class="woo-better-reviews-single-author-charstc">';
 
-		// Close the list item.
-		$display_view  .= '</li>';
+				// Set the label.
+				$display_view  .= '<span class="' . esc_attr( $charstc_class ) . '-label">' . esc_html( $charstc['label'] ) . ': </span>';
+
+				// Set the value.
+				$display_view  .= '<span class="' . esc_attr( $charstc_class ) . '-value">' . esc_html( $charstc['value'] ) . '</span>';
+
+			// Close the list item.
+			$display_view  .= '</li>';
+		}
+
+		// Close up the unordered list.
+		$display_view  .= '</ul>';
 	}
-
-	// Close up the unordered list.
-	$display_view  .= '</ul>';
 
 	// Set the whole thing inside a div.
 	$display_wrap   = '<div class="woo-better-reviews-single-charstcs-wrap">' . $display_view . '</div>';
