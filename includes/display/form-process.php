@@ -226,7 +226,10 @@ function redirect_front_submit_result( $redirect = '', $error = '', $success = f
 	if ( false !== $success ) {
 
 		// Now set my redirect link.
-		$redirect_link  = add_query_arg( array( 'wbr-success' => 1 ), $redirect );
+		$redirect_base  = add_query_arg( array( 'wbr-success' => 1 ), $redirect );
+
+		// Include the hashed portion on the end.
+		$redirect_link  = $redirect_base . '#tab-reviews';
 
 		// Do the redirect.
 		wp_safe_redirect( $redirect_link );
@@ -243,7 +246,10 @@ function redirect_front_submit_result( $redirect = '', $error = '', $success = f
 	$redirect_args  = ! empty( $custom ) ? wp_parse_args( $custom, $redirect_args ) : $redirect_args;
 
 	// Now set my redirect link.
-	$redirect_link  = add_query_arg( $redirect_args, $redirect );
+	$redirect_base  = add_query_arg( $redirect_args, $redirect );
+
+	// Include the hashed portion on the end.
+	$redirect_link  = $redirect_base . '#tab-reviews';
 
 	// Do the redirect.
 	wp_safe_redirect( $redirect_link );

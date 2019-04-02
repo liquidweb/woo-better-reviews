@@ -38,26 +38,16 @@ function set_review_list_messages_view( $product_id = 0 ) {
 	// Determine if it was a success.
 	$maybe_success  = ! empty( $_REQUEST['wbr-success'] ) ? true : false;
 
-	// If we have a success, set up those items.
-	if ( false !== $maybe_success ) {
+	// Get the error code we (maybe) have.
+	$maybe_err_code = ! empty( $_REQUEST['wbr-error-code'] ) ? sanitize_text_field( $_REQUEST['wbr-error-code'] ) : 'review-post-failed';
 
-		// Set the class.
-		$message_class  = 'woo-better-reviews-message-text woo-better-reviews-message-text-success';
+	// Get the message text.
+	$message_code   = false !== $maybe_success ? 'review-posted' : $maybe_err_code;
+	$message_words  = Helpers\get_error_notice_text( $message_code );
 
-		// Get the message text.
-		$message_words  = Helpers\get_error_notice_text( 'review-posted' );
-
-	} else {
-
-		// Get the error code we (hopefully) have.
-		$get_error_code = ! empty( $_REQUEST['wbr-error-code'] ) ? sanitize_text_field( $_REQUEST['wbr-error-code'] ) : 'review-post-failed';
-
-		// Set the class.
-		$message_class  = 'woo-better-reviews-message-text woo-better-reviews-message-text-error';
-
-		// Get the message text.
-		$message_words  = Helpers\get_error_notice_text( $get_error_code );
-	}
+	// Set the class to wrap it with.
+	$message_class  = 'woo-better-reviews-message-text woo-better-reviews-message-code-' . sanitize_html_class( $message_code );
+	$message_class .= false !== $maybe_success ? ' woo-better-reviews-message-text-success' : ' woo-better-reviews-message-text-error';
 
 	// Wrap the text in a paragraph with our class.
 	$display_view   = '<p class="' . esc_attr( $message_class ) . '">' . esc_html( $message_words ) . '</p>';
