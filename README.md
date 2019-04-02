@@ -10,6 +10,9 @@
 Like reviews, only way better.
 
 
+#### To-Do List
+
+* better incorporate existing WooCommerce template parts
 
 #### Potential Upcoming Features
 
