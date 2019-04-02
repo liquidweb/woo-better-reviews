@@ -2,10 +2,10 @@
 /**
  * Scroll down to our review form.
  */
-function scrollToReviewForm() {
+function scrollToPageClass( pageClass ) {
 
 	jQuery( 'html,body' ).animate({
-		scrollTop: jQuery( '.woo-better-reviews-form-block' ).offset().top - 200
+		scrollTop: jQuery( pageClass ).offset().top - 200
 	}, 500 );
 
 	// And just return false.
@@ -18,7 +18,7 @@ function scrollToReviewForm() {
 jQuery( document ).ready( function($) {
 
 	/**
-	 * Handle the notice dismissal.
+	 * Handle the click for leaving a review.
 	 */
 	$( '.woo-better-reviews-list-title-wrapper' ).on( 'click', '.woo-better-reviews-template-title-form-link', function( event ) {
 
@@ -26,7 +26,7 @@ jQuery( document ).ready( function($) {
 		event.preventDefault();
 
 		// And scroll to it.
-		scrollToReviewForm();
+		scrollToPageClass( '.woo-better-reviews-form-block' );
 	});
 
 //********************************************************

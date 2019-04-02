@@ -60,7 +60,7 @@ function process_review_submission() {
 	$maybe_enabled  = Helpers\maybe_reviews_enabled( $product_id );
 
 	// Bail if we aren't aren't enabled.
-	if ( $maybe_enabled ) {
+	if ( ! $maybe_enabled ) {
 		redirect_front_submit_result( $base_redirect, 'reviews-not-enabled' );
 	}
 
