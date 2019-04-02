@@ -72,9 +72,8 @@ require_once __DIR__ . '/includes/tables/data-authormeta.php';
 require_once __DIR__ . '/includes/tables/tax-attributes.php';
 require_once __DIR__ . '/includes/tables/tax-characteristics.php';
 
-// Load the files loaded plugin-wide.
+// Load my query logic plugin-wide.
 require_once __DIR__ . '/includes/queries.php';
-require_once __DIR__ . '/includes/woo-class.php';
 
 // Load the admin specific files.
 if ( is_admin() ) {
@@ -83,12 +82,12 @@ if ( is_admin() ) {
 	require_once __DIR__ . '/includes/admin/admin-assets.php';
 	require_once __DIR__ . '/includes/admin/admin-notices.php';
 	require_once __DIR__ . '/includes/admin/admin-pages.php';
-	require_once __DIR__ . '/includes/admin/admin-process.php';
 	require_once __DIR__ . '/includes/admin/list-reviews.php';
 	require_once __DIR__ . '/includes/admin/list-attributes.php';
 	require_once __DIR__ . '/includes/admin/list-charstcs.php';
 	require_once __DIR__ . '/includes/admin/product-meta.php';
 	require_once __DIR__ . '/includes/admin/woo-settings.php';
+	require_once __DIR__ . '/includes/process/admin-process.php';
 }
 
 // Load the front-end specific files.
@@ -96,13 +95,13 @@ if ( ! is_admin() ) {
 	require_once __DIR__ . '/includes/front-end.php';
 	require_once __DIR__ . '/includes/display/form-data.php';
 	require_once __DIR__ . '/includes/display/form-fields.php';
-	require_once __DIR__ . '/includes/display/form-process.php';
 	require_once __DIR__ . '/includes/display/layout-review-list.php';
 	require_once __DIR__ . '/includes/display/layout-review-aggregate.php';
 	require_once __DIR__ . '/includes/display/layout-single-review.php';
 	require_once __DIR__ . '/includes/display/layout-new-review-form.php';
 	require_once __DIR__ . '/includes/display/view-output.php';
 	require_once __DIR__ . '/includes/display/woo-filters.php';
+	require_once __DIR__ . '/includes/process/form-process.php';
 }
 
 // Load the triggered file loads.

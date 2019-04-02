@@ -1,8 +1,8 @@
 === Better Reviews For WooCommerce ===
 Contributors: liquidweb, norcross
 Tags: woocommerce, reviews
-Requires at least: 4.8
-Tested up to: 4.9.8
+Requires at least: 5.0
+Tested up to: 5.1.1
 Stable tag: 0.1.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
