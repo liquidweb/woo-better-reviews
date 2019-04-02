@@ -54,7 +54,16 @@ function set_review_form_rating_stars_view( $product_id = 0 ) {
 			$display_view  .= '<fieldset class="woo-better-reviews-rating-form-stars-fieldset">';
 
 			// Add our legend title.
-			$display_view  .= '<legend class="woo-better-reviews-rating-fieldset-intro woo-better-reviews-rating-form-stars-intro">' . esc_html__( 'Overall Rating', 'woo-better-reviews' ) . '</legend>';
+			$display_view  .= '<legend class="woo-better-reviews-rating-fieldset-intro woo-better-reviews-rating-form-stars-intro">';
+
+				// First do the actual legend.
+				$display_view  .= esc_html__( 'Overall Rating', 'woo-better-reviews' );
+
+				// Include the required portion.
+				$display_view  .= '<span class="woo-better-reviews-field-required" aria-label="' . esc_attr( __( 'This is a required field', 'woo-better-reviews' ) ) . '">&#8727;</span>';
+
+			// Close up the legend.
+			$display_view  .= '</legend>';
 
 			// Set (and reverse) my score range.
 			$initial_range  = range( 1, 7, 1 );
@@ -142,7 +151,16 @@ function set_review_form_rating_attributes_view( $product_id = 0 ) {
 					$display_view  .= '<fieldset class="woo-better-reviews-rating-form-single-attribute-fieldset">';
 
 						// Add our legend title.
-						$display_view  .= '<legend class="woo-better-reviews-rating-fieldset-intro woo-better-reviews-rating-form-single-attribute-intro">' . esc_html( $attribute_args['name'] ) . '</legend>';
+						$display_view  .= '<legend class="woo-better-reviews-rating-fieldset-intro woo-better-reviews-rating-form-single-attribute-intro">';
+
+							// First do the actual legend.
+							$display_view  .= esc_html( trim( $attribute_args['name'] ) );
+
+							// Include the required portion.
+							$display_view  .= '<span class="woo-better-reviews-field-required" aria-label="' . esc_attr( __( 'This is a required field', 'woo-better-reviews' ) ) . '">&#8727;</span>';
+
+						// Close up the legend.
+						$display_view  .= '</legend>';
 
 						// Loop my scoring range.
 						for ( $setscore = 7; $setscore >= 1; $setscore-- ) {

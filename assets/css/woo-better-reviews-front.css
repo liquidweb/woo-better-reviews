@@ -634,6 +634,9 @@ div#review_form_wrapper form.woo-better-reviews-form-container {
     line-height: 1;
     text-transform: uppercase;
     padding: 0 3px; }
+    .woo-better-reviews-rating-stars-fields .woo-better-reviews-rating-form-stars-intro .woo-better-reviews-field-required {
+      color: #8b0000;
+      padding-left: 3px; }
   .woo-better-reviews-rating-stars-fields .woo-better-reviews-rating-form-stars-row {
     width: 100%;
     display: block;
@@ -689,6 +692,9 @@ div#review_form_wrapper form.woo-better-reviews-form-container {
     font-weight: 700;
     line-height: 1;
     text-transform: uppercase; }
+    .woo-better-reviews-rating-attribute-single .woo-better-reviews-rating-form-single-attribute-intro .woo-better-reviews-field-required {
+      color: #8b0000;
+      padding-left: 3px; }
   .woo-better-reviews-rating-attribute-single .woo-better-reviews-rating-form-single-attribute-fieldset {
     background-color: transparent;
     border: none;
