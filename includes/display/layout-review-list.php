@@ -17,6 +17,56 @@ use LiquidWeb\WooBetterReviews\Display\FormData as FormData;
 use LiquidWeb\WooBetterReviews\Display\FormFields as FormFields;
 
 /**
+ * Set up the messages portion of the review list.
+ *
+ * @param  integer $product_id  The product ID we are displaying for.
+ *
+ * @return HTML
+ */
+function set_review_list_messages_view( $product_id = 0 ) {
+
+	// Bail without the parts we want.
+	if ( empty( $product_id ) ) {
+		return;
+	}
+
+	// If we don't have the success flag at all, bail.
+	if ( ! isset( $_REQUEST['wbr-success'] ) ) {
+		return;
+	}
+
+	// Determine if it was a success.
+	$maybe_success  = ! empty( $_REQUEST['wbr-success'] ) ? true : false;
+
+	// If we have a success, set up those items.
+	if ( false !== $maybe_success ) {
+
+		// Set the class.
+		$message_class  = 'woo-better-reviews-message-text woo-better-reviews-message-text-success';
+
+		// Get the message text.
+		$message_words  = Helpers\get_error_notice_text( 'review-posted' );
+
+	} else {
+
+		// Get the error code we (hopefully) have.
+		$get_error_code = ! empty( $_REQUEST['wbr-error-code'] ) ? sanitize_text_field( $_REQUEST['wbr-error-code'] ) : 'review-post-failed';
+
+		// Set the class.
+		$message_class  = 'woo-better-reviews-message-text woo-better-reviews-message-text-error';
+
+		// Get the message text.
+		$message_words  = Helpers\get_error_notice_text( $get_error_code );
+	}
+
+	// Wrap the text in a paragraph with our class.
+	$display_view   = '<p class="' . esc_attr( $message_class ) . '">' . esc_html( $message_words ) . '</p>';
+
+	// Return it, filtered.
+	return apply_filters( Core\HOOK_PREFIX . 'review_list_messages_view', $display_view, $product_id );
+}
+
+/**
  * Set up the header portion of the review list.
  *
  * @param  integer $product_id  The product ID we are displaying for.

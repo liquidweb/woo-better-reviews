@@ -39,7 +39,7 @@ function admin_result_notices() {
 		$error_code = ! empty( $_GET['wbr-error-code'] ) ? $_GET['wbr-error-code'] : 'unknown';
 
 		// Handle my error text retrieval.
-		$error_text = Helpers\get_admin_notice_text( $error_code );
+		$error_text = Helpers\get_error_notice_text( $error_code );
 
 		// And handle the display.
 		display_admin_notice_markup( $error_text, 'error' );
@@ -49,7 +49,7 @@ function admin_result_notices() {
 	}
 
 	// Go get my text to display.
-	$notice = Helpers\get_admin_notice_text( sanitize_text_field( $_GET['wbr-action-result'] ) );
+	$notice = Helpers\get_error_notice_text( sanitize_text_field( $_GET['wbr-action-result'] ) );
 
 	// And handle the display.
 	display_admin_notice_markup( $notice, $result );

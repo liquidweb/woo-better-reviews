@@ -226,7 +226,7 @@ function redirect_front_submit_result( $redirect = '', $error = '', $success = f
 	if ( false !== $success ) {
 
 		// Now set my redirect link.
-		$redirect_link  = add_query_arg( array( 'success' => 1 ), $redirect );
+		$redirect_link  = add_query_arg( array( 'wbr-success' => 1 ), $redirect );
 
 		// Do the redirect.
 		wp_safe_redirect( $redirect_link );
@@ -234,7 +234,7 @@ function redirect_front_submit_result( $redirect = '', $error = '', $success = f
 	}
 
 	// Set up my redirect args.
-	$redirect_args  = array( 'success' => 0, 'wbr-error-code' => esc_attr( $error ) );
+	$redirect_args  = array( 'wbr-success' => 0, 'wbr-error-code' => esc_attr( $error ) );
 
 	// Now check to see if we have a return, which means a return link.
 	$redirect_args  = ! empty( $return ) ? wp_parse_args( $redirect_args, array( 'wbr-submit-return' => $return ) ) : $redirect_args;

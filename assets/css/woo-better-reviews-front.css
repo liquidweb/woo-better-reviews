@@ -1,3 +1,30 @@
+.woo-better-reviews-list-messages-wrapper {
+  clear: both;
+  margin: 0 0 20px; }
+
+.woo-better-reviews-message-text {
+  clear: both;
+  width: 100%;
+  display: block;
+  border: 1px solid #778899;
+  border-radius: 3px;
+  background-color: #fff;
+  padding: 7px;
+  margin: 0;
+  position: relative;
+  font-size: 15px;
+  line-height: 20px;
+  text-align: center;
+  color: #222; }
+  .woo-better-reviews-message-text.woo-better-reviews-message-text-success {
+    border-color: #4f8a10;
+    background-color: #4f8a10;
+    background-color: rgba(79, 138, 16, 0.2); }
+  .woo-better-reviews-message-text.woo-better-reviews-message-text-error {
+    border-color: #bc2f25;
+    background-color: #bc2f25;
+    background-color: rgba(188, 47, 37, 0.2); }
+
 .woo-better-reviews-list-visual-aggregate-wrapper {
   margin: 0 0 15px;
   padding: 10px;
