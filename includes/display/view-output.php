@@ -76,7 +76,7 @@ function display_review_template_visual_aggregate( $product_id = 0, $echo = true
 	}
 
 	// Fetch any existing reviews we may have.
-	$fetch_reviews  = Queries\get_reviews_for_product( $product_id, 'display' );
+	$fetch_reviews  = Queries\get_approved_reviews_for_product( $product_id, 'display' );
 
 	// Bail without reviews.
 	if ( empty( $fetch_reviews ) ) {

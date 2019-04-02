@@ -508,6 +508,11 @@ function format_review_author_charstcs( $review ) {
 	// Our scoring data has 3 pieces.
 	foreach ( $charstcs as $charstcs_id => $charstcs_slug ) {
 
+		// Skip a missing slug.
+		if ( empty( $charstcs_slug ) ) {
+			continue;
+		}
+
 		// Pull my charstcs data.
 		$charstcs_data  = Queries\get_single_charstcs( $charstcs_id );
 		$charstcs_vals  = maybe_unserialize( $charstcs_data['charstcs_values'] );

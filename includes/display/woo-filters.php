@@ -39,11 +39,8 @@ function modify_review_count_title( $title, $key ) {
 	// Set my global.
 	global $product;
 
-	// Check for a sorting request.
-	$filtered_ids   = Helpers\maybe_sorted_reviews();
-
 	// Set the count of filtered or the total.
-	$review_count   = false !== $filtered_ids ? count( $filtered_ids ) : $product->get_review_count();
+	$review_count   = Helpers\get_front_review_count( $product->get_id() );
 
 	// If we have filtered IDs, change my title.
 	return sprintf( __( 'Reviews (%s)', 'woocommerce' ), '<span class="wbr-review-tab-count">' . absint( $review_count ) . '</span>' );

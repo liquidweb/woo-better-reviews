@@ -524,76 +524,15 @@ class WooBetterReviews_ListReviews extends WP_List_Table {
 				break;
 		}
 
-		/*
-		// Set an empty array for updating.
-		$tochange   = array();
-
-		// Now loop my IDs and attempt to update each one.
-		foreach ( $review_ids as $review_id ) {
-
-			// Get my single review data.
-			$single_review  = Queries\get_single_review( $review_id );
-
-			// Check the status so we don't change unneeded.
-			if ( 'approved' === $single_review->review_status ) {
-				continue;
-			}
-
-			// Run the update.
-			$maybe_updated  = Database\update( 'content', absint( $review_id ), array( 'review_status' => 'approved' ) );
-
-			// Check for some error return or blank.
-			if ( empty( $maybe_updated ) || false === $maybe_updated || is_wp_error( $maybe_updated ) ) {
-
-				// Figure out the error code.
-				$error_code     = is_wp_error( $maybe_updated ) ? $maybe_updated->get_error_code() : 'review-update-failed';
-
-				// Set my error return args.
-				$redirect_args  = array(
-					'success'           => false,
-					'wbr-action-result' => 'failed',
-					'wbr-error-code'    => $error_code,
-				);
-
-				// And redirect.
-				Helpers\admin_page_redirect( $redirect_args, Core\REVIEWS_ANCHOR );
-			}
-
-			// Add the ID to the update.
-			$tochange[] = $single_review->product_id;
-
-			// Handle the transient purging.
-			Utilities\purge_transients( null, 'reviews' );
-
-			// Nothing left in the loop to do.
-		}
-
-		// Run the change loop if we have items.
-		if ( ! empty( $tochange ) ) {
-
-			// Get just the individual unique IDs.
-			$update_ids = array_unique( $tochange );
-
-			// Update all my counts.
-			Utilities\update_product_review_count( $update_ids );
-
-			// Recalculate the total score on each.
-			foreach ( $update_ids as $update_id ) {
-				Utilities\calculate_total_review_scoring( $update_id );
-			}
-
-			// Nothing left for the changed items.
-		}
-
-		// Set my success args.
+		// Nothing left to do, so set my error return args.
 		$redirect_args  = array(
-			'success'           => 1,
-			'wbr-action-result' => 'reviews-approved-bulk',
+			'success'           => false,
+			'wbr-action-result' => 'failed',
+			'wbr-error-code'    => 'unknown-bulk-error',
 		);
 
 		// And redirect.
 		Helpers\admin_page_redirect( $redirect_args, Core\REVIEWS_ANCHOR );
-		*/
 	}
 
 	/**
@@ -712,6 +651,9 @@ class WooBetterReviews_ListReviews extends WP_List_Table {
 			Helpers\admin_page_redirect( $redirect_args, Core\REVIEWS_ANCHOR );
 		}
 
+		// Set an empty array for updating.
+		$tochange   = array();
+
 		// Loop my review IDs and start deleting them.
 		foreach ( $review_ids as $review_id ) {
 
@@ -741,7 +683,27 @@ class WooBetterReviews_ListReviews extends WP_List_Table {
 			// Handle the transient purging.
 			Utilities\purge_transients( null, 'reviews' );
 
+			// Add the ID to the update.
+			$tochange[] = $single_review->product_id;
+
 			// Nothing left in the loop to do.
+		}
+
+		// Run the change loop if we have items.
+		if ( ! empty( $tochange ) ) {
+
+			// Get just the individual unique IDs.
+			$update_ids = array_unique( $tochange );
+
+			// Update all my counts.
+			Utilities\update_product_review_count( $update_ids );
+
+			// Recalculate the total score on each.
+			foreach ( $update_ids as $update_id ) {
+				Utilities\calculate_total_review_scoring( $update_id );
+			}
+
+			// Nothing left for the changed items.
 		}
 
 		// Purge my grouping related transients.
