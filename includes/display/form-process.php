@@ -60,7 +60,7 @@ function process_review_submission() {
 	$maybe_enabled  = Helpers\maybe_reviews_enabled( $product_id );
 
 	// Bail if we aren't aren't enabled.
-	if ( ! $maybe_enabled ) {
+	if ( $maybe_enabled ) {
 		redirect_front_submit_result( $base_redirect, 'reviews-not-enabled' );
 	}
 
@@ -222,27 +222,13 @@ function redirect_front_submit_result( $redirect = '', $error = '', $success = f
 		return;
 	}
 
-	// If we have success, skip the rest.
-	if ( false !== $success ) {
+	// Set my redirect core.
+	$redirect_core  = false !== $success ? array( 'wbr-success' => 1 ) : array( 'wbr-success' => 0 );
 
-		// Now set my redirect link.
-		$redirect_base  = add_query_arg( array( 'wbr-success' => 1 ), $redirect );
+	// Add the possible error code.
+	$redirect_args  = ! empty( $error ) ? wp_parse_args( array( 'wbr-error-code' => esc_attr( $error ) ), $redirect_core ) : $redirect_core;
 
-		// Include the hashed portion on the end.
-		$redirect_link  = false !== $hashed ? $redirect_base . '#tab-reviews' : $redirect_base;
-
-		// Do the redirect.
-		wp_safe_redirect( $redirect_link );
-		exit;
-	}
-
-	// Set up my redirect args.
-	$redirect_args  = array( 'wbr-success' => 0, 'wbr-error-code' => esc_attr( $error ) );
-
-	// Add any custom item.
-	$redirect_args  = ! empty( $custom ) ? wp_parse_args( $custom, $redirect_args ) : $redirect_args;
-
-	// Now set my redirect link.
+	// Now set the redirect base link.
 	$redirect_base  = add_query_arg( $redirect_args, $redirect );
 
 	// Include the hashed portion on the end.
