@@ -113,7 +113,7 @@ require_once __DIR__ . '/includes/uninstall.php';
 if ( defined( 'WP_CLI' ) && WP_CLI ) {
 
 	// Load our commands file.
-	require_once dirname( __FILE__ ) . '/includes/cli-commands.php';
+	require_once dirname( __FILE__ ) . '/includes/process/cli-commands.php';
 
 	// And add our command.
 	WP_CLI::add_command( 'woo-better-reviews', Commands::class );
