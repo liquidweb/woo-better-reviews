@@ -211,11 +211,11 @@ function process_review_submission() {
  * @param  string  $error     Optional error code.
  * @param  boolean $success   Whether it was successful.
  * @param  array   $custom    Any custom args to add.
- * @param  string  $return    Slug of the menu page to add a return link for.
+ * @param  boolean $hashed    Whether we are adding the hash to the URL.
  *
  * @return void
  */
-function redirect_front_submit_result( $redirect = '', $error = '', $success = false, $custom = array(), $return = '' ) {
+function redirect_front_submit_result( $redirect = '', $error = '', $success = false, $hashed = true ) {
 
 	// Just fail without the redirect URL.
 	if ( empty( $redirect ) ) {
@@ -229,7 +229,7 @@ function redirect_front_submit_result( $redirect = '', $error = '', $success = f
 		$redirect_base  = add_query_arg( array( 'wbr-success' => 1 ), $redirect );
 
 		// Include the hashed portion on the end.
-		$redirect_link  = $redirect_base . '#tab-reviews';
+		$redirect_link  = false !== $hashed ? $redirect_base . '#tab-reviews' : $redirect_base;
 
 		// Do the redirect.
 		wp_safe_redirect( $redirect_link );
@@ -239,9 +239,6 @@ function redirect_front_submit_result( $redirect = '', $error = '', $success = f
 	// Set up my redirect args.
 	$redirect_args  = array( 'wbr-success' => 0, 'wbr-error-code' => esc_attr( $error ) );
 
-	// Now check to see if we have a return, which means a return link.
-	$redirect_args  = ! empty( $return ) ? wp_parse_args( $redirect_args, array( 'wbr-submit-return' => $return ) ) : $redirect_args;
-
 	// Add any custom item.
 	$redirect_args  = ! empty( $custom ) ? wp_parse_args( $custom, $redirect_args ) : $redirect_args;
 
@@ -249,7 +246,7 @@ function redirect_front_submit_result( $redirect = '', $error = '', $success = f
 	$redirect_base  = add_query_arg( $redirect_args, $redirect );
 
 	// Include the hashed portion on the end.
-	$redirect_link  = $redirect_base . '#tab-reviews';
+	$redirect_link  = false !== $hashed ? $redirect_base . '#tab-reviews' : $redirect_base;
 
 	// Do the redirect.
 	wp_safe_redirect( $redirect_link );
