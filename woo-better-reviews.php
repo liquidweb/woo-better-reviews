@@ -116,5 +116,5 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 	require_once dirname( __FILE__ ) . '/includes/process/cli-commands.php';
 
 	// And add our command.
-	WP_CLI::add_command( 'woo-better-reviews', Commands::class );
+	WP_CLI::add_command( 'woo-better-reviews', WBR_Commands::class );
 }

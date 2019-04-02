@@ -18,7 +18,7 @@ use WP_CLI_Command;
 /**
  * Extend the CLI command class with our own.
  */
-class Commands extends WP_CLI_Command {
+class WBR_Commands extends WP_CLI_Command {
 
 	/**
 	 * Get the array of arguments for the runcommand function.
