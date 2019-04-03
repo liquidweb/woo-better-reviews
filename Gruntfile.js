@@ -14,6 +14,7 @@ module.exports = function( grunt ) {
           'assets/**',
           'includes/**',
           'languages/**',
+          'templates/**',
           'index.php',
           'woo-better-reviews.php',
           'readme.txt',
@@ -22,8 +23,6 @@ module.exports = function( grunt ) {
 
           /*
            * Exclude files not necessary in the distribution.
-           *
-           * @link https://github.com/liquidweb/airstory-wp/issues/69
            */
           '!assets/scss/**',
           '!assets/scss',
