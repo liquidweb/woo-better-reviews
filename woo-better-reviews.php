@@ -3,7 +3,7 @@
  * Plugin Name: Better Reviews For WooCommerce
  * Plugin URI:  https://github.com/liquidweb/woo-better-reviews
  * Description: Like reviews, only way better.
- * Version:     0.0.1
+ * Version:     0.1.0
  * Author:      Liquid Web
  * Author URI:  https://www.liquidweb.com
  * Text Domain: woo-better-reviews
@@ -24,7 +24,7 @@ use WP_CLI;
 if ( ! defined( 'ABSPATH' ) ) exit;
 
 // Define our plugin version.
-define( __NAMESPACE__ . '\VERS', '0.0.1' );
+define( __NAMESPACE__ . '\VERS', '0.1.0' );
 
 // Plugin root file.
 define( __NAMESPACE__ . '\FILE', __FILE__ );
