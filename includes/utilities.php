@@ -97,12 +97,16 @@ function calculate_total_review_scoring( $product_id = 0 ) {
 
 	// And calculate the average.
 	$review_avg_score   = array_sum( $approved_totals ) / count( $approved_totals );
+	$review_avg_round   = round( $review_avg_score, 0 );
+
+	// Make sure the average is not zero.
+	$review_avg_confirm = absint( $review_avg_round ) < 1 ? 1 : absint( $review_avg_round );
 
 	// Update the Woo postmeta key.
-	update_post_meta( $product_id, '_wc_average_rating', round( $review_avg_score, 0 ) );
+	update_post_meta( $product_id, '_wc_average_rating', absint( $review_avg_confirm ) );
 
 	// Update our own post meta key as well.
-	update_post_meta( $product_id, Core\META_PREFIX . 'average_rating', round( $review_avg_score, 0 ) );
+	update_post_meta( $product_id, Core\META_PREFIX . 'average_rating', absint( $review_avg_confirm ) );
 }
 
 /**
