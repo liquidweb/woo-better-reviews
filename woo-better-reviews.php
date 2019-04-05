@@ -104,6 +104,9 @@ if ( ! is_admin() ) {
 	require_once __DIR__ . '/includes/process/form-process.php';
 }
 
+// Load our converting and potentially export logic.
+require_once __DIR__ . '/includes/process/convert-existing.php';
+
 // Load the triggered file loads.
 require_once __DIR__ . '/includes/activate.php';
 require_once __DIR__ . '/includes/deactivate.php';
