@@ -361,8 +361,11 @@ function store_legacy_review_ids( $original_id = 0, $product_id = 0 ) {
 		// Set a postmeta flag to indicate we have converted reviews.
 		update_post_meta( $product_id, Core\META_PREFIX . 'has_converted_reviews', true );
 
-		// Set my new array.
-		$existing_ids   = (array) $original_id;
+		// And set my postmeta IDs.
+		update_post_meta( $product_id, Core\META_PREFIX . 'legacy_review_ids', (array) $original_id );
+
+		// And be done.
+		return;
 	}
 
 	// Check for the IDs and merge, or create a new array.
