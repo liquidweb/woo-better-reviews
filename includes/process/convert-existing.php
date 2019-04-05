@@ -145,34 +145,6 @@ function process_existing_review_conversion() {
 }
 
 /**
- * Take the original comment ID and store it in an array.
- *
- * @param  integer $original_id  The original ID of the comment.
- * @param  integer $product_id   The product ID being related to.
- *
- * @return void
- */
-function store_legacy_review_ids( $original_id = 0, $product_id = 0 ) {
-
-	// Bail if parts are missing.
-	if ( empty( $original_id ) || empty( $product_id ) ) {
-		return;
-	}
-
-	// Get my existing items.
-	$existing_ids   = get_post_meta( $product_id, Core\META_PREFIX . 'legacy_review_ids', true );
-
-	// Check for the IDs and merge, or create a new array.
-	$updated_ids    = ! empty( $existing_ids ) ? wp_parse_args( (array) $original_id, $existing_ids ) : (array) $original_id;
-
-	// Make sure we're unique with the IDs.
-	$set_stored_ids = array_unique( $updated_ids );
-
-	// Update the array.
-	update_post_meta( $product_id, Core\META_PREFIX . 'legacy_review_ids', $set_stored_ids );
-}
-
-/**
  * Take our existing 5 point scoring and convert to 7.
  *
  * @param  integer $original_id    My original comment ID.
@@ -363,4 +335,67 @@ function parse_converted_attributes_for_scoring( $scoring_array = array() ) {
 
 	// Return the args, serialized.
 	return maybe_serialize( $setup_args );
+}
+
+/**
+ * Take the original comment ID and store it in an array.
+ *
+ * @param  integer $original_id  The original ID of the comment.
+ * @param  integer $product_id   The product ID being related to.
+ *
+ * @return void
+ */
+function store_legacy_review_ids( $original_id = 0, $product_id = 0 ) {
+
+	// Bail if parts are missing.
+	if ( empty( $original_id ) || empty( $product_id ) ) {
+		return;
+	}
+
+	// Set a postmeta flag to indicate we have converted reviews.
+	update_post_meta( $product_id, Core\META_PREFIX . 'has_converted_reviews', true );
+
+	// Get my existing items.
+	$existing_ids   = get_post_meta( $product_id, Core\META_PREFIX . 'legacy_review_ids', true );
+
+	// Check for the IDs and merge, or create a new array.
+	$updated_ids    = ! empty( $existing_ids ) ? wp_parse_args( (array) $original_id, $existing_ids ) : (array) $original_id;
+
+	// Make sure we're unique with the IDs.
+	$set_stored_ids = array_unique( $updated_ids );
+
+	// Update the array.
+	update_post_meta( $product_id, Core\META_PREFIX . 'legacy_review_ids', $set_stored_ids );
+}
+
+/**
+ * Get all the stored legacy IDs and update the comment type to "hide" them.
+ *
+ * @param  integer $product_id   The product ID being related to.
+ *
+ * @return void
+ */
+function convert_legacy_review_ids( $product_id = 0 ) {
+
+	// Bail if parts are missing.
+	if ( empty( $product_id ) ) {
+		return;
+	}
+
+	// Get my existing items.
+	$existing_ids   = get_post_meta( $product_id, Core\META_PREFIX . 'legacy_review_ids', true );
+
+	// Bail if no legacy IDs exist.
+	if ( empty( $existing_ids ) ) {
+		return;
+	}
+
+	// Check for the IDs and merge, or create a new array.
+	$updated_ids    = ! empty( $existing_ids ) ? wp_parse_args( (array) $original_id, $existing_ids ) : (array) $original_id;
+
+	// Make sure we're unique with the IDs.
+	$set_stored_ids = array_unique( $updated_ids );
+
+	// Update the array.
+	update_post_meta( $product_id, Core\META_PREFIX . 'legacy_review_ids', $set_stored_ids );
 }
