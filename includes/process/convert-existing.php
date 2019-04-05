@@ -352,14 +352,21 @@ function store_legacy_review_ids( $original_id = 0, $product_id = 0 ) {
 		return;
 	}
 
-	// Set a postmeta flag to indicate we have converted reviews.
-	update_post_meta( $product_id, Core\META_PREFIX . 'has_converted_reviews', true );
-
 	// Get my existing items.
 	$existing_ids   = get_post_meta( $product_id, Core\META_PREFIX . 'legacy_review_ids', true );
 
+	// If we have none, make a new array and set the flag.
+	if ( empty( $existing_ids ) ) {
+
+		// Set a postmeta flag to indicate we have converted reviews.
+		update_post_meta( $product_id, Core\META_PREFIX . 'has_converted_reviews', true );
+
+		// Set my new array.
+		$existing_ids   = (array) $original_id;
+	}
+
 	// Check for the IDs and merge, or create a new array.
-	$updated_ids    = ! empty( $existing_ids ) ? wp_parse_args( (array) $original_id, $existing_ids ) : (array) $original_id;
+	$updated_ids    = wp_parse_args( (array) $original_id, $existing_ids );
 
 	// Make sure we're unique with the IDs.
 	$set_stored_ids = array_unique( $updated_ids );
