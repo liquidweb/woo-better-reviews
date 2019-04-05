@@ -128,6 +128,9 @@ function process_existing_review_conversion() {
 		Utilities\purge_transients( null, 'products', array( 'ids' => (array) $product_id ) );
 		Utilities\purge_transients( null, 'authors', array( 'ids' => (array) $product_id ) );
 
+		// Store the legacy review IDs in the product postmeta.
+		store_legacy_review_ids( $original_id, $product_id );
+
 		// Increment the counter.
 		$ccount++;
 	}
@@ -139,6 +142,34 @@ function process_existing_review_conversion() {
 	$return_msg = sprintf( _n( '%d review converted.', '%d reviews converted.', absint( $ccount ), 'woo-better-reviews' ), absint( $ccount ) );
 
 	die( $return_msg ); // @@todo what are we gonna do here?
+}
+
+/**
+ * Take the original comment ID and store it in an array.
+ *
+ * @param  integer $original_id  The original ID of the comment.
+ * @param  integer $product_id   The product ID being related to.
+ *
+ * @return void
+ */
+function store_legacy_review_ids( $original_id = 0, $product_id = 0 ) {
+
+	// Bail if parts are missing.
+	if ( empty( $original_id ) || empty( $product_id ) ) {
+		return;
+	}
+
+	// Get my existing items.
+	$existing_ids   = get_post_meta( $product_id, Core\META_PREFIX . 'legacy_review_ids', true );
+
+	// Check for the IDs and merge, or create a new array.
+	$updated_ids    = ! empty( $existing_ids ) ? wp_parse_args( (array) $original_id, $existing_ids ) : (array) $original_id;
+
+	// Make sure we're unique with the IDs.
+	$set_stored_ids = array_unique( $updated_ids );
+
+	// Update the array.
+	update_post_meta( $product_id, Core\META_PREFIX . 'legacy_review_ids', $set_stored_ids );
 }
 
 /**
@@ -167,9 +198,9 @@ function rebase_existing_review_score( $original_id = 0, $review_object ) {
 	// Check for a rating.
 	$original_score = get_comment_meta( $original_id, 'rating', true );
 
-	// For now, return 4 if we don't have it.
+	// For now, set a 4 (middle of 7) if we don't have it.
 	if ( empty( $original_score ) ) {
-		return 4;
+		return apply_filters( Core\HOOK_PREFIX . 'converted_review_default_rating_score', 4, $original_id, $review_object );
 	}
 
 	// Now we do the maths.
