@@ -17,46 +17,21 @@ use LiquidWeb\WooBetterReviews\Database as Database;
 // And pull in any other namespaces.
 use WP_Error;
 
-function rkv_test_review_conversions() {
-
-	// Check the key.
-	if ( empty( $_GET['cnv-rvs'] ) ) {
-		return;
-	}
-
-	// Set my lookup args.
-	$setup_args = array(
-		'status'    => 'approved',
-		'type'      => 'comment',
-		'post_type' => 'product',
-		'orderby'   => 'comment_post_ID',
-	);
-
-	// Now fetch my reviews.
-	$maybe_cmns = get_comments( $setup_args );
-	// preprint( $maybe_cmns, true );
-
-	// Bail and fail without.
-	if ( empty( $maybe_cmns ) ) {
-		die( 'No reviews exist' );
-	}
-
-	// Loop and dig into the individual comment objects.
-	foreach ( $maybe_cmns as $comment_object ) {
-		# code...
-
-		// $verified = get_comment_meta( $comment_id, 'verified', true );
-	}
-
-
-}
 
 /**
- * Format my data.
- * @param  [type] $review_object [description]
- * @return [type]                [description]
+ * Take the entire review (comment) object and get it into our format.
+ *
+ * @param  object  $review_object  The entire review object.
+ * @param  ingeger $original_id    The original comment ID.
+ *
+ * @return array
  */
-function rkv_format_convert_data_content( $review_object ) {
+function format_existing_review_data( $review_object, $original_id = 0 ) {
+
+	// Bail with missing items.
+	if ( empty( $review_object ) || ! is_object( $review_object ) || empty( $original_id ) ) {
+		return false;
+	}
 
 	// Set the timestamp and date formatting that we're gonna use.
 	$set_timestamp  = strtotime( $review_object->comment_date );
@@ -68,10 +43,17 @@ function rkv_format_convert_data_content( $review_object ) {
 	$author_wp_id   = ! empty( $review_object->user_id ) ? $review_object->user_id : 0;
 
 	// Check the verification.
-	$maybe_verified = get_comment_meta( $review_object->comment_ID, 'verified', true );
+	$maybe_verified = get_comment_meta( $original_id, 'verified', true );
 
-	// Get my empty rating
-	$original_score = get_comment_meta( $review_object->comment_ID, 'rating', true );
+	// Figure out the recaluclated score.
+	$recalced_score = rebase_existing_review_score( $original_id );
+
+	// preprint( $recalced_score, true );
+
+	// Get all my attribute arguments.
+	$attribute_args = rkv_testing_setup_product_attributes();
+
+	// preprint( $attribute_args, true );
 
 	// Set up the insert data array.
 	$insert_setup   = array(
@@ -85,9 +67,75 @@ function rkv_format_convert_data_content( $review_object ) {
 		'review_content'     => wp_kses_post( $review_object->comment_content ),
 		'review_status'      => 'approved',
 		'is_verified'        => $maybe_verified,
-		'rating_total_score' => '',
-		'rating_attributes'  => '',
+		'rating_total_score' => $recalced_score,
+		'rating_attributes'  => $attribute_args,
 		'author_charstcs'    => '',
 	);
+
+	preprint( $insert_setup );
+}
+
+/**
+ * Take our existing 5 point scoring and convert to 7.
+ *
+ * @param  integer $original_id  My original comment ID.
+ *
+ * @return integer
+ */
+function rebase_existing_review_score( $original_id = 0 ) {
+
+	// Bail without the ID.
+	if ( empty( $original_id ) ) {
+		return;
+	}
+
+	// Check for a rating.
+	$original_score = get_comment_meta( $original_id, 'rating', true );
+
+	// For now, return 4 if we don't have it.
+	if ( empty( $original_score ) ) {
+		return 4;
+	}
+
+	// Now we do the maths.
+	$raw_ratio_calc = ( $original_score / 5 ) * 7;
+
+	// Round it.
+	$review_round   = round( $raw_ratio_calc, 0 );
+
+	// Make sure the average is not zero.
+	return absint( $review_round ) < 1 ? 1 : absint( $review_round );
+}
+
+/**
+ * Get all the attribute stuff.
+ *
+ * @param  integer $product_id  The product ID we are gonna get the attributes for.
+ *
+ * @return integer
+ */
+function get_formatted_attribute_data( $product_id = 0, $format = 'content' ) {
+
+	// Get all my attribute arguments.
+	$attribute_data = get_option( 'rkv_test_attribs', '' );
+
+	// Pull out my IDs.
+	$attribute_list = wp_list_pluck( $attribute_data, 'id' );
+
+	// Set my empty.
+	$scoring_array  = array();
+
+	// Add the first score if we have it.
+	if ( ! empty( $score ) && 'scoring' === sanitize_text_field( $format ) ) {
+		$scoring_array[0] = absint( $score );
+	}
+
+	// Set up my array with the static 4.
+	foreach ( $attribute_list as $attribute_id ) {
+		$scoring_array[ $attribute_id  ] = 4;
+	}
+
+	// Return the entire scoring array.
+	return $scoring_array;
 
 }

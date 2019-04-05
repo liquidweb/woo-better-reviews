@@ -1537,7 +1537,7 @@ function get_attributes_for_product( $product_id = 0, $return_type = 'objects', 
 		}
 
 		// Set our transient with our data.
-		set_transient( $ky, absint( $query_list ), HOUR_IN_SECONDS );
+		set_transient( $ky, $query_list, HOUR_IN_SECONDS );
 
 		// And change the variable to do the things.
 		$cached_dataset = $query_list;

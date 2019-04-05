@@ -386,6 +386,22 @@ function get_selected_product_attributes( $product_id = 0 ) {
 }
 
 /**
+ * Get the attributes the product has assigned, potentially global.
+ *
+ * @param  integer $product_id  The product ID we are checking attributes for.
+ *
+ * @return mixed
+ */
+function get_attributes_for_product( $product_id = 0 ) {
+
+	// Bail without a product ID.
+	if ( empty( $product_id ) ) {
+		return false;
+	}
+
+}
+
+/**
  * Construct and return the link for a form in a review.
  *
  * @param  integer $product_id    The product ID being viewed.
