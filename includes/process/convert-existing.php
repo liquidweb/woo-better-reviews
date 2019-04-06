@@ -27,7 +27,7 @@ function process_existing_review_conversion() {
 
 	// Set my lookup args.
 	$setup_args = array(
-		'status'    => 'approve',
+	//	'status'    => 'approve',
 		'post_type' => 'product',
 		'orderby'   => 'comment_post_ID',
 	);
@@ -40,6 +40,9 @@ function process_existing_review_conversion() {
 	if ( empty( $maybe_cmns ) ) {
 		die( 'No reviews exist' );
 	}
+
+	// Set an empty array for the product IDs.
+	$pids   = array();
 
 	// Set a converted counter.
 	$ccount = 0;
@@ -124,9 +127,8 @@ function process_existing_review_conversion() {
 			return new WP_Error( 'scoring-update-fail', __( 'The formatted review scoring could not be updated in the database.', 'woo-better-reviews' ) );
 		}
 
-		// Handle purging product and author related transients.
-		Utilities\purge_transients( null, 'products', array( 'ids' => (array) $product_id ) );
-		Utilities\purge_transients( null, 'authors', array( 'ids' => (array) $product_id ) );
+		// Include the product ID in the array.
+		$pids[] = $product_id;
 
 		// Store the legacy review IDs in the product postmeta.
 		store_legacy_review_ids( $original_id, $product_id );
@@ -134,6 +136,9 @@ function process_existing_review_conversion() {
 		// Increment the counter.
 		$ccount++;
 	}
+
+	// Handle our functions related to the product ID array.
+	update_products_post_conversion( $pids );
 
 	// Now delete my big list of review data cached.
 	Utilities\purge_transients( null, 'reviews' );
@@ -328,7 +333,7 @@ function parse_converted_attributes_for_scoring( $scoring_array = array() ) {
 		$array_val  = $single_score['rating_score'];
 
 		// Handle our two dynamic key names.
-		$setup_args[ $array_key ] = $array_val;
+		$setup_args[ $array_key ] = (string) $array_val;
 
 		// This finishes out the scoring data.
 	}
@@ -379,6 +384,49 @@ function store_legacy_review_ids( $original_id = 0, $product_id = 0 ) {
 }
 
 /**
+ * Run all the various cleanup and recalculating functions on products.
+ *
+ * @param  array  $product_ids  All the product IDs.
+ *
+ * @return void
+ */
+function update_products_post_conversion( $product_ids = array() ) {
+
+	// Bail if we don't have product IDs.
+	if ( empty( $product_ids ) ) {
+		return false;
+	}
+
+	// Make sure we have unique IDs.
+	$unique_ids = array_unique( $product_ids );
+
+	// Update all my counts.
+	Utilities\update_product_review_count( $unique_ids );
+
+	// Loop the product IDs and run our functions.
+	foreach ( $unique_ids as $unique_id ) {
+
+		// If we don't have the correct product type, skip.
+		if ( 'product' !== get_post_type( $unique_id ) ) {
+			continue;
+		}
+
+		// Convert the existing comment review IDs.
+		$converted  = convert_legacy_review_ids( $unique_id );
+
+		// Recalculate the total score on each.
+		Utilities\calculate_total_review_scoring( $unique_id );
+
+		// Handle purging product and author related transients.
+		Utilities\purge_transients( null, 'products', array( 'ids' => (array) $unique_id ) );
+		Utilities\purge_transients( null, 'authors', array( 'ids' => (array) $unique_id ) );
+	}
+
+	// Include an action for all the product IDs.
+	do_action( Core\HOOK_PREFIX . 'after_update_products_post_conversion', $product_ids );
+}
+
+/**
  * Get all the stored legacy IDs and update the comment type to "hide" them.
  *
  * @param  integer $product_id   The product ID being related to.
@@ -400,12 +448,38 @@ function convert_legacy_review_ids( $product_id = 0 ) {
 		return;
 	}
 
-	// Check for the IDs and merge, or create a new array.
-	$updated_ids    = ! empty( $existing_ids ) ? wp_parse_args( (array) $original_id, $existing_ids ) : (array) $original_id;
+	// Set an update count.
+	$update = 0;
 
-	// Make sure we're unique with the IDs.
-	$set_stored_ids = array_unique( $updated_ids );
+	// Loop and set our update args.
+	foreach ( $existing_ids as $existing_id ) {
 
-	// Update the array.
-	update_post_meta( $product_id, Core\META_PREFIX . 'legacy_review_ids', $set_stored_ids );
+		// Include a 'before' hook.
+		do_action( Core\HOOK_PREFIX . 'before_legacy_review_converted', $existing_id );
+
+		// Set the individual update args.
+		$setup_args = array(
+			'comment_ID'       => absint( $existing_id ),
+			'comment_approved' => 'converted-review',
+		);
+
+		// Filter the args.
+		$setup_args = apply_filters( Core\HOOK_PREFIX . 'convert_legacy_review_args', $setup_args, $existing_id );
+
+		// Run the actual comment update.
+		$run_update = wp_update_comment( $setup_args );
+
+		// Increment the count if we had success.
+		if ( false !== $run_update ) {
+			$update++;
+		}
+
+		// Include an 'after' hook.
+		do_action( Core\HOOK_PREFIX . 'after_legacy_review_converted', $existing_id );
+
+		// @@todo maybe do some error checking here.
+	}
+
+	// Return the total updated count.
+	return $update;
 }
