@@ -252,12 +252,12 @@ function format_submitted_review_content( $form_data = array(), $product_id = 0,
 
 	// Bail without the data needed.
 	if ( empty( $form_data ) || empty( $product_id ) || empty( $form_data['review-content'] ) ) {
-		return new WP_Error( 'missing-formatting-data', __( 'The required data to format.', 'woo-better-reviews' ) );
+		return new WP_Error( 'missing-formatting-data', __( 'The required data to format is missing.', 'woo-better-reviews' ) );
 	}
 
 	// Set the timestamp and date formatting that we're gonna use.
 	$set_timestamp  = current_time( 'timestamp', false );
-	$default_title  = sprintf( __( 'Review on %s', 'woo-better-reviews' ), date( 'F jS, Y at g:i a', $set_timestamp ) );
+	$default_title  = sprintf( __( 'Product review for "%s"', 'woo-better-reviews' ), get_the_title( $product_id ) );
 
 	// Set some variables based on what was passed.
 	$author_name    = ! empty( $form_data['author-name'] ) ? $form_data['author-name'] : '';
@@ -339,7 +339,7 @@ function format_submitted_review_scoring( $form_data = array(), $review_id = 0, 
 			);
 
 			// Nothing remains for this.
-		 }
+		}
 	}
 
 	// Return it, filtered.

@@ -386,6 +386,36 @@ function get_selected_product_attributes( $product_id = 0 ) {
 }
 
 /**
+ * Get the attributes the product has assigned, potentially global.
+ *
+ * @param  integer $product_id  The product ID we are checking attributes for.
+ *
+ * @return mixed
+ */
+function get_product_attributes_for_conversion( $product_id = 0 ) {
+
+	// First check for the global setting.
+	$are_global = maybe_attributes_global();
+
+	// If we are global, send the whole bunch.
+	if ( false !== $are_global ) {
+		return Queries\get_all_attributes( 'ids' );
+	}
+
+	// Now confirm we have a product ID.
+	if ( empty( $product_id ) ) {
+		return false;
+	}
+
+	// Attempt to get our attributes based on the global setting.
+	$maybe_has  = Queries\get_attributes_for_product( $product_id, 'ids' );
+
+	// Return the applied items, or return false.
+	return ! empty( $maybe_has ) && ! is_wp_error( $maybe_has ) ? $maybe_has : false;
+
+}
+
+/**
  * Construct and return the link for a form in a review.
  *
  * @param  integer $product_id    The product ID being viewed.
