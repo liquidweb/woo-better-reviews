@@ -27,18 +27,17 @@ function process_existing_review_conversion() {
 
 	// Set my lookup args.
 	$setup_args = array(
-	//	'status'    => 'approve',
+		'status'    => 'approve',
 		'post_type' => 'product',
 		'orderby'   => 'comment_post_ID',
 	);
 
 	// Now fetch my reviews.
 	$maybe_cmns = get_comments( $setup_args );
-	// preprint( $maybe_cmns, true );
 
 	// Bail and fail without.
 	if ( empty( $maybe_cmns ) ) {
-		die( 'No reviews exist' );
+		return new WP_Error( 'no-existing-reviews', __( 'There are no existing reviews to convert.', 'woo-better-reviews' ) );
 	}
 
 	// Set an empty array for the product IDs.
@@ -264,10 +263,7 @@ function format_converted_scoring_data( $review_id = 0, $rebased_score = 0, $pro
 	}
 
 	// Get all my attribute arguments.
-	// @@ todo replace with actual query.
-	// $attribute_data = get_option( 'rkv_test_attribs', '' );
 	$attribute_data = Helpers\get_product_attributes_for_conversion( $product_id );
-	// preprint( $attribute_data, true );
 
 	// Bail without the data.
 	if ( empty( $attribute_data ) ) {
@@ -364,7 +360,7 @@ function store_legacy_review_ids( $original_id = 0, $product_id = 0 ) {
 	if ( empty( $existing_ids ) ) {
 
 		// Set a postmeta flag to indicate we have converted reviews.
-		update_post_meta( $product_id, Core\META_PREFIX . 'has_converted_reviews', true );
+		update_post_meta( $product_id, Core\META_PREFIX . 'has_legacy_reviews', true );
 
 		// And set my postmeta IDs.
 		update_post_meta( $product_id, Core\META_PREFIX . 'legacy_review_ids', (array) $original_id );
@@ -458,6 +454,7 @@ function convert_legacy_review_ids( $product_id = 0 ) {
 		do_action( Core\HOOK_PREFIX . 'before_legacy_review_converted', $existing_id );
 
 		// Set the individual update args.
+		// This odd approval flag hides them without deleting.
 		$setup_args = array(
 			'comment_ID'       => absint( $existing_id ),
 			'comment_approved' => 'converted-review',
