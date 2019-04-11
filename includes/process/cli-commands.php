@@ -276,8 +276,13 @@ class WBR_Commands extends WP_CLI_Command {
 			'cleanup' => 'convert',
 		));
 
+		// Make sure the cleanup argument exists.
+		if ( empty( $parse_cli_args['cleanup'] ) ) {
+			WP_CLI::error( __( 'The required cleanup type was missing. Please try again.', 'woo-better-reviews' ) );
+		}
+
 		// Make sure the cleanup argument is valid.
-		if ( empty( $parse_cli_args['cleanup'] ) || ! in_array( esc_attr( $parse_cli_args['cleanup'] ), array( 'convert', 'purge' ) ) ) {
+		if ( ! in_array( esc_attr( $parse_cli_args['cleanup'] ), array( 'convert', 'purge' ) ) ) {
 			WP_CLI::error( __( 'An invalid cleanup type was requested. Please try again.', 'woo-better-reviews' ) );
 		}
 
