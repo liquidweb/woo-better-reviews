@@ -264,6 +264,8 @@ class WBR_Commands extends WP_CLI_Command {
 	 * ## EXAMPLES
 	 *
 	 *     wp woo-better-reviews convert
+	 *     wp woo-better-reviews convert --cleanup=convert
+	 *     wp woo-better-reviews convert --cleanup=purge
 	 *
 	 * @when after_wp_load
 	 */
@@ -283,9 +285,14 @@ class WBR_Commands extends WP_CLI_Command {
 		$maybe_do_type  = 'convert' === esc_attr( $parse_cli_args['cleanup'] ) ? true : false;
 		$maybe_do_purge = 'purge' === esc_attr( $parse_cli_args['cleanup'] ) ? true : false;
 
+		// Handle a confirm for the purge flag.
+		if ( false !== $maybe_do_purge ) {
+			WP_CLI::confirm( __( 'Are you sure you want to purge the existing reviews? THIS CANNOT BE UNDONE.', 'woo-better-reviews' ), $assoc_args );
+		}
+
 		// The function itself is a single function, since
 		// this is just a wrapper for the conversion function.
-		$maybe_convert  = attempt_existing_review_conversion( $maybe_do_type, $maybe_do_purge );
+		$maybe_convert  = ConvertExisting\attempt_existing_review_conversion( $maybe_do_type, $maybe_do_purge );
 
 		// If we have an actual empty return, display
 		// the blank error message and halt.

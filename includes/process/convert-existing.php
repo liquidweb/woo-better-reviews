@@ -28,14 +28,14 @@ use WP_Error;
  */
 function attempt_existing_review_conversion( $convert_type = true, $purge_existing = false ) {
 
-	// If both the convert AND purge flags are false, error out.
+	// If both the convert AND purge flags are set to "false", error out.
 	if ( false === $convert_type && false === $purge_existing ) {
 		return new WP_Error( 'invalid-conversion-args', __( 'The existing reviews must either be converted or purged. Please select one.', 'woo-better-reviews' ) );
 	}
 
-	// If both the convert AND purge flags are true, error out.
+	// If both the convert AND purge flags are set to "true", error out.
 	if ( false !== $convert_type && false !== $purge_existing ) {
-		return new WP_Error( 'invalid-conversion-args', __( 'The existing reviews either be converted or purged, not both. Please choose one.', 'woo-better-reviews' ) );
+		return new WP_Error( 'invalid-conversion-args', __( 'The existing reviews can either be converted or purged, not both. Please choose one.', 'woo-better-reviews' ) );
 	}
 
 	// Set my lookup args.
