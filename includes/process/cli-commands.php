@@ -294,17 +294,17 @@ class WBR_Commands extends WP_CLI_Command {
 		// this is just a wrapper for the conversion function.
 		$maybe_convert  = ConvertExisting\attempt_existing_review_conversion( $maybe_do_type, $maybe_do_purge );
 
-		// If we have an actual empty return, display
-		// the blank error message and halt.
-		if ( empty( $maybe_convert ) ) {
-			WP_CLI::error( __( 'The attempted conversion returned an empty result.', 'woo-better-reviews' ) );
-		}
-
 		// First look for the 'no-reviews' string. If is
 		// exists, display the 'none' message and halt.
 		if ( 'no-reviews' === esc_attr( $maybe_convert ) ) {
 			WP_CLI::line( __( 'No existing reviews exist to convert.', 'woo-better-reviews' ) );
 			WP_CLI::halt( 0 );
+		}
+
+		// If we have an actual empty return, display
+		// the blank error message and halt.
+		if ( empty( $maybe_convert ) ) {
+			WP_CLI::error( __( 'The attempted conversion returned an empty result.', 'woo-better-reviews' ) );
 		}
 
 		// Handle a WP_Error object return.
