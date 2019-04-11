@@ -6,7 +6,7 @@
  */
 
 // Declare our namespace.
-namespace LiquidWeb\WooBetterReviews\Display\ConvertExisting;
+namespace LiquidWeb\WooBetterReviews\ConvertExisting;
 
 // Set our aliases.
 use LiquidWeb\WooBetterReviews as Core;
@@ -21,9 +21,22 @@ use WP_Error;
 /**
  * Convert the existing comment-based reviews to our new ones.
  *
+ * @param  boolean $convert_type    Whether to convert the type the existing.
+ * @param  boolean $purge_existing  Whether to actually purge the existing.
+ *
  * @return mixed
  */
-function process_existing_review_conversion() {
+function attempt_existing_review_conversion( $convert_type = true, $purge_existing = false ) {
+
+	// If both the convert AND purge flags are set to "false", error out.
+	if ( false === $convert_type && false === $purge_existing ) {
+		return new WP_Error( 'invalid-conversion-args', __( 'The existing reviews must either be converted or purged. Please select one.', 'woo-better-reviews' ) );
+	}
+
+	// If both the convert AND purge flags are set to "true", error out.
+	if ( false !== $convert_type && false !== $purge_existing ) {
+		return new WP_Error( 'invalid-conversion-args', __( 'The existing reviews can either be converted or purged, not both. Please choose one.', 'woo-better-reviews' ) );
+	}
 
 	// Set my lookup args.
 	$setup_args = array(
@@ -35,9 +48,9 @@ function process_existing_review_conversion() {
 	// Now fetch my reviews.
 	$maybe_cmns = get_comments( $setup_args );
 
-	// Bail and fail without.
+	// Bail with a 'no-reviews' string to look for later.
 	if ( empty( $maybe_cmns ) ) {
-		return new WP_Error( 'no-existing-reviews', __( 'There are no existing reviews to convert.', 'woo-better-reviews' ) );
+		return 'no-reviews';
 	}
 
 	// Set an empty array for the product IDs.
@@ -136,8 +149,11 @@ function process_existing_review_conversion() {
 		$ccount++;
 	}
 
+	// Set and sanitize my product ID array.
+	$product_id_array   = array_unique( $pids );
+
 	// Handle our functions related to the product ID array.
-	update_products_post_conversion( $pids );
+	update_products_post_conversion( $product_id_array, $convert_type, $purge_existing );
 
 	// Now delete my big list of review data cached.
 	Utilities\purge_transients( null, 'reviews' );
@@ -145,7 +161,13 @@ function process_existing_review_conversion() {
 	// Set up the return message.
 	$return_msg = sprintf( _n( '%d review converted.', '%d reviews converted.', absint( $ccount ), 'woo-better-reviews' ), absint( $ccount ) );
 
-	die( $return_msg ); // @@todo what are we gonna do here?
+	// Return an array with a success flag included.
+	return array(
+		'success'     => 1,
+		'message'     => $return_msg,
+		'count'       => $ccount,
+		'product-ids' => $product_id_array,
+	);
 }
 
 /**
@@ -382,40 +404,46 @@ function store_legacy_review_ids( $original_id = 0, $product_id = 0 ) {
 /**
  * Run all the various cleanup and recalculating functions on products.
  *
- * @param  array  $product_ids  All the product IDs.
+ * @param  array   $product_ids     All the product IDs.
+ * @param  boolean $convert_type    Whether to convert the comment type.
+ * @param  boolean $purge_existing  Whether to actually purge the existing.
  *
  * @return void
  */
-function update_products_post_conversion( $product_ids = array() ) {
+function update_products_post_conversion( $product_ids = array(), $convert_type = true, $purge_existing = false ) {
 
 	// Bail if we don't have product IDs.
 	if ( empty( $product_ids ) ) {
 		return false;
 	}
 
-	// Make sure we have unique IDs.
-	$unique_ids = array_unique( $product_ids );
-
 	// Update all my counts.
-	Utilities\update_product_review_count( $unique_ids );
+	Utilities\update_product_review_count( $product_ids );
 
 	// Loop the product IDs and run our functions.
-	foreach ( $unique_ids as $unique_id ) {
+	foreach ( $product_ids as $product_id ) {
 
 		// If we don't have the correct product type, skip.
-		if ( 'product' !== get_post_type( $unique_id ) ) {
+		if ( 'product' !== get_post_type( $product_id ) ) {
 			continue;
 		}
 
 		// Convert the existing comment review IDs.
-		$converted  = convert_legacy_review_ids( $unique_id );
+		if ( false !== $convert_type ) {
+			convert_legacy_review_ids( $product_id );
+		}
+
+		// Purge the existing review IDs.
+		if ( false !== $purge_existing ) {
+			purge_legacy_review_ids( $product_id );
+		}
 
 		// Recalculate the total score on each.
-		Utilities\calculate_total_review_scoring( $unique_id );
+		Utilities\calculate_total_review_scoring( $product_id );
 
 		// Handle purging product and author related transients.
-		Utilities\purge_transients( null, 'products', array( 'ids' => (array) $unique_id ) );
-		Utilities\purge_transients( null, 'authors', array( 'ids' => (array) $unique_id ) );
+		Utilities\purge_transients( null, 'products', array( 'ids' => (array) $product_id ) );
+		Utilities\purge_transients( null, 'authors', array( 'ids' => (array) $product_id ) );
 	}
 
 	// Include an action for all the product IDs.
@@ -453,8 +481,8 @@ function convert_legacy_review_ids( $product_id = 0 ) {
 		// Include a 'before' hook.
 		do_action( Core\HOOK_PREFIX . 'before_legacy_review_converted', $existing_id );
 
-		// Set the individual update args.
-		// This odd approval flag hides them without deleting.
+		// Set the individual update args. This odd
+		// approval flag hides them without deleting.
 		$setup_args = array(
 			'comment_ID'       => absint( $existing_id ),
 			'comment_approved' => 'converted-review',
@@ -479,4 +507,53 @@ function convert_legacy_review_ids( $product_id = 0 ) {
 
 	// Return the total updated count.
 	return $update;
+}
+
+/**
+ * Get all the stored legacy IDs and purge the original comment.
+ *
+ * @param  integer $product_id   The product ID being related to.
+ *
+ * @return void
+ */
+function purge_legacy_review_ids( $product_id = 0 ) {
+
+	// Bail if parts are missing.
+	if ( empty( $product_id ) ) {
+		return;
+	}
+
+	// Get my existing items.
+	$existing_ids   = get_post_meta( $product_id, Core\META_PREFIX . 'legacy_review_ids', true );
+
+	// Bail if no legacy IDs exist.
+	if ( empty( $existing_ids ) ) {
+		return;
+	}
+
+	// Set a delete count.
+	$delete = 0;
+
+	// Loop and set our update args.
+	foreach ( $existing_ids as $existing_id ) {
+
+		// Include a 'before' hook.
+		do_action( Core\HOOK_PREFIX . 'before_legacy_review_purge', $existing_id );
+
+		// Run the actual comment delete.
+		$run_update = wp_delete_comment( $existing_id, true );
+
+		// Increment the count if we had success.
+		if ( false !== $run_update ) {
+			$delete++;
+		}
+
+		// Include an 'after' hook.
+		do_action( Core\HOOK_PREFIX . 'after_legacy_review_purge', $existing_id );
+
+		// @@todo maybe do some error checking here.
+	}
+
+	// Return the total deleted count.
+	return $delete;
 }
