@@ -4,7 +4,7 @@ Tags: woocommerce, reviews
 Requires at least: 5.0
 Tested up to: 5.1.1
 Requires PHP: 5.6.0
-Stable tag: 0.1.0
+Stable tag: 0.2.0-dev
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
