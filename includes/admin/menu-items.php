@@ -11,7 +11,7 @@ namespace LiquidWeb\WooBetterReviews\Admin\MenuItems;
 // Set our aliases.
 use LiquidWeb\WooBetterReviews as Core;
 use LiquidWeb\WooBetterReviews\Helpers as Helpers;
-use LiquidWeb\WooBetterReviews\Admin\AdminPages as AdminPages;
+use LiquidWeb\WooBetterReviews\AdminPages as AdminPages;
 
 // And pull in any other namespaces.
 use WP_Error;

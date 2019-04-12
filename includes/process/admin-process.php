@@ -6,7 +6,7 @@
  */
 
 // Declare our namespace.
-namespace LiquidWeb\WooBetterReviews\Admin\AdminProcess;
+namespace LiquidWeb\WooBetterReviews\AdminProcess;
 
 // Set our aliases.
 use LiquidWeb\WooBetterReviews as Core;

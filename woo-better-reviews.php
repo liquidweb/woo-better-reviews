@@ -66,11 +66,11 @@ require_once __DIR__ . '/includes/utilities.php';
 
 // Load the database and custom table items.
 require_once __DIR__ . '/includes/database.php';
-require_once __DIR__ . '/includes/tables/data-content.php';
-require_once __DIR__ . '/includes/tables/data-ratings.php';
-require_once __DIR__ . '/includes/tables/data-authormeta.php';
-require_once __DIR__ . '/includes/tables/tax-attributes.php';
-require_once __DIR__ . '/includes/tables/tax-characteristics.php';
+require_once __DIR__ . '/includes/db-tables/data-content.php';
+require_once __DIR__ . '/includes/db-tables/data-ratings.php';
+require_once __DIR__ . '/includes/db-tables/data-authormeta.php';
+require_once __DIR__ . '/includes/db-tables/tax-attributes.php';
+require_once __DIR__ . '/includes/db-tables/tax-characteristics.php';
 
 // Load my query logic plugin-wide.
 require_once __DIR__ . '/includes/queries.php';
@@ -82,11 +82,11 @@ if ( is_admin() ) {
 	require_once __DIR__ . '/includes/admin/admin-assets.php';
 	require_once __DIR__ . '/includes/admin/admin-notices.php';
 	require_once __DIR__ . '/includes/admin/admin-pages.php';
-	require_once __DIR__ . '/includes/admin/list-reviews.php';
-	require_once __DIR__ . '/includes/admin/list-attributes.php';
-	require_once __DIR__ . '/includes/admin/list-charstcs.php';
 	require_once __DIR__ . '/includes/admin/product-meta.php';
-	require_once __DIR__ . '/includes/admin/woo-settings.php';
+	require_once __DIR__ . '/includes/list-tables/list-reviews.php';
+	require_once __DIR__ . '/includes/list-tables/list-attributes.php';
+	require_once __DIR__ . '/includes/list-tables/list-charstcs.php';
+	require_once __DIR__ . '/includes/woo/settings.php';
 	require_once __DIR__ . '/includes/process/admin-process.php';
 }
 
@@ -95,12 +95,12 @@ if ( ! is_admin() ) {
 	require_once __DIR__ . '/includes/front-end.php';
 	require_once __DIR__ . '/includes/display/form-data.php';
 	require_once __DIR__ . '/includes/display/form-fields.php';
-	require_once __DIR__ . '/includes/display/layout-review-list.php';
-	require_once __DIR__ . '/includes/display/layout-review-aggregate.php';
-	require_once __DIR__ . '/includes/display/layout-single-review.php';
-	require_once __DIR__ . '/includes/display/layout-new-review-form.php';
 	require_once __DIR__ . '/includes/display/view-output.php';
-	require_once __DIR__ . '/includes/display/woo-filters.php';
+	require_once __DIR__ . '/includes/woo/filters.php';
+	require_once __DIR__ . '/includes/layout/review-list.php';
+	require_once __DIR__ . '/includes/layout/review-aggregate.php';
+	require_once __DIR__ . '/includes/layout/single-review.php';
+	require_once __DIR__ . '/includes/layout/new-review-form.php';
 	require_once __DIR__ . '/includes/process/form-process.php';
 }
 
