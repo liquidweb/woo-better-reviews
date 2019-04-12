@@ -6,14 +6,14 @@
  */
 
 // Declare our namespace.
-namespace LiquidWeb\WooBetterReviews\Display\LayoutSingleReview;
+namespace LiquidWeb\WooBetterReviews\Layout\SingleReview;
 
 // Set our aliases.
 use LiquidWeb\WooBetterReviews as Core;
 use LiquidWeb\WooBetterReviews\Helpers as Helpers;
 use LiquidWeb\WooBetterReviews\Utilities as Utilities;
 use LiquidWeb\WooBetterReviews\Queries as Queries;
-use LiquidWeb\WooBetterReviews\Display\FormFields as FormFields;
+use LiquidWeb\WooBetterReviews\FormFields as FormFields;
 
 /**
  * Build and return the header portion for a single review.

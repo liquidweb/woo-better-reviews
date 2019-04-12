@@ -6,15 +6,15 @@
  */
 
 // Declare our namespace.
-namespace LiquidWeb\WooBetterReviews\Display\LayoutReviewList;
+namespace LiquidWeb\WooBetterReviews\Layout\ReviewList;
 
 // Set our aliases.
 use LiquidWeb\WooBetterReviews as Core;
 use LiquidWeb\WooBetterReviews\Helpers as Helpers;
 use LiquidWeb\WooBetterReviews\Utilities as Utilities;
 use LiquidWeb\WooBetterReviews\Queries as Queries;
-use LiquidWeb\WooBetterReviews\Display\FormData as FormData;
-use LiquidWeb\WooBetterReviews\Display\FormFields as FormFields;
+use LiquidWeb\WooBetterReviews\FormData as FormData;
+use LiquidWeb\WooBetterReviews\FormFields as FormFields;
 
 /**
  * Set up the messages portion of the review list.
