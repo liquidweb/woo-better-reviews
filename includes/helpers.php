@@ -81,6 +81,25 @@ function maybe_reviews_enabled( $product_id = 0 ) {
 }
 
 /**
+ * Check to see if schema markup is enabled.
+ *
+ * @param  integer $product_id  The ID of the individual product.
+ *
+ * @return boolean
+ */
+function maybe_schema_enabled( $product_id = 0 ) {
+
+	// Check the setting.
+	$set_option = get_option( Core\OPTION_PREFIX . 'enable_schema', 'no' );
+
+	// Set the enabled boolean.
+	$is_enabled = ! empty( $set_option ) && 'yes' === sanitize_text_field( $set_option ) ? true : false;
+
+	// Return this boolean.
+	return apply_filters( Core\HOOK_PREFIX . 'enabled_schema_markup', $is_enabled, $product_id );
+}
+
+/**
  * Check to see if a review is verified.
  *
  * @param  integer $author_id     The ID of the author posting the review.
