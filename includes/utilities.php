@@ -539,6 +539,39 @@ function format_review_author_charstcs( $review ) {
 }
 
 /**
+ * Get and format the aggregate schema data.
+ *
+ * @param  integer $product_id   The product ID we are looking for.
+ * @param  boolean $include_tag  Whether or not to include the tag wrapper.
+ *
+ * @return JSON
+ */
+function format_aggregate_review_schema( $product_id = 0, $include_tag = true ) {
+
+	// Bail without a product ID.
+	if ( empty( $product_id ) ) {
+		return false;
+	}
+
+	// Query the schema data.
+	$schema_query   = Queries\get_schema_data_for_product( $product_id );
+
+	// Bail without data to structure.
+	if ( empty( $schema_query ) ) {
+		return false;
+	}
+
+	// Filter the arguments before encoding.
+	$filtered_args  = apply_filters( Core\HOOK_PREFIX . 'aggregate_review_schema_data', $schema_query, $product_id );
+
+	// Encode my data.
+	$schema_encoded = json_encode( $filtered_args, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES );
+
+	// Return it tagged or not.
+	return false !== $include_tag ? '<script type="application/ld+json">' . "\n" . $schema_encoded . "\n" . '</script>' . "\n" : $schema_encoded;
+}
+
+/**
  * Set up the class to create a single bar chart.
  *
  * @param integer $rating_count  The count of how many ratings this has.

@@ -1977,6 +1977,74 @@ function get_single_charstcs( $charstcs_id = 0, $purge = false ) {
 }
 
 /**
+ * Get the data for the aggregate structured schema data.
+ *
+ * @param  integer $product_id   Which product ID we are looking up.
+ * @param  boolean $purge        Optional to purge the cache'd version before looking up.
+ *
+ * @return mixed
+ */
+function get_schema_data_for_product( $product_id = 0, $purge = false ) {
+
+	// Bail without a product ID.
+	if ( empty( $product_id ) ) {
+		return new WP_Error( 'missing_product_id', __( 'A product ID is required.', 'woo-better-reviews' ) );
+	}
+
+	// Set the key to use in our transient.
+	$ky = Core\HOOK_PREFIX . 'schema_product' . absint( $product_id );
+
+	// If we don't want the cache'd version, delete the transient first.
+	if ( defined( 'WP_DEBUG' ) && WP_DEBUG || ! empty( $purge ) ) {
+		delete_transient( $ky );
+	}
+
+	// Attempt to get the reviews from the cache.
+	$cached_dataset = get_transient( $ky );
+
+	// If we have none, do the things.
+	if ( false === $cached_dataset ) {
+
+		// Grab the entire post object.
+		$product_object = get_post( $product_id );
+
+		// Start pulling out various pieces we need.
+		$product_name   = $product_object->post_title;
+		$product_desc   = $product_object->post_excerpt;
+		$product_image  = get_the_post_thumbnail_url( $product_id, 'medium' );
+
+		// Pull out the averages and total review count.
+		$average_score  = get_post_meta( $product_id, Core\META_PREFIX . 'average_rating', true );
+		$review_count   = Helpers\get_admin_review_count( $product_id, false );
+
+		// Set up the schema arguments.
+		$schema_args    = array(
+			'@context'        => 'http://schema.org/',
+			'@type'           => 'Product',
+			'name'            => esc_attr( $product_name ),
+			'image'           => esc_url( $product_image ),
+			'description'     => wp_strip_all_tags( $product_desc, true ),
+			'aggregateRating' => array(
+				'@type'       => 'AggregateRating',
+				'ratingValue' => esc_attr( $average_score ),
+				'bestRating'  => '7',
+				'worstRating' => '1',
+				'ratingCount' => esc_attr( $review_count ),
+			),
+		);
+
+		// Set our transient with our data.
+		set_transient( $ky, $schema_args, HOUR_IN_SECONDS );
+
+		// And change the variable to do the things.
+		$cached_dataset = $schema_args;
+	}
+
+	// Return the raw dataset, we will format it later.
+	return $cached_dataset;
+}
+
+/**
  * Take the review object array and merge the taxonomies.
  *
  * @param  array $reviews  The review objects from the query.
