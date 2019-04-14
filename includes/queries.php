@@ -1979,8 +1979,8 @@ function get_single_charstcs( $charstcs_id = 0, $purge = false ) {
 /**
  * Get the data for the aggregate structured schema data.
  *
- * @param  integer $product_id   Which product ID we are looking up.
- * @param  boolean $purge        Optional to purge the cache'd version before looking up.
+ * @param  integer $product_id  Which product ID we are looking up.
+ * @param  boolean $purge       Optional to purge the cache'd version before looking up.
  *
  * @return mixed
  */

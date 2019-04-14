@@ -56,14 +56,27 @@ function insert_aggregate_review_schema() {
 /**
  * Insert our schema in the opening part of each review.
  *
- * @param  mixed   $display_view   The existing display in the filter.
- * @param  object  $review_object  The entire review object.
- * @param  integer $product_id     The individual product ID for all the reviews.
+ * @param  mixed   $display_view  The existing display in the filter.
+ * @param  array   $review_array  The entire review array.
+ * @param  integer $product_id    The individual product ID for all the reviews.
  *
  * @return mixed
  */
-function insert_single_review_schema( $display_view, $review_object, $product_id ) {
+function insert_single_review_schema( $display_view, $review_array, $product_id ) {
 
-	// Return whatever display view we have.
-	return $display_view;
+	// Bail without our array data.
+	if ( empty( $review_array ) ) {
+		return $display_view;
+	}
+
+	// Query the schema display data.
+	$schema_display = Utilities\format_single_review_schema( $review_array );
+
+	// Bail if no display data came back.
+	if ( empty( $schema_display ) ) {
+		return $display_view;
+	}
+
+	// Return the schema with the display schema.
+	return $display_view . $schema_display;
 }
