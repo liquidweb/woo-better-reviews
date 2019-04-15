@@ -14,69 +14,144 @@ namespace LiquidWeb\WooBetterReviews\SchemaMarkup;
 use LiquidWeb\WooBetterReviews as Core;
 use LiquidWeb\WooBetterReviews\Helpers as Helpers;
 use LiquidWeb\WooBetterReviews\Utilities as Utilities;
+use LiquidWeb\WooBetterReviews\Queries as Queries;
 
 /**
  * Start our engines.
  */
-add_action( 'wp_head', __NAMESPACE__ . '\insert_aggregate_review_schema' );
-add_filter( 'wc_better_reviews_before_single_review_output', __NAMESPACE__ . '\insert_single_review_schema', 10, 3 );
+add_filter( 'woocommerce_structured_data_product', __NAMESPACE__ . '\append_woo_structured_data', 10, 2 );
 
 /**
- * Insert our schema for the agreegate review data.
+ * Add our data to the existing Woo generated structured data.
  *
- * @return JSON-LD
- */
-function insert_aggregate_review_schema() {
-
-	// Bail if we aren't on a product.
-	if ( ! is_singular( 'product' ) || ! comments_open() ) {
-		return;
-	}
-
-	// Run the check.
-	$maybe_enabled  = Helpers\maybe_schema_enabled( get_the_ID() );
-
-	// Bail if we aren't enabled.
-	if ( ! $maybe_enabled ) {
-		return;
-	}
-
-	// Query the schema display data.
-	$schema_display = Utilities\format_aggregate_review_schema( get_the_ID() );
-
-	// Bail if no display data came back.
-	if ( empty( $schema_display ) ) {
-		return;
-	}
-
-	// Echo the display schema.
-	echo $schema_display;
-}
-
-/**
- * Insert our schema in the opening part of each review.
- *
- * @param  mixed   $display_view  The existing display in the filter.
- * @param  array   $review_array  The entire review array.
- * @param  integer $product_id    The individual product ID for all the reviews.
+ * @param  array  $markup   The existing markup data array.
+ * @param  object $product  The WC_Product_Simple object.
  *
  * @return mixed
  */
-function insert_single_review_schema( $display_view, $review_array, $product_id ) {
+function append_woo_structured_data( $markup, $product ) {
 
-	// Bail without our array data.
-	if ( empty( $review_array ) ) {
-		return $display_view;
+	// Run the check.
+	$confirm_enable = confirm_schema_before_insert( $product->get_id() );
+
+	// Bail if we aren't enabled.
+	if ( ! $confirm_enable ) {
+		return;
 	}
 
-	// Query the schema display data.
-	$schema_display = Utilities\format_single_review_schema( $review_array );
+	// Pull out the averages and total review count.
+	$average_score  = get_post_meta( $product->get_id(), Core\META_PREFIX . 'average_rating', true );
+	$review_count   = Helpers\get_admin_review_count( $product->get_id(), false );
 
-	// Bail if no display data came back.
-	if ( empty( $schema_display ) ) {
-		return $display_view;
+	// Set an empty array.
+	$single_args    = array();
+
+	// If we have both, add our stuff.
+	if ( ! empty( $average_score ) && ! empty( $review_count ) ) {
+
+		// Unset the existing aggregate schema data.
+		unset( $markup['aggregateRating'] );
+
+		// Now add in our aggregate data.
+		$markup['aggregateRating'] = array(
+			'@type'       => 'AggregateRating',
+			'ratingValue' => esc_attr( $average_score ),
+			'bestRating'  => '7',
+			'worstRating' => '1',
+			'ratingCount' => esc_attr( $review_count ),
+		);
+
+		// Nothing left to do inside the aggregate setup.
 	}
 
-	// Return the schema with the display schema.
-	return $display_view . $schema_display;
+	// Get some recent reviews.
+	$recent_reviews = Queries\get_recent_reviews_for_product( $product->get_id() );
+
+	// Add the reviews if we have any.
+	if ( ! empty( $recent_reviews ) ) {
+
+		// Unset the existing schema data.
+		unset( $markup['reviews'] );
+		unset( $markup['review'] );
+
+		// First grab my first review.
+		$first_review   = $recent_reviews[0];
+
+		// Trim down the review.
+		$review_trimmed = wp_trim_words( $first_review->review_content, 20, '...' );
+
+		// Now add my single review data.
+		$markup['review']  = array(
+			'@context'      => 'http://schema.org/',
+			'@type'         => 'Review',
+			'name'          => $first_review->review_title,
+			'reviewBody'    => wp_strip_all_tags( $review_trimmed, true ),
+			'datePublished' => date( 'Y-m-d', strtotime( $first_review->review_date ) ),
+			'reviewRating'  => array(
+				'@type'       => 'Rating',
+				'ratingValue' => $first_review->rating_total_score,
+				'bestRating'  => '7',
+				'worstRating' => '1',
+			),
+			'author'       => array(
+				'@type' => 'Person',
+				'name'  => $first_review->author_name,
+			),
+		);
+
+		// Now loop each review and pull out what we want.
+		foreach ( $recent_reviews as $single_review ) {
+
+			// Trim down the review.
+			$single_trimmed = wp_trim_words( $single_review->review_content, 20, '...' );
+
+			// Set the args for a single review.
+			$single_args[]  = array(
+				'@context'      => 'http://schema.org/',
+				'@type'         => 'Review',
+				'name'          => $single_review->review_title,
+				'reviewBody'    => wp_strip_all_tags( $single_trimmed, true ),
+				'datePublished' => date( 'Y-m-d', strtotime( $single_review->review_date ) ),
+				'reviewRating'  => array(
+					'@type'       => 'Rating',
+					'ratingValue' => $single_review->rating_total_score,
+					'bestRating'  => '7',
+					'worstRating' => '1',
+				),
+				'author'       => array(
+					'@type' => 'Person',
+					'name'  => $single_review->author_name,
+				),
+			);
+		}
+
+		// Now add my data.
+		$markup['reviews']  = $single_args;
+
+		// Nothing left for single reviews.
+	}
+
+	// Send back the markup if we have it.
+	return $markup;
+}
+
+/**
+ * Confirm we should be doing the schema before.
+ *
+ * @param  integer $product_id  The individual product ID.
+ *
+ * @return boolean
+ */
+function confirm_schema_before_insert( $product_id = 0 ) {
+
+	// Bail if we aren't on a product.
+	if ( empty( $product_id ) || 'product' !== get_post_type( $product_id ) || ! comments_open( $product_id ) ) {
+		return false;
+	}
+
+	// Run the check.
+	$maybe_enabled  = Helpers\maybe_schema_enabled( $product_id );
+
+	// Return our result.
+	return false !== $maybe_enabled ? true : false;
 }
