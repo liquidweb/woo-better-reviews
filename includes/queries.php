@@ -1598,6 +1598,15 @@ function get_all_attributes( $return_type = 'objects', $purge = false ) {
 			return $cached_dataset;
 			break;
 
+		case 'indexed' :
+
+			// First get the IDs.
+			$id_index   = wp_list_pluck( $cached_dataset, 'attribute_id', null );
+
+			// Return it with our IDs as the index.
+			return array_combine( $id_index, $cached_dataset );
+			break;
+
 		case 'display' :
 			return Utilities\format_attribute_display_data( $cached_dataset );
 			break;
