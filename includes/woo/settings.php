@@ -104,20 +104,6 @@ function filter_woo_admin_review_settings( $settings ) {
 	// Add our custom setting for the global attributes.
 	$settings   = Utilities\array_insert_after( 12, $settings, 'attrib', $prod_args );
 
-	// Set the attributes for the schema markup.
-	$schem_args  = array(
-		'title'           => __( 'Structured Markup', 'woo-better-reviews' ),
-		'desc'            => __( 'Include the JSON-LD Schema markup for the review data.', 'woo-better-reviews' ),
-		'id'              => Core\OPTION_PREFIX . 'enable_schema',
-		'default'         => 'yes',
-		'type'            => 'checkbox',
-		'checkboxgroup'   => '',
-		'show_if_checked' => 'yes',
-	);
-
-	// Add our custom setting for the schema markup.
-	$settings   = Utilities\array_insert_after( 'attrib', $settings, 'schema', $schem_args );
-
 	// Return our settings, resetting the indexes.
 	return array_values( $settings );
 }

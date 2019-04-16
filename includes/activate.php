@@ -87,5 +87,4 @@ function set_initial_options() {
 	update_option( 'woocommerce_enable_reviews', 'yes' );
 	update_option( Core\OPTION_PREFIX . 'allow_anonymous', 'no' );
 	update_option( Core\OPTION_PREFIX . 'global_attributes', 'yes' );
-	update_option( Core\OPTION_PREFIX . 'enable_schema', 'yes' );
 }

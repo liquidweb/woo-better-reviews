@@ -32,19 +32,16 @@ add_filter( 'woocommerce_structured_data_product', __NAMESPACE__ . '\append_woo_
 function append_woo_structured_data( $markup, $product ) {
 
 	// Run the check.
-	$confirm_enable = confirm_schema_before_insert( $product->get_id() );
+	$maybe_disable  = apply_filters( Core\HOOK_PREFIX . 'disable_review_schema', false, $product );
 
 	// Bail if we aren't enabled.
-	if ( ! $confirm_enable ) {
+	if ( false !== $maybe_disable ) {
 		return;
 	}
 
 	// Pull out the averages and total review count.
 	$average_score  = get_post_meta( $product->get_id(), Core\META_PREFIX . 'average_rating', true );
 	$review_count   = Helpers\get_admin_review_count( $product->get_id(), false );
-
-	// Set an empty array.
-	$single_args    = array();
 
 	// If we have both, add our stuff.
 	if ( ! empty( $average_score ) && ! empty( $review_count ) ) {
@@ -74,84 +71,76 @@ function append_woo_structured_data( $markup, $product ) {
 		unset( $markup['reviews'] );
 		unset( $markup['review'] );
 
-		// First grab my first review.
-		$first_review   = $recent_reviews[0];
+		// Grab my first review.
+		$first_review   = array_shift( $recent_reviews );
 
-		// Trim down the review.
-		$review_trimmed = wp_trim_words( $first_review->review_content, 20, '...' );
+		// Pull out the data pieces we want.
+		$first_rv_data  = Utilities\format_review_data_for_schema( $first_review );
 
-		// Now add my single review data.
-		$markup['review']  = array(
-			'@context'      => 'http://schema.org/',
-			'@type'         => 'Review',
-			'name'          => $first_review->review_title,
-			'reviewBody'    => wp_strip_all_tags( $review_trimmed, true ),
-			'datePublished' => date( 'Y-m-d', strtotime( $first_review->review_date ) ),
-			'reviewRating'  => array(
-				'@type'       => 'Rating',
-				'ratingValue' => $first_review->rating_total_score,
-				'bestRating'  => '7',
-				'worstRating' => '1',
-			),
-			'author'       => array(
-				'@type' => 'Person',
-				'name'  => $first_review->author_name,
-			),
-		);
+		// Add the data if we have it.
+		if ( ! empty( $first_rv_data ) ) {
 
-		// Now loop each review and pull out what we want.
-		foreach ( $recent_reviews as $single_review ) {
-
-			// Trim down the review.
-			$single_trimmed = wp_trim_words( $single_review->review_content, 20, '...' );
-
-			// Set the args for a single review.
-			$single_args[]  = array(
+			// Now add my single review data.
+			$markup['review'] = array(
 				'@context'      => 'http://schema.org/',
 				'@type'         => 'Review',
-				'name'          => $single_review->review_title,
-				'reviewBody'    => wp_strip_all_tags( $single_trimmed, true ),
-				'datePublished' => date( 'Y-m-d', strtotime( $single_review->review_date ) ),
+				'name'          => $first_rv_data['title'],
+				'reviewBody'    => $first_rv_data['content'],
+				'datePublished' => $first_rv_data['date'],
 				'reviewRating'  => array(
 					'@type'       => 'Rating',
-					'ratingValue' => $single_review->rating_total_score,
+					'ratingValue' => $first_rv_data['score'],
 					'bestRating'  => '7',
 					'worstRating' => '1',
 				),
 				'author'       => array(
 					'@type' => 'Person',
-					'name'  => $single_review->author_name,
+					'name'  => $first_rv_data['author'],
+				),
+			);
+
+			// Done with the first review dataset.
+		}
+
+		// Now loop each remaining review and pull out what we want.
+		foreach ( $recent_reviews as $single_review ) {
+
+			// Pull out the data pieces we want.
+			$single_rv_data = Utilities\format_review_data_for_schema( $single_review );
+
+			// Skip if we have no data.
+			if ( empty( $single_rv_data ) ) {
+				continue;
+			}
+
+			// Set the args for a single review.
+			$single_args[]  = array(
+				'@context'      => 'http://schema.org/',
+				'@type'         => 'Review',
+				'name'          => $single_rv_data['title'],
+				'reviewBody'    => $single_rv_data['content'],
+				'datePublished' => $single_rv_data['date'],
+				'reviewRating'  => array(
+					'@type'       => 'Rating',
+					'ratingValue' => $single_rv_data['score'],
+					'bestRating'  => '7',
+					'worstRating' => '1',
+				),
+				'author'       => array(
+					'@type' => 'Person',
+					'name'  => $single_rv_data['author'],
 				),
 			);
 		}
 
 		// Now add my data.
-		$markup['reviews']  = $single_args;
+		if ( ! empty( $single_args ) ) {
+			$markup['reviews']  = $single_args;
+		}
 
 		// Nothing left for single reviews.
 	}
 
 	// Send back the markup if we have it.
 	return $markup;
-}
-
-/**
- * Confirm we should be doing the schema before.
- *
- * @param  integer $product_id  The individual product ID.
- *
- * @return boolean
- */
-function confirm_schema_before_insert( $product_id = 0 ) {
-
-	// Bail if we aren't on a product.
-	if ( empty( $product_id ) || 'product' !== get_post_type( $product_id ) || ! comments_open( $product_id ) ) {
-		return false;
-	}
-
-	// Run the check.
-	$maybe_enabled  = Helpers\maybe_schema_enabled( $product_id );
-
-	// Return our result.
-	return false !== $maybe_enabled ? true : false;
 }

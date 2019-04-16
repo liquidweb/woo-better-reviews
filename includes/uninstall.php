@@ -41,5 +41,4 @@ register_uninstall_hook( Core\FILE, __NAMESPACE__ . '\uninstall' );
 function delete_initial_options() {
 	delete_option( Core\OPTION_PREFIX . 'allow_anonymous' );
 	delete_option( Core\OPTION_PREFIX . 'global_attributes' );
-	delete_option( Core\OPTION_PREFIX . 'enable_schema' );
 }
