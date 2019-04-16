@@ -1681,22 +1681,22 @@ function get_attributes_for_product( $product_id = 0, $return_type = 'objects', 
 			return false;
 		}
 
+		// Get all my attributes.
+		$all_attributes = get_all_attributes( 'indexed' );
+
 		// Set my empty.
 		$query_list = array();
 
 		// Loop the attribute IDs.
 		foreach ( $maybe_attributes as $attribute_id ) {
 
-			// Get the single attribute data.
-			$attribute_data = get_single_attribute( $attribute_id );
-
 			// Skip the empty data.
-			if ( empty( $attribute_data ) ) {
+			if ( empty( $all_attributes[ $attribute_id ] ) ) {
 				continue;
 			}
 
 			// Add the data to the list.
-			$query_list[] = $attribute_data;
+			$query_list[] = $all_attributes[ $attribute_id ];
 		}
 
 		// Set our transient with our data.
