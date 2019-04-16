@@ -32,7 +32,7 @@ Care for the back-end of your site by making your reviews more reliable:
 * Stores data in custom tables instead of comments
 * Set WooCommerce reviews to pending - all reviews are set `pending` on submission
 
-[![Watch the video](https://img.youtube.com/vi/IdBtuIPrpkU/maxresdefault.jpg)](https://www.youtube.com/watch?v=IdBtuIPrpkU)
+[![Watch the video](https://img.youtube.com/vi/IdBtuIPrpkU/hqdefault.jpg)](https://www.youtube.com/watch?v=IdBtuIPrpkU)
 
 ## Installation ##
 
