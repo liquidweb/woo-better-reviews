@@ -253,6 +253,9 @@ function display_existing_reviews( $product_id = 0, $echo = true ) {
 		// Now open a div for the individual review.
 		$build .= '<div id="' . sanitize_html_class( 'woo-better-reviews-single-' . absint( $single_review['review_id'] ) ) . '" class="' . esc_attr( $class ) . '">';
 
+			// Handle the "before" display.
+			$build .= apply_filters( Core\HOOK_PREFIX . 'before_single_review_output', null, $single_review, $product_id );
+
 			// Output the title.
 			$build .= LayoutSingleReview\set_single_review_header_view( $single_review );
 
@@ -264,6 +267,9 @@ function display_existing_reviews( $product_id = 0, $echo = true ) {
 
 			// Output the author characteristics.
 			$build .= LayoutSingleReview\set_single_review_author_charstcs_view( $single_review );
+
+			// Handle the "after" display.
+			$build .= apply_filters( Core\HOOK_PREFIX . 'after_single_review_output', null, $single_review, $product_id );
 
 		// Close the single review div.
 		$build .= '</div>';

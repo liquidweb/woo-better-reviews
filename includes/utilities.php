@@ -177,6 +177,49 @@ function calculate_average_attribute_scoring( $attribute_set = array() ) {
 }
 
 /**
+ * Take our review and format it for schema insertion.
+ *
+ * @param  object  $review  The entire review object.
+ *
+ * @return array
+ */
+function format_review_data_for_schema( $review ) {
+
+	// Bail without any content.
+	if ( empty( $review ) ) {
+		return;
+	}
+
+	// Parse out the easy pieces we want first.
+	$review_title   = esc_attr( $review->review_title );
+	$review_dstamp  = strtotime( $review->review_date );
+	$review_score   = absint( $review->rating_total_score );
+	$review_author  = esc_attr( $review->author_name );
+
+	// De-tag the content first.
+	$stripped_text  = wp_strip_all_tags( $review->review_content, true );
+
+	// Set my variables for the content trimming.
+	$set_trim_count = apply_filters( Core\HOOK_PREFIX . 'schema_content_trim_count', 20, $review );
+	$set_trim_more  = apply_filters( Core\HOOK_PREFIX . 'schema_content_trim_more', '...', $review );
+
+	// Now trim the actual words.
+	$review_content = wp_trim_words( $stripped_text, $set_trim_count, $set_trim_more );
+
+	// Set up the arguments to return.
+	$schema_setup   = array(
+		'title'   => $review_title,
+		'content' => $review_content,
+		'date'    => date( 'Y-m-d', $review_dstamp ),
+		'score'   => $review_score,
+		'author'  => $review_author,
+	);
+
+	// Return the possibly filtered text.
+	return apply_filters( Core\HOOK_PREFIX . 'schema_formatted_review_data', $schema_setup, $review );
+}
+
+/**
  * Take the potentially values and format a nice list.
  *
  * @param  mixed  $values   The values, perhaps serialized.

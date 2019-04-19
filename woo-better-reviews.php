@@ -96,11 +96,12 @@ if ( ! is_admin() ) {
 	require_once __DIR__ . '/includes/display/form-data.php';
 	require_once __DIR__ . '/includes/display/form-fields.php';
 	require_once __DIR__ . '/includes/display/view-output.php';
-	require_once __DIR__ . '/includes/woo/filters.php';
+	require_once __DIR__ . '/includes/display/schema-markup.php';
 	require_once __DIR__ . '/includes/layout/review-list.php';
 	require_once __DIR__ . '/includes/layout/review-aggregate.php';
 	require_once __DIR__ . '/includes/layout/single-review.php';
 	require_once __DIR__ . '/includes/layout/new-review-form.php';
+	require_once __DIR__ . '/includes/woo/filters.php';
 	require_once __DIR__ . '/includes/process/form-process.php';
 }
 

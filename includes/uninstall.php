@@ -39,6 +39,6 @@ register_uninstall_hook( Core\FILE, __NAMESPACE__ . '\uninstall' );
  * @return void
  */
 function delete_initial_options() {
-	delete_option( Core\OPTION_PREFIX . 'allow_anonymous', 'no' );
-	delete_option( Core\OPTION_PREFIX . 'global_attributes', 'yes' );
+	delete_option( Core\OPTION_PREFIX . 'allow_anonymous' );
+	delete_option( Core\OPTION_PREFIX . 'global_attributes' );
 }
