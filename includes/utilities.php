@@ -123,6 +123,9 @@ function calculate_average_attribute_scoring( $attribute_set = array() ) {
 		return;
 	}
 
+	// Get all my attributes.
+	$all_attributes = Queries\get_all_attributes( 'indexed' );
+
 	// Parse out some labels.
 	$label_set  = wp_list_pluck( $attribute_set[0], 'label', 'id' );
 
@@ -152,14 +155,21 @@ function calculate_average_attribute_scoring( $attribute_set = array() ) {
 	// Now loop my setup and do the maths.
 	foreach ( $setup as $attribute_id => $score_string ) {
 
+		// Now get my matching setup.
+		$attribute_item = $all_attributes[ $attribute_id ];
+
+		// Set my various classes and labels.
+		$set_min_label  = ! empty( $attribute_item->min_label ) ? esc_attr( $attribute_item->min_label ) : __( 'Min.', 'woo-better-reviews' );
+		$set_max_label  = ! empty( $attribute_item->max_label ) ? esc_attr( $attribute_item->max_label ) : __( 'Max.', 'woo-better-reviews' );
+
+		// Get my labels if possible.
+		$attribute_lbls = array( 'min' => $set_min_label, 'max' => $set_max_label );
+
 		// Set my scoring array up.
 		$scoring_array  = explode( ',', $score_string );
 
 		// And calculate the average.
 		$attribute_avg  = array_sum( $scoring_array ) / count( $scoring_array );
-
-		// Get my labels if possible.
-		$attribute_lbls = Queries\get_single_attribute( $attribute_id, 'labels' );
 
 		// Add my two values.
 		$build[ $attribute_id ] = array(
@@ -505,19 +515,22 @@ function format_review_scoring_data( $review, $discard = false ) {
 	// Check for the attributes kept.
 	if ( isset( $review['rating_attributes'] ) ) {
 
+		// Get all my attributes.
+		$all_attributes = Queries\get_all_attributes( 'indexed' );
+
 		// Pull out the attributes.
-		$attributes = maybe_unserialize( $review['rating_attributes'] );
+		$set_attributes = maybe_unserialize( $review['rating_attributes'] );
 
 		// Our scoring data has 3 pieces.
-		foreach ( $attributes as $attribute_id => $attribute_score ) {
+		foreach ( $set_attributes as $attribute_id => $attribute_score ) {
 
 			// Pull my attribute data.
-			$attribute_data = Queries\get_single_attribute( $attribute_id );
+			$attribute_data = $all_attributes[ $attribute_id ];
 
 			// Now set the array accordingly.
 			$setup['rating_attributes'][] = array(
 				'id'    => $attribute_id,
-				'label' => $attribute_data['attribute_name'],
+				'label' => $attribute_data->attribute_name,
 				'value' => $attribute_score,
 			);
 

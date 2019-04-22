@@ -1598,6 +1598,15 @@ function get_all_attributes( $return_type = 'objects', $purge = false ) {
 			return $cached_dataset;
 			break;
 
+		case 'indexed' :
+
+			// First get the IDs.
+			$id_index   = wp_list_pluck( $cached_dataset, 'attribute_id', null );
+
+			// Return it with our IDs as the index.
+			return array_combine( $id_index, $cached_dataset );
+			break;
+
 		case 'display' :
 			return Utilities\format_attribute_display_data( $cached_dataset );
 			break;
@@ -1672,22 +1681,22 @@ function get_attributes_for_product( $product_id = 0, $return_type = 'objects', 
 			return false;
 		}
 
+		// Get all my attributes.
+		$all_attributes = get_all_attributes( 'indexed' );
+
 		// Set my empty.
 		$query_list = array();
 
 		// Loop the attribute IDs.
 		foreach ( $maybe_attributes as $attribute_id ) {
 
-			// Get the single attribute data.
-			$attribute_data = get_single_attribute( $attribute_id );
-
 			// Skip the empty data.
-			if ( empty( $attribute_data ) ) {
+			if ( empty( $all_attributes[ $attribute_id ] ) ) {
 				continue;
 			}
 
 			// Add the data to the list.
-			$query_list[] = $attribute_data;
+			$query_list[] = $all_attributes[ $attribute_id ];
 		}
 
 		// Set our transient with our data.

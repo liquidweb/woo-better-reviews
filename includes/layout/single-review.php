@@ -76,21 +76,27 @@ function set_single_review_attributes_scoring_view( $review = array() ) {
 		return;
 	}
 
+	// Get all my attributes.
+	$all_attributes = Queries\get_all_attributes( 'indexed' );
+
 	// First set the empty.
 	$display_view   = '';
 
 	// Loop my characteristics.
 	foreach ( $review['rating_attributes'] as $attribute_data ) {
 
+		// Set my attribute ID, and grab that part of the data.
+		$attribute_id   = absint( $attribute_data['id'] );
+
+		// Now get my matching setup.
+		$attribute_item = $all_attributes[ $attribute_id ];
+
 		// Set my attribute score.
 		$single_score   = ! empty( $attribute_data['value'] ) ? absint( $attribute_data['value'] ) : 0;
 
-		// Get my labels for the box.
-		$attribute_lbls = Queries\get_single_attribute( $attribute_data['id'], 'labels' );
-
 		// Set my various classes and labels.
-		$set_min_label  = ! empty( $attribute_lbls['min'] ) ? esc_attr( $attribute_lbls['min'] ) : __( 'Min.', 'woo-better-reviews' );
-		$set_max_label  = ! empty( $attribute_lbls['max'] ) ? esc_attr( $attribute_lbls['max'] ) : __( 'Max.', 'woo-better-reviews' );
+		$set_min_label  = ! empty( $attribute_item->min_label ) ? esc_attr( $attribute_item->min_label ) : __( 'Min.', 'woo-better-reviews' );
+		$set_max_label  = ! empty( $attribute_item->max_label ) ? esc_attr( $attribute_item->max_label ) : __( 'Max.', 'woo-better-reviews' );
 		$min_max_class  = 'woo-better-reviews-list-attribute-summary-label woo-better-reviews-list-attribute-summary-label-';
 
 		// Set it inside a div.
