@@ -4,11 +4,12 @@ All notable changes to this project will be documented in this file, according t
 
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## [0.1.0]
-
-* Initial public release.
-
-
 ##[0.2.0]
 
 * adding CLI command for converting existing reviews.
+* including review data in WooCommerce structured data.
+* removed duplicate queries, general cleanup.
+
+## [0.1.0]
+
+* Initial public release.

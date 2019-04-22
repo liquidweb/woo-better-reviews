@@ -4,7 +4,7 @@ Tags: woocommerce, reviews
 Requires at least: 5.0
 Tested up to: 5.1.1
 Requires PHP: 5.6.0
-Stable tag: 0.2.0-dev
+Stable tag: 0.2.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -71,6 +71,11 @@ Yes.
 1. **WooCommerce Settings** - Set the options for reviews
 
 == Changelog ==
+
+= 0.2.0 =
+* adding CLI command for converting existing reviews.
+* including review data in WooCommerce structured data.
+* removed duplicate queries, general cleanup.
 
 = 0.1.0 =
 * Initial release
