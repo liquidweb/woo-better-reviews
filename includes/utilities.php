@@ -519,10 +519,10 @@ function format_review_scoring_data( $review, $discard = false ) {
 		$all_attributes = Queries\get_all_attributes( 'indexed' );
 
 		// Pull out the attributes.
-		$my_attributes  = maybe_unserialize( $review['rating_attributes'] );
+		$set_attributes = maybe_unserialize( $review['rating_attributes'] );
 
 		// Our scoring data has 3 pieces.
-		foreach ( $my_attributes as $attribute_id => $attribute_score ) {
+		foreach ( $set_attributes as $attribute_id => $attribute_score ) {
 
 			// Pull my attribute data.
 			$attribute_data = $all_attributes[ $attribute_id ];
