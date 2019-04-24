@@ -76,6 +76,12 @@ require_once __DIR__ . '/includes/db-tables/tax-characteristics.php';
 
 // Load my query logic plugin-wide.
 require_once __DIR__ . '/includes/queries.php';
+require_once __DIR__ . '/includes/triggers.php';
+
+// Load all the Woo files.
+require_once __DIR__ . '/includes/woo/actions.php';
+require_once __DIR__ . '/includes/woo/filters.php';
+require_once __DIR__ . '/includes/woo/settings.php';
 
 // Load the admin specific files.
 if ( is_admin() ) {
@@ -88,7 +94,6 @@ if ( is_admin() ) {
 	require_once __DIR__ . '/includes/list-tables/list-reviews.php';
 	require_once __DIR__ . '/includes/list-tables/list-attributes.php';
 	require_once __DIR__ . '/includes/list-tables/list-charstcs.php';
-	require_once __DIR__ . '/includes/woo/settings.php';
 	require_once __DIR__ . '/includes/process/admin-process.php';
 }
 
@@ -103,7 +108,6 @@ if ( ! is_admin() ) {
 	require_once __DIR__ . '/includes/layout/review-aggregate.php';
 	require_once __DIR__ . '/includes/layout/single-review.php';
 	require_once __DIR__ . '/includes/layout/new-review-form.php';
-	require_once __DIR__ . '/includes/woo/filters.php';
 	require_once __DIR__ . '/includes/process/form-process.php';
 }
 
@@ -124,3 +128,7 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 	// And add our command.
 	WP_CLI::add_command( 'woo-better-reviews', WBR_Commands::class );
 }
+
+// Define a few constants to use for the trigger logic.
+define( __NAMESPACE__ . '\AFTER_PURCHASE_TRIGGER', 'wc_better_reviews_trigger_after_purchase_' );
+define( __NAMESPACE__ . '\STATUS_CHANGE_TRIGGER', 'wc_better_reviews_trigger_status_change_' );

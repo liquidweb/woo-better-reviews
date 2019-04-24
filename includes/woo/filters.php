@@ -1,6 +1,6 @@
 <?php
 /**
- * Handle display related Woo stuff.
+ * Handle filtered related Woo stuff.
  *
  * @package WooBetterReviews
  */
