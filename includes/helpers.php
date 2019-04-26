@@ -584,6 +584,43 @@ function get_scoring_stars_display( $product_id = 0, $review_score = 0, $include
 }
 
 /**
+ * Check if we are on the admin settings tab.
+ *
+ * @param  string $hook  Optional hook sent from some actions.
+ *
+ * @return boolean
+ */
+function maybe_admin_settings_tab( $hook = '' ) {
+
+	// Can't be the admin tab if we aren't admin.
+	if ( ! is_admin() ) {
+		return false;
+	}
+
+	// Set an array of allowed hooks.
+	$allowed_hooks  = array(
+		'edit.php',
+		'woocommerce_page_wc-settings',
+		'toplevel_page_' . Core\REVIEWS_ANCHOR,
+		'reviews_page_' . Core\ATTRIBUTES_ANCHOR,
+		'reviews_page_' . Core\CHARSTCS_ANCHOR,
+	);
+
+	// Check the hook if we passed one.
+	if ( ! empty( $hook ) && in_array( $hook, $allowed_hooks ) ) {
+		return true;
+	}
+
+	// Check the tab portion and return true if it matches.
+	if ( ! empty( $_GET['tab'] ) && Core\TAB_BASE === sanitize_text_field( wp_unslash( $_GET['tab'] ) ) ) {
+		return true;
+	}
+
+	// Nothing left to check, so go false.
+	return false;
+}
+
+/**
  * Return our base link, with function fallbacks.
  *
  * @param  string $menu_slug  Which menu slug to use. Defaults to the primary.

@@ -85,7 +85,7 @@ function add_review_settings_tab( $tabs ) {
 
 	// Confirm we don't already have the tab.
 	if ( ! isset( $tabs[ Core\TAB_BASE ] ) ) {
-		$tabs[ Core\TAB_BASE ] = __( 'Reviews', 'woo-better-reviews' );
+		$tabs[ Core\TAB_BASE ] = __( 'Product Reviews', 'woo-better-reviews' );
 	}
 
 	// And return the entire array.
@@ -141,17 +141,17 @@ function get_settings() {
 		)
 		*/
 
-		'header' => array(
-			'title' => __( 'Product Reviews', 'woo-better-reviews' ),
+		'mainheader' => array(
+			'title' => __( 'Product Review Settings', 'woo-better-reviews' ),
 			'type'  => 'title',
 			'desc'  => '',
-			'id'    => Core\OPTION_PREFIX . 'settings_header',
+			'id'    => Core\OPTION_PREFIX . 'main_settings_header',
 		),
 
 		'enable' => array(
-			'name'     => __( 'Enable Reviews', 'woo-better-reviews' ),
-			'desc'     => __( 'Use the Better Reviews for WooCommerce.', 'woo-better-reviews' ),
-			'id'       => 'woocommerce_enable_reviews',
+			'title'    => __( 'Enable Reviews', 'woo-better-reviews' ),
+			'desc'     => __( 'Use the Better Reviews for WooCommerce', 'woo-better-reviews' ),
+			'id'       => 'woocommerce_enable_reviews', // @@todo figure out if setting key should be different.
 			'type'     => 'checkbox',
 			'default'  => 'yes',
 			'class'    => 'woo-better-reviews-settings-checkbox',
@@ -159,29 +159,139 @@ function get_settings() {
 		),
 
 		'anonymous' => array(
-			'name'    => __( 'Anonymous Reviews', 'woo-better-reviews' ),
-			'desc'    => __( 'Allow non-logged in users to leave product reviews.', 'woo-better-reviews' ),
-			'id'      => Core\OPTION_PREFIX . 'allow_anonymous',
-			'type'    => 'checkbox',
-			'default' => 'no',
-			'class'   => 'woo-better-reviews-settings-checkbox',
+			'title'    => __( 'Anonymous Reviews', 'woo-better-reviews' ),
+			'desc'     => __( 'Allow non-logged in users to leave product reviews', 'woo-better-reviews' ),
+			'id'       => Core\OPTION_PREFIX . 'allow_anonymous',
+			'type'     => 'checkbox',
+			'default'  => 'no',
+			'class'    => 'woo-better-reviews-settings-checkbox',
 			'desc_tip' => __( 'User accounts must be enabled for this feature.', 'woo-better-reviews' ),
 		),
 
-		'gloablattrib' => array(
-			'name'    => __( 'Product Attributes', 'woo-better-reviews' ),
-			'desc'    => __( 'Apply each created attribute to every product.', 'woo-better-reviews' ),
-			'id'      => Core\OPTION_PREFIX . 'global_attributes',
-			'type'    => 'checkbox',
-			'default' => 'yes',
-			'class'   => 'woo-better-reviews-settings-checkbox',
+		'doverified' => array(
+			'title'           => __( 'Verified Reviews', 'woo-better-reviews' ),
+			'desc'            => __( 'Show "verified owner" label on customer reviews', 'woo-better-reviews' ),
+			'id'              => 'woocommerce_review_rating_verification_label',
+			'default'         => 'yes',
+			'type'            => 'checkbox',
+			'checkboxgroup'   => 'start',
+			'show_if_checked' => 'yes',
+			'class'           => 'woo-better-reviews-settings-checkbox',
+			'autoload'        => false,
+		),
+
+		'onlyverified' => array(
+			'desc'            => __( 'Reviews can only be left by "verified owners"', 'woo-better-reviews' ),
+			'id'              => 'woocommerce_review_rating_verification_required',
+			'default'         => 'no',
+			'type'            => 'checkbox',
+			'checkboxgroup'   => 'end',
+			'show_if_checked' => 'yes',
+			'class'           => 'woo-better-reviews-settings-checkbox',
+			'autoload'        => false,
+		),
+
+		'gloablattributes' => array(
+			'title'    => __( 'Product Attributes', 'woo-better-reviews' ),
+			'desc'     => __( 'Apply each created attribute to every product', 'woo-better-reviews' ),
+			'id'       => Core\OPTION_PREFIX . 'global_attributes',
+			'type'     => 'checkbox',
+			'default'  => 'yes',
+			'class'    => 'woo-better-reviews-settings-checkbox',
 			'desc_tip' => sprintf( __( '<a href="%s">Click here</a> to view and edit your product review attributes.', 'woo-better-reviews' ), Helpers\get_admin_menu_link( Core\ATTRIBUTES_ANCHOR ) ),
 		),
 
 		// Include my section end.
-		'section_end' => array( 'type' => 'sectionend', 'id' => Core\TAB_BASE . '_section_end' ),
+		'mainsection_end' => array( 'type' => 'sectionend', 'id' => Core\TAB_BASE . '_main_settings_section_end' ),
+
+		// Now start the reminders.
+		'remindheader' => array(
+			'title' => __( 'Reminders and Follow Up', 'woo-better-reviews' ),
+			'type'  => 'title',
+			'desc'  => __( 'Send reminders to customers to leave reviews.', 'woo-better-reviews' ),
+			'id'    => Core\OPTION_PREFIX . 'remind_settings_header',
+		),
+
+		'doreminders' => array(
+			'title'   => __( 'Enable Reminders', 'woo-better-reviews' ),
+			'desc'    => __( 'Send an email reminder for customers to leave product reviews', 'woo-better-reviews' ),
+			'id'      => Core\OPTION_PREFIX . 'send_reminders',
+			'type'    => 'checkbox',
+			'default' => 'yes',
+			'class'   => 'woo-better-reviews-settings-checkbox',
+		),
+
+		'sendreminder' => array(
+			'title'    => __( 'Reminder Delay', 'woocommerce' ),
+			'desc'     => '<span class="woo-better-reviews-settings-block-desc">' . __( 'Set the amount of time from purchase to send the reminder.', 'woocommerce' ) . '</span>',
+			'id'       => Core\OPTION_PREFIX . 'reminder_wait',
+			'type'     => 'relative_date_selector',
+			'default'  => array(
+				'number' => '2',
+				'unit'   => 'weeks',
+			),
+			'autoload' => false,
+			'class'   => 'woo-better-reviews-settings-date-group',
+		),
+
+		// Close up the reminders section.
+		'remindsection_end' => array( 'type' => 'sectionend', 'id' => Core\TAB_BASE . '_remind_settings_section_end' ),
 	);
 
-	// Return our set of fields with a filter.
-	return apply_filters( Core\HOOK_PREFIX . 'settings_data_array', $setup_args );
+	// Return our set of fields with a filter, resetting the keys again.
+	return apply_filters( Core\HOOK_PREFIX . 'settings_data_array', array_values( $setup_args ) );
+}
+
+/**
+ * Output our custom subtitle section
+ *
+ * @param  array $args  The field args we set up.
+ *
+ * @return HTML
+ */
+function output_settings_subtitle( $args ) {
+
+	// Bail if we don't have a title.
+	if ( empty( $args['title'] ) ) {
+		return;
+	}
+
+	// Do the table stuff.
+	echo '<tr valign="top">';
+
+		echo '<th scope="row" class="titledesc">&nbsp;</th>';
+
+		echo '<td>';
+
+		// Handle the first subtitle output.
+		if ( ! empty( $args['title'] ) ) {
+			echo '<h4 class="woo-better-reviews-admin-settings-subtitle">' . esc_html( $args['title'] ) . '</h4>';
+		}
+
+		// Handle the text output.
+		if ( ! empty( $args['desc'] ) ) {
+			echo wp_kses_post( wpautop( wptexturize( $args['desc'] ) ) );
+		}
+		echo '</td>';
+	echo '</tr>';
+
+	/*
+		<th scope="row" class="titledesc">
+			<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['title'] ); ?> <?php echo $tooltip_html; // WPCS: XSS ok. ?></label>
+		</th>
+		<td class="forminp forminp-<?php echo esc_attr( sanitize_title( $value['type'] ) ); ?>">
+			<input
+				name="<?php echo esc_attr( $value['id'] ); ?>"
+				id="<?php echo esc_attr( $value['id'] ); ?>"
+				type="<?php echo esc_attr( $value['type'] ); ?>"
+				style="<?php echo esc_attr( $value['css'] ); ?>"
+				value="<?php echo esc_attr( $option_value ); ?>"
+				class="<?php echo esc_attr( $value['class'] ); ?>"
+				placeholder="<?php echo esc_attr( $value['placeholder'] ); ?>"
+				<?php echo implode( ' ', $custom_attributes ); // WPCS: XSS ok. ?>
+				/><?php echo esc_html( $value['suffix'] ); ?> <?php echo $description; // WPCS: XSS ok. ?>
+		</td>
+
+	 */
+
 }

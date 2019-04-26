@@ -63,6 +63,14 @@ form.woo-better-reviews-admin-edit-single-item-form {
     .woo-better-reviews-admin-table-review-score .woo-better-reviews-list-total-score .woo-better-reviews-single-star.woo-better-reviews-single-star-empty {
       color: #ccc; }
 
+body.woo-better-reviews-admin-body-class table.form-table input.woo-better-reviews-settings-date-group {
+  line-height: 32px;
+  height: 32px; }
+body.woo-better-reviews-admin-body-class table.form-table .woo-better-reviews-settings-block-desc {
+  display: block;
+  width: 100%;
+  padding: 10px 0 0; }
+
 .wp-list-table.productreviews .column-review_verified {
   width: 80px; }
 
