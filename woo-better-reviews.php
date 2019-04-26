@@ -53,6 +53,9 @@ define( __NAMESPACE__ . '\TABLE_PREFIX', 'woocommerce_better_reviews_' );
 define( __NAMESPACE__ . '\OPTION_PREFIX', 'wbr_setting_' );
 define( __NAMESPACE__ . '\META_PREFIX', '_wbr_meta_' );
 
+// Set our tab base slug constant.
+define( __NAMESPACE__ . '\TAB_BASE', 'wbr_settings' );
+
 // Set the name for our various menu page anchors.
 define( __NAMESPACE__ . '\REVIEWS_ANCHOR', 'woo-better-reviews' );
 define( __NAMESPACE__ . '\ATTRIBUTES_ANCHOR', 'woo-better-reviews-product-attributes' );

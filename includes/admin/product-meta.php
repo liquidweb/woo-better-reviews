@@ -20,8 +20,24 @@ use WP_Error;
 /**
  * Start our engines.
  */
-add_action( 'add_meta_boxes_product', __NAMESPACE__ . '\load_attribute_metabox' );
+add_action( 'add_meta_boxes_product', __NAMESPACE__ . '\filter_default_review_metaboxes', 11 );
+add_action( 'add_meta_boxes_product', __NAMESPACE__ . '\load_attribute_metabox', 15 );
 add_action( 'save_post_product', __NAMESPACE__ . '\save_product_attributes', 10, 2 );
+
+/**
+ * Removes the default reviews metabox in leiu of our own.
+ *
+ * @param object $post  The entire WP_Post object.
+ *
+ * @return void
+ */
+function filter_default_review_metaboxes( $post ) {
+
+	// This is the box being removed.
+	remove_meta_box( 'commentsdiv', 'product', 'normal' );
+
+	// @@todo this will eventually load ours.
+}
 
 /**
  * Load the metabox for applying review attributes.

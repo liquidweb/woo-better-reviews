@@ -615,6 +615,30 @@ function get_admin_menu_link( $menu_slug = '' ) {
 }
 
 /**
+ * Return our base link, with function fallbacks.
+ *
+ * @param  string $menu_slug  Which tab slug to use. Defaults to the primary.
+ *
+ * @return string
+ */
+function get_admin_tab_link( $tab_slug = '' ) {
+
+	// Bail if we aren't on the admin side.
+	if ( ! is_admin() ) {
+		return false;
+	}
+
+	// Set my slug.
+	$tab_slug   = ! empty( $tab_slug ) ? trim( $tab_slug ) : trim( Core\TAB_BASE );
+
+	// Set up my args.
+	$setup_args = array( 'page' => 'wc-settings', 'tab' => esc_attr( $tab_slug ) );
+
+	// Return the link with our args.
+	return add_query_arg( $setup_args, admin_url( 'admin.php' ) );
+}
+
+/**
  * Handle our redirect within the admin settings page.
  *
  * @param  array   $custom_args  The query args to include in the redirect.
