@@ -187,6 +187,75 @@ function calculate_average_attribute_scoring( $attribute_set = array() ) {
 }
 
 /**
+ * Calculate our timestamp based on today.
+ *
+ * @param  integer $product_id  The product we're calcing on.
+ *
+ * @return integer
+ */
+function calculate_relative_date( $product_id = 0 ) {
+
+	// Get the date array from the product.
+	$date_array = get_post_meta( $product_id, Core\META_PREFIX . 'reminder_wait', true );
+
+	// Pull the option.
+	if ( empty( $date_array ) ) {
+		$date_array = get_option(  Core\OPTION_PREFIX . 'reminder_wait', 0 );
+	}
+
+	// Bail without a date array.
+	if ( empty( $date_array ) ) {
+		return;
+	}
+
+	// Make sure we have a good array.
+	$date_build = wc_parse_relative_date_option( $date_array );
+
+	// Set our today.
+	$date_today = (int) current_time( 'timestamp' );
+
+	// Set a fallback.
+	$set_durate = 2 * WEEK_IN_SECONDS;
+
+	// Handle my different unit types.
+	switch ( esc_attr( $date_array['unit'] ) ) {
+
+		case 'day' :
+		case 'days' :
+
+			// Set the constant times the number.
+			$set_durate = absint( $date_array['number'] ) * DAY_IN_SECONDS;
+			break;
+
+		case 'week' :
+		case 'weeks' :
+
+			// Set the constant times the number.
+			$set_durate = absint( $date_array['number'] ) * WEEK_IN_SECONDS;
+			break;
+
+		case 'month' :
+		case 'months' :
+
+			// Set the constant times the number.
+			$set_durate = absint( $date_array['number'] ) * MONTH_IN_SECONDS;
+			break;
+
+		case 'year' :
+		case 'years' :
+
+			// Set the constant times the number.
+			$set_durate = absint( $date_array['number'] ) * YEAR_IN_SECONDS;
+			break;
+
+		// End all case breaks.
+	}
+
+	// Now return the time from today.
+	return absint( $date_today ) + absint( $set_durate );
+}
+
+/**
  * Take our review and format it for schema insertion.
  *
  * @param  object  $review  The entire review object.

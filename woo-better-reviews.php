@@ -114,7 +114,7 @@ if ( ! is_admin() ) {
 }
 
 // Load our triggers setup, along with the converting and potentially export logic.
-require_once __DIR__ . '/includes/process/triggers.php';
+require_once __DIR__ . '/includes/process/reminders.php';
 require_once __DIR__ . '/includes/process/convert-existing.php';
 
 // Load the triggered file loads.

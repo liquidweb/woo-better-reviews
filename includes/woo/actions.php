@@ -52,8 +52,11 @@ function run_after_purchase_triggers( $order_id ) {
 		return;
 	}
 
+	// Get the array of product IDs in the order items.
+	$product_ids    = array_keys( $order_data['line_items'] );
+
 	// Do the action that contains the line items.
-	do_action( Core\AFTER_PURCHASE_TRIGGER . 'order_line_items', $order_data['line_items'], $order_data, $order_id );
+	do_action( Core\AFTER_PURCHASE_TRIGGER . 'order_line_items', $product_ids, $order_data, $order_id );
 	// wc_better_reviews_trigger_after_purchase_
 
 	// Now loop through each line item and pass that along.
