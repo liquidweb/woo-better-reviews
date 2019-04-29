@@ -222,12 +222,12 @@ function get_settings() {
 		),
 
 		'sendreminder' => array(
-			'title'    => __( 'Reminder Delay', 'woocommerce' ),
-			'desc'     => '<span class="woo-better-reviews-settings-block-desc">' . __( 'Set the amount of time from purchase to send the reminder.', 'woocommerce' ) . '</span>',
+			'title'    => __( 'Reminder Delay', 'woo-better-reviews' ),
+			'desc'     => '<span class="woo-better-reviews-settings-block-desc">' . __( 'Set the amount of time from purchase to send the reminder.', 'woo-better-reviews' ) . '</span>',
 			'id'       => Core\OPTION_PREFIX . 'reminder_wait',
 			'type'     => 'relative_date_selector',
 			'default'  => array(
-				'number' => '2',
+				'number' => 2,
 				'unit'   => 'weeks',
 			),
 			'autoload' => false,

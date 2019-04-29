@@ -81,6 +81,50 @@ function maybe_reviews_enabled( $product_id = 0 ) {
 }
 
 /**
+ * Check to see if reminders are enabled.
+ *
+ * @param  integer $product_id   The ID of the individual product.
+ * @param  string  $return_type  How to return the result. Boolean or string.
+ *
+ * @return boolean
+ */
+function maybe_reminders_enabled( $product_id = 0, $return_type = 'boolean' ) {
+
+	// Check the base setting first.
+	$all_reminders  = get_option( Core\OPTION_PREFIX . 'send_reminders', 0 );
+
+	// Set the boolean and string returns.
+	$return_boolean = ! empty( $all_reminders ) && 'yes' === sanitize_text_field( $all_reminders ) ? true : false;
+	$return_strings = ! empty( $all_reminders ) && 'yes' === sanitize_text_field( $all_reminders ) ? 'yes' : 'no';
+
+	// Return right away if no product ID was passed.
+	if ( empty( $product_id ) ) {
+		return 'strings' === sanitize_text_field( $return_type ) ? $return_strings : $return_boolean;
+	}
+
+	// First get all the meta keys for the product.
+	$all_metadata   = get_post_meta( $product_id );
+
+	// Set our meta key as a variable.
+	$single_metakey = Core\META_PREFIX . 'send_reminder';
+
+	// If no keys exist at all, or our single meta key isn't, return the global.
+	if ( empty( $all_metadata ) || ! isset( $all_metadata[ $single_metakey ] ) ) {
+		return 'strings' === sanitize_text_field( $return_type ) ? $return_strings : $return_boolean;
+	}
+
+	// Now pull the single product meta.
+	$one_reminder   = $all_metadata[ $single_metakey ][0];
+
+	// Set the boolean and string returns.
+	$single_boolean = ! empty( $one_reminder ) && 'yes' === sanitize_text_field( $one_reminder ) ? true : false;
+	$single_strings = ! empty( $one_reminder ) && 'yes' === sanitize_text_field( $one_reminder ) ? 'yes' : 'no';
+
+	// Now return the results.
+	return 'strings' === sanitize_text_field( $return_type ) ? $single_strings : $single_boolean;
+}
+
+/**
  * Check to see if a review is verified.
  *
  * @param  integer $author_id     The ID of the author posting the review.
@@ -600,6 +644,7 @@ function maybe_admin_settings_tab( $hook = '' ) {
 	// Set an array of allowed hooks.
 	$allowed_hooks  = array(
 		'edit.php',
+		'post.php',
 		'toplevel_page_' . Core\REVIEWS_ANCHOR,
 		'reviews_page_' . Core\ATTRIBUTES_ANCHOR,
 		'reviews_page_' . Core\CHARSTCS_ANCHOR,
