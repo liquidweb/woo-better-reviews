@@ -74,9 +74,6 @@ body.woo-better-reviews-admin-body-class table.form-table .woo-better-reviews-se
 .woocommerce_options_panel .product-reminder-wait_field input.relative-date {
   width: 65px;
   margin-right: 5px; }
-.woocommerce_options_panel .product-reminder-wait_field .description {
-  display: inline-block;
-  width: 100%; }
 
 .wp-list-table.productreviews .column-review_verified {
   width: 80px; }

@@ -79,7 +79,6 @@ require_once __DIR__ . '/includes/db-tables/tax-characteristics.php';
 
 // Load my query logic plugin-wide.
 require_once __DIR__ . '/includes/queries.php';
-require_once __DIR__ . '/includes/triggers.php';
 
 // Load all the Woo files.
 require_once __DIR__ . '/includes/woo/actions.php';
@@ -114,7 +113,8 @@ if ( ! is_admin() ) {
 	require_once __DIR__ . '/includes/process/form-process.php';
 }
 
-// Load our converting and potentially export logic.
+// Load our triggers setup, along with the converting and potentially export logic.
+require_once __DIR__ . '/includes/process/triggers.php';
 require_once __DIR__ . '/includes/process/convert-existing.php';
 
 // Load the triggered file loads.
