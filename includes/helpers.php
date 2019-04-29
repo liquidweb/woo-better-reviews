@@ -125,6 +125,27 @@ function maybe_reminders_enabled( $product_id = 0, $return_type = 'boolean' ) {
 }
 
 /**
+ * Check the order status against the ones we will allow.
+ *
+ * @param  string $order_status  The status being checked.
+ *
+ * @return boolean
+ */
+function maybe_allowed_status( $order_status ) {
+
+	// Bail without a status to check.
+	if ( empty( $order_status ) ) {
+		return false;
+	}
+
+	// Set our allowed statuses.
+	$allowed_statuses   = apply_filters( Core\OPTION_PREFIX . 'reminder_order_statuses', array( 'completed' ) );
+
+	// Return the boolean based on the match.
+	return empty( $allowed_statuses ) || ! in_array( $order_status, $allowed_statuses ) ? false : true;
+}
+
+/**
  * Check to see if a review is verified.
  *
  * @param  integer $author_id     The ID of the author posting the review.

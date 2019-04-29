@@ -826,6 +826,18 @@ function delete_related_review_data( $review_id = 0 ) {
 }
 
 /**
+ * Delete the meta related to an order reminder.
+ *
+ * @param  integer $order_id  The order ID we are deleting.
+ *
+ * @return void
+ */
+function purge_order_reminder_meta( $order_id = 0 ) {
+	delete_post_meta( $order_id, Core\META_PREFIX . 'review_reminder_status' );
+	delete_post_meta( $order_id, Core\META_PREFIX . 'review_reminder_data' );
+}
+
+/**
  * Purge one or many transients based on what's happening.
  *
  * @param  string $key     A single transient key.

@@ -20,21 +20,22 @@ use WP_Error;
 /**
  * Start our engines.
  */
-add_action( 'wc_better_reviews_trigger_after_purchase_order_line_items', __NAMESPACE__ . '\maybe_set_reminder', 10, 3 );
+add_action( 'wc_better_reviews_trigger_after_purchase_order_line_items', __NAMESPACE__ . '\maybe_set_reminder_at_order', 10, 3 );
+add_action( 'wc_better_reviews_trigger_status_change_order_completed', __NAMESPACE__ . '\maybe_set_reminder_at_completed', 10, 3 );
 
 /**
  * Check to see if we need to set reminders for purchased products.
  *
+ * @param  integer $order_id     The order ID being run.
  * @param  array   $product_ids  The product ID of each item in the order.
  * @param  array   $order_data   The entire order data.
- * @param  integer $order_id     The order ID being run.
  *
  * @return void
  */
-function maybe_set_reminder( $product_ids, $order_data, $order_id ) {
+function maybe_set_reminder_at_order( $order_id, $product_ids, $order_data ) {
 
 	// Bail if no product IDs or order status came through.
-	if ( empty( $product_ids ) || empty( $order_data['status'] ) ) {
+	if ( empty( $order_id ) || empty( $product_ids ) || empty( $order_data['status'] ) ) {
 		die('missing stuff');
 		return;
 	}
@@ -42,18 +43,16 @@ function maybe_set_reminder( $product_ids, $order_data, $order_id ) {
 	// Run the main check for being enabled.
 	$maybe_enabled  = Helpers\maybe_reminders_enabled();
 
-	// Bail if not enabled.
-	if ( ! $maybe_enabled ) {
-		die('not enabled');
-		return;
-	}
-
 	// Check if we have an allowed status.
-	$maybe_allowed  = allowed_reminder_status( $order_data['status'] );
+	$maybe_allowed  = Helpers\maybe_allowed_status( $order_data['status'] );
 
 	// Bail if not allowed.
-	if ( ! $maybe_allowed ) {
-		die('not allowed');
+	if ( ! $maybe_enabled || ! $maybe_allowed ) {
+
+		// Purge the meta.
+		Utilities\purge_order_reminder_meta( $order_id );
+
+		die('not enabled or allowed');
 		return;
 	}
 
@@ -80,36 +79,108 @@ function maybe_set_reminder( $product_ids, $order_data, $order_id ) {
 
 	// If all were set to 'no', then bail.
 	if ( empty( $reminder_arr ) ) {
+
+		// Purge the meta.
+		Utilities\purge_order_reminder_meta( $order_id );
+
 		die('all empty');
 		return;
 	}
-
-	preprint( $reminder_arr, true );
 
 	// Set the array of products to set reminders to.
 	update_post_meta( $order_id, Core\META_PREFIX . 'review_reminder_status', 'pending' );
 	update_post_meta( $order_id, Core\META_PREFIX . 'review_reminder_data', $reminder_arr );
 
-	// Core\META_PREFIX . 'reminder_wait'
+	// Handle an action.
+	do_action( Core\HOOK_PREFIX . 'after_order_created_reminder_set', $order_data, $order_id );
 }
 
 /**
- * Check the order status against the ones we will allow.
+ * Check to see if we need to set reminders for purchased products when the status changes.
  *
- * @param  string $order_status  The status being checked.
+ * @param  integer $order_id    The order ID being run.
+ * @param  array   $order_data  The entire order data.
  *
- * @return boolean
+ * @return void
  */
-function allowed_reminder_status( $order_status ) {
+function maybe_set_reminder_at_completed( $order_id, $order_data ) {
 
-	// Bail without a status to check.
-	if ( empty( $order_status ) ) {
-		return false;
+	// Bail if no data.
+	if ( empty( $order_id ) || empty( $order_data ) ) {
+		die('missing stuff');
+		return;
 	}
 
-	// Set our allowed statuses.
-	$allowed_statuses   = apply_filters( Core\AFTER_PURCHASE_TRIGGER . 'reminder_order_statuses', array( 'completed' ) );
+	// Bail if no line items.
+	if ( empty( $order_data['line_items'] ) ) {
+		die('missing line items');
+		return;
+	}
 
-	// Return the boolean based on the match.
-	return empty( $allowed_statuses ) || ! in_array( $order_status, $allowed_statuses ) ? false : true;
+	// Run the main check for being enabled.
+	$maybe_enabled  = Helpers\maybe_reminders_enabled();
+
+	// Bail if not allowed.
+	if ( ! $maybe_enabled ) {
+
+		// Purge the meta.
+		Utilities\purge_order_reminder_meta( $order_id );
+
+		die('not enabled');
+		return;
+	}
+
+	// Check for a meta flag.
+	$maybe_pending  = get_post_meta( $order_id, Core\META_PREFIX . 'review_reminder_status', true );
+
+	// If we already set the pending flag, bail.
+	if ( ! empty( $maybe_pending ) && 'pending' === sanitize_text_field( $maybe_pending ) ) {
+
+		die('already set');
+		return;
+	}
+
+	// Get the array of product IDs in the order items.
+	$product_ids    = array_keys( $order_data['line_items'] );
+
+	// Set some empty variable.
+	$reminder_arr   = array();
+
+	// Now loop the product IDs and check each one.
+	foreach ( $product_ids as $product_id ) {
+
+		// Get the meta key.
+		$meta_check = get_post_meta( $product_id, Core\META_PREFIX . 'send_reminder', true );
+
+		// If we have a specific "no", then skip.
+		if ( ! empty( $meta_check ) && 'no' === sanitize_text_field( $meta_check ) ) {
+			continue;
+		}
+
+		// Add my product ID and the date stamp.
+		$reminder_arr[] = array(
+			'product_id' => absint( $product_id ),
+			'timestamp' => Utilities\calculate_relative_date( $product_id ),
+		);
+	}
+
+	// If all were set to 'no', then bail.
+	if ( empty( $reminder_arr ) ) {
+
+		// Purge the meta.
+		Utilities\purge_order_reminder_meta( $order_id );
+
+		die('all empty');
+		return;
+	}
+
+	// Set the array of products to set reminders to.
+	update_post_meta( $order_id, Core\META_PREFIX . 'review_reminder_status', 'pending' );
+	update_post_meta( $order_id, Core\META_PREFIX . 'review_reminder_data', $reminder_arr );
+
+	// Handle an action.
+	do_action( Core\HOOK_PREFIX . 'after_status_completed_reminder_set', $order_data, $order_id );
+
 }
+
+
