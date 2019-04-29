@@ -25,5 +25,6 @@ use WP_Error;
 // add_action( 'wc_better_reviews_trigger_after_purchase_order_line_items', __NAMESPACE__ . '\after_purchase_order_line_items' );
 // add_action( 'wc_better_reviews_trigger_after_purchase_order_single_line_item', __NAMESPACE__ . '\after_purchase_order_single_line_item' );
 // add_action( 'wc_better_reviews_trigger_status_change_order_data', __NAMESPACE__ . '\status_change_order_data' );
-// add_action( 'wc_better_reviews_trigger_status_change_set_from_STATUS', __NAMESPACE__ . '\status_change_set_from_STATUS' );
-// add_action( 'wc_better_reviews_trigger_status_change_set_to_STATUS', __NAMESPACE__ . '\status_change_set_to_STATUS' );
+// add_action( 'wc_better_reviews_trigger_status_change_order_completed', __NAMESPACE__ . '\status_change_order_completed' );
+// add_action( 'wc_better_reviews_trigger_status_change_transition', __NAMESPACE__ . '\status_change_transition' );
+// add_action( 'wc_better_reviews_trigger_status_change_set_from_STATUS_to_STATUS', __NAMESPACE__ . '\status_change_set_from_STATUS_to_STATUS' );

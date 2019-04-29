@@ -87,6 +87,11 @@ function run_after_status_change_triggers( $order_id, $old_status, $new_status )
 		return;
 	}
 
+	// Make sure this isn't a same to same.
+	if ( $old_status === $new_status ) {
+		return;
+	}
+
 	// Get an instance of the WC_Order object and then pull the data.
 	$order_object   = wc_get_order( $order_id );
 	$order_data     = $order_object->get_data();
@@ -95,8 +100,17 @@ function run_after_status_change_triggers( $order_id, $old_status, $new_status )
 	do_action( Core\STATUS_CHANGE_TRIGGER . 'order_data', $order_data, $order_id );
 	// wc_better_reviews_trigger_status_change_
 
-	// Run an action trigger for the from and the to.
-	do_action( Core\STATUS_CHANGE_TRIGGER . 'set_from_' . $old_status, $order_data, $order_id );
-	do_action( Core\STATUS_CHANGE_TRIGGER . 'set_to_' . $new_status, $order_data, $order_id );
+	// If we are moving to "completed", run a special action for that.
+	if ( 'completed' === $new_status ) {
+		do_action( Core\STATUS_CHANGE_TRIGGER . 'order_completed', $order_data, $order_id );
+		// wc_better_reviews_trigger_status_change_
+	}
+
+	// Run a generic transition action.
+	do_action( Core\STATUS_CHANGE_TRIGGER . 'transition', $old_status, $new_status, $order_data, $order_id );
+	// wc_better_reviews_trigger_status_change_
+
+	// Run an action trigger for the specific to and from.
+	do_action( Core\STATUS_CHANGE_TRIGGER . 'from_' . $old_status . '_to_' . $new_status, $order_data, $order_id );
 	// wc_better_reviews_trigger_status_change_
 }
