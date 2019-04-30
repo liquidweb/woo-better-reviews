@@ -200,7 +200,7 @@ function calculate_relative_date( $product_id = 0 ) {
 
 	// Pull the option.
 	if ( empty( $date_array ) ) {
-		$date_array = get_option(  Core\OPTION_PREFIX . 'reminder_wait', 0 );
+		$date_array = get_option( Core\OPTION_PREFIX . 'reminder_wait', 0 );
 	}
 
 	// Bail without a date array.
@@ -1002,4 +1002,30 @@ function array_insert_after( $key, $array, $new_key, $new_value ) {
 
 	// Return the resulting array.
 	return $updated_array;
+}
+
+/**
+ * Take our existing cron job and update or remove the schedule.
+ *
+ * @param  boolean $clear      Whether to remove the existing one.
+ * @param  string  $frequency  The new frequency we wanna use.
+ *
+ * @return void
+ */
+function modify_cron_setup( $clear = true, $frequency = '' ) {
+
+	// Pull in the existing one and remove it.
+	if ( ! empty( $clear ) ) {
+
+		// Grab the next scheduled stamp.
+		$timestamp  = wp_next_scheduled( Core\CRON_NAME );
+
+		// Remove it from the schedule.
+		wp_unschedule_event( $timestamp, Core\CRON_NAME );
+	}
+
+	// Now schedule our new one, assuming we passed a new frequency.
+	if ( ! empty( $frequency ) ) {
+		wp_schedule_event( current_time( 'timestamp' ), sanitize_text_field( $frequency ), Core\CRON_NAME );
+	}
 }

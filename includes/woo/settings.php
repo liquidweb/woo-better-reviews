@@ -113,6 +113,21 @@ function display_settings_tab() {
  * @uses self::get_settings()
  */
 function update_review_settings() {
+
+	// Set our reminder key.
+	$reminder_key   = Core\OPTION_PREFIX . 'send_reminders';
+
+	// Pull in our scheduled cron and unschedule it if disabled.
+	if ( empty( $_POST[ $reminder_key ] ) ) {
+		Utilities\modify_cron_setup( true, false );
+	}
+
+	// Check for the reminders being turned on or off and handle the cron.
+	if ( ! empty( $_POST[ $reminder_key ] ) && ! wp_next_scheduled( Core\CRON_NAME ) ) {
+		Utilities\modify_cron_setup( false, 'twicedaily' );
+	}
+
+	// Now save as normal.
 	woocommerce_update_options( get_settings() );
 }
 

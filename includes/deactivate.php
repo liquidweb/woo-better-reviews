@@ -10,6 +10,7 @@ namespace LiquidWeb\WooBetterReviews\Deactivate;
 
 // Set our aliases.
 use LiquidWeb\WooBetterReviews as Core;
+use LiquidWeb\WooBetterReviews\Utilities as Utilities;
 
 /**
  * Delete various options when deactivating the plugin.
@@ -17,6 +18,9 @@ use LiquidWeb\WooBetterReviews as Core;
  * @return void
  */
 function deactivate() {
+
+	// Pull in our scheduled cron and unschedule it.
+	Utilities\modify_cron_setup( true, false );
 
 	// Include our action so that we may add to this later.
 	do_action( Core\HOOK_PREFIX . 'deactivate_process' );

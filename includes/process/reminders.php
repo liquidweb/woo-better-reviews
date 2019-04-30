@@ -36,7 +36,6 @@ function maybe_set_reminder_at_order( $order_id, $product_ids, $order_data ) {
 
 	// Bail if no product IDs or order status came through.
 	if ( empty( $order_id ) || empty( $product_ids ) || empty( $order_data['status'] ) ) {
-		die('missing stuff');
 		return;
 	}
 
@@ -52,7 +51,7 @@ function maybe_set_reminder_at_order( $order_id, $product_ids, $order_data ) {
 		// Purge the meta.
 		Utilities\purge_order_reminder_meta( $order_id );
 
-		die('not enabled or allowed');
+		// And return nothing, since it isn't an error per se.
 		return;
 	}
 
@@ -73,7 +72,7 @@ function maybe_set_reminder_at_order( $order_id, $product_ids, $order_data ) {
 		// Add my product ID and the date stamp.
 		$reminder_arr[] = array(
 			'product_id' => absint( $product_id ),
-			'timestamp' => Utilities\calculate_relative_date( $product_id ),
+			'timestamp'  => Utilities\calculate_relative_date( $product_id ),
 		);
 	}
 
@@ -83,7 +82,7 @@ function maybe_set_reminder_at_order( $order_id, $product_ids, $order_data ) {
 		// Purge the meta.
 		Utilities\purge_order_reminder_meta( $order_id );
 
-		die('all empty');
+		// And return an empty.
 		return;
 	}
 
@@ -107,13 +106,11 @@ function maybe_set_reminder_at_completed( $order_id, $order_data ) {
 
 	// Bail if no data.
 	if ( empty( $order_id ) || empty( $order_data ) ) {
-		die('missing stuff');
 		return;
 	}
 
 	// Bail if no line items.
 	if ( empty( $order_data['line_items'] ) ) {
-		die('missing line items');
 		return;
 	}
 
@@ -126,7 +123,7 @@ function maybe_set_reminder_at_completed( $order_id, $order_data ) {
 		// Purge the meta.
 		Utilities\purge_order_reminder_meta( $order_id );
 
-		die('not enabled');
+		// And bail.
 		return;
 	}
 
@@ -135,8 +132,6 @@ function maybe_set_reminder_at_completed( $order_id, $order_data ) {
 
 	// If we already set the pending flag, bail.
 	if ( ! empty( $maybe_pending ) && 'pending' === sanitize_text_field( $maybe_pending ) ) {
-
-		die('already set');
 		return;
 	}
 
@@ -160,7 +155,7 @@ function maybe_set_reminder_at_completed( $order_id, $order_data ) {
 		// Add my product ID and the date stamp.
 		$reminder_arr[] = array(
 			'product_id' => absint( $product_id ),
-			'timestamp' => Utilities\calculate_relative_date( $product_id ),
+			'timestamp'  => Utilities\calculate_relative_date( $product_id ),
 		);
 	}
 
@@ -170,7 +165,7 @@ function maybe_set_reminder_at_completed( $order_id, $order_data ) {
 		// Purge the meta.
 		Utilities\purge_order_reminder_meta( $order_id );
 
-		die('all empty');
+		// And bail.
 		return;
 	}
 
@@ -180,7 +175,6 @@ function maybe_set_reminder_at_completed( $order_id, $order_data ) {
 
 	// Handle an action.
 	do_action( Core\HOOK_PREFIX . 'after_status_completed_reminder_set', $order_data, $order_id );
-
 }
 
 

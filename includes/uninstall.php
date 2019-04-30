@@ -10,6 +10,7 @@ namespace LiquidWeb\WooBetterReviews\Uninstall;
 
 // Set our aliases.
 use LiquidWeb\WooBetterReviews as Core;
+use LiquidWeb\WooBetterReviews\Utilities as Utilities;
 use LiquidWeb\WooBetterReviews\Database as Database;
 
 /**
@@ -24,6 +25,9 @@ function uninstall() {
 
 	// Delete the options we set.
 	delete_initial_options();
+
+	// Pull in our scheduled cron and unschedule it.
+	Utilities\modify_cron_setup( true, false );
 
 	// Include our action so that we may add to this later.
 	do_action( Core\HOOK_PREFIX . 'uninstall_process' );
@@ -41,4 +45,6 @@ register_uninstall_hook( Core\FILE, __NAMESPACE__ . '\uninstall' );
 function delete_initial_options() {
 	delete_option( Core\OPTION_PREFIX . 'allow_anonymous' );
 	delete_option( Core\OPTION_PREFIX . 'global_attributes' );
+	delete_option( Core\OPTION_PREFIX . 'send_reminders' );
+	delete_option( Core\OPTION_PREFIX . 'reminder_wait' );
 }

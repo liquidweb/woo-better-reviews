@@ -10,6 +10,7 @@ namespace LiquidWeb\WooBetterReviews\Activate;
 
 // Set our aliases.
 use LiquidWeb\WooBetterReviews as Core;
+use LiquidWeb\WooBetterReviews\Utilities as Utilities;
 use LiquidWeb\WooBetterReviews\Database as Database;
 use LiquidWeb\WooBetterReviews\Queries as Queries;
 
@@ -28,6 +29,11 @@ function activate() {
 
 	// Set our initial options.
 	set_initial_options();
+
+	// Schedule our cron job assuming it isn't there already.
+	if ( ! wp_next_scheduled( Core\CRON_NAME ) ) {
+		Utilities\modify_cron_setup( false, 'twicedaily' );
+	}
 
 	// Include our action so that we may add to this later.
 	do_action( Core\HOOK_PREFIX . 'activate_process' );
@@ -84,7 +90,11 @@ function backup_existing_review_counts( $replace = false ) {
  * @return void
  */
 function set_initial_options() {
+
+	// Set our actual option flags.
 	update_option( 'woocommerce_enable_reviews', 'yes' );
 	update_option( Core\OPTION_PREFIX . 'allow_anonymous', 'no' );
 	update_option( Core\OPTION_PREFIX . 'global_attributes', 'yes' );
+	update_option( Core\OPTION_PREFIX . 'send_reminders', 'yes' );
+	update_option( Core\OPTION_PREFIX . 'reminder_wait', array( 'number' => 2, 'unit' => 'weeks' ) );
 }

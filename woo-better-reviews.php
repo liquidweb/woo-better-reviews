@@ -65,6 +65,9 @@ define( __NAMESPACE__ . '\CHARSTCS_ANCHOR', 'woo-better-reviews-author-character
 define( __NAMESPACE__ . '\DB_VERS', '1' );
 define( __NAMESPACE__ . '\SCHEMA_KEY', HOOK_PREFIX . 'db_version' );
 
+// Set our cron function name constant.
+define( __NAMESPACE__ . '\CRON_NAME', 'wbr_process_reminders' );
+
 // Load the multi-use files first.
 require_once __DIR__ . '/includes/helpers.php';
 require_once __DIR__ . '/includes/utilities.php';
@@ -115,6 +118,7 @@ if ( ! is_admin() ) {
 
 // Load our triggers setup, along with the converting and potentially export logic.
 require_once __DIR__ . '/includes/process/reminders.php';
+require_once __DIR__ . '/includes/process/cron-tasks.php';
 require_once __DIR__ . '/includes/process/convert-existing.php';
 
 // Load the triggered file loads.
