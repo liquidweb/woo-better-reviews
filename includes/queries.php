@@ -2140,14 +2140,14 @@ function get_single_charstcs( $charstcs_id = 0, $purge = false ) {
 }
 
 /**
- * Get all the order IDs for pending reminders.
+ * Get all the order data for pending reminders.
  *
  * @param  string  $return_type  What type of return we want. Accepts "counts", "ids", or "dataset".
  * @param  boolean $purge        Optional to purge the cache'd version before looking up.
  *
  * @return mixed
  */
-function get_reminder_order_ids( $return_type = 'dataset', $purge = false ) {
+function get_reminder_order_data( $return_type = 'dataset', $purge = false ) {
 
 	// Set the key to use in our transient.
 	$ky = Core\HOOK_PREFIX . 'reminder_orders';

@@ -12,6 +12,7 @@ namespace LiquidWeb\WooBetterReviews\CronTasks;
 use LiquidWeb\WooBetterReviews as Core;
 use LiquidWeb\WooBetterReviews\Helpers as Helpers;
 use LiquidWeb\WooBetterReviews\Utilities as Utilities;
+use LiquidWeb\WooBetterReviews\Queries as Queries;
 use LiquidWeb\WooBetterReviews\Database as Database;
 
 /**
@@ -26,4 +27,11 @@ add_action( Core\REMINDER_CRON, __NAMESPACE__ . '\maybe_send_reminders' );
  */
 function maybe_send_reminders() {
 
+	// First check for our reminder data.
+	$reminder_dataset   = Queries\get_reminder_order_data();
+
+	// Bail without any data to handle.
+	if ( empty( $reminder_dataset ) ) {
+		return;
+	}
 }

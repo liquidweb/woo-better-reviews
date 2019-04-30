@@ -183,4 +183,11 @@ function maybe_set_reminder_at_completed( $order_id, $order_data ) {
 	do_action( Core\HOOK_PREFIX . 'after_status_completed_reminder_set', $reminder_arr, $order_id, $product_ids, $order_data );
 }
 
+/**
+ * [send_reminder_to_customer description]
+ * @param  array  $dataset [description]
+ * @return [type]          [description]
+ */
+function send_reminder_to_customer( $dataset = array() ) {
 
+}
