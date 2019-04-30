@@ -2208,6 +2208,63 @@ function get_schema_data_for_product( $product_id = 0, $purge = false ) {
 }
 
 /**
+ * Get all the order IDs for pending reminders.
+ *
+ * @param  string  $return_type  What type of return we want. Accepts "counts", "objects", or fields.
+ * @param  boolean $date_order   If the date order should be maintained on the field returns.
+ * @param  boolean $purge        Optional to purge the cache'd version before looking up.
+ *
+ * @return mixed
+ */
+function get_reminder_order_ids( $return_type = 'objects', $date_order = true, $purge = false ) {
+
+	// Set the key to use in our transient.
+	$ky = Core\HOOK_PREFIX . 'reminder_orders';
+
+	// If we don't want the cache'd version, delete the transient first.
+	if ( defined( 'WP_DEBUG' ) && WP_DEBUG || ! empty( $purge ) ) {
+		delete_transient( $ky );
+	}
+
+	// Attempt to get the reviews from the cache.
+	$cached_dataset = get_transient( $ky );
+
+	// If we have none, do the things.
+	if ( false === $cached_dataset ) {
+
+		// Call the global database.
+		global $wpdb;
+
+		// Set our table name.
+		$table_name = $wpdb->prefix . Core\TABLE_PREFIX . 'postmeta';
+
+		// Set up our query.
+		$query_args = $wpdb->prepare("
+			SELECT   post_id
+			FROM     $table_name
+			WHERE    meta_key = '%s'
+			AND      meta_value = '%s'
+		", esc_attr( Core\META_PREFIX . 'review_reminder_status' ), esc_attr( 'pending' ) );
+
+		// Process the query.
+		$query_run  = $wpdb->get_results( $query_args );
+
+		// Bail without any reviews.
+		if ( empty( $query_run ) ) {
+			return false;
+		}
+
+		// Set our transient with our data.
+		set_transient( $ky, $query_run, HOUR_IN_SECONDS );
+
+		// And change the variable to do the things.
+		$cached_dataset = $query_run;
+	}
+
+	/// to be continued
+}
+
+/**
  * Take the review object array and merge the taxonomies.
  *
  * @param  array $reviews  The review objects from the query.
