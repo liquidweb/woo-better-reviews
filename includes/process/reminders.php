@@ -55,6 +55,9 @@ function maybe_set_reminder_at_order( $order_id, $product_ids, $order_data ) {
 		return;
 	}
 
+	// Get my order date and convert it.
+	$start_stamp    = ! empty( $order_data['date_created'] ) ? $order_data['date_created']->date( 'U' ) : 0;
+
 	// Set some empty variable.
 	$reminder_arr   = array();
 
@@ -72,7 +75,7 @@ function maybe_set_reminder_at_order( $order_id, $product_ids, $order_data ) {
 		// Add my product ID and the date stamp.
 		$reminder_arr[] = array(
 			'product_id' => absint( $product_id ),
-			'timestamp'  => Utilities\calculate_relative_date( $product_id ),
+			'timestamp'  => Utilities\calculate_relative_date( $product_id, $start_stamp ),
 		);
 	}
 
@@ -91,7 +94,7 @@ function maybe_set_reminder_at_order( $order_id, $product_ids, $order_data ) {
 	update_post_meta( $order_id, Core\META_PREFIX . 'review_reminder_data', $reminder_arr );
 
 	// Handle an action.
-	do_action( Core\HOOK_PREFIX . 'after_order_created_reminder_set', $order_data, $order_id );
+	do_action( Core\HOOK_PREFIX . 'after_order_created_reminder_set', $reminder_arr, $order_id, $product_ids, $order_data );
 }
 
 /**
@@ -135,6 +138,9 @@ function maybe_set_reminder_at_completed( $order_id, $order_data ) {
 		return;
 	}
 
+	// Get my order date and convert it.
+	$start_stamp    = ! empty( $order_data['date_created'] ) ? $order_data['date_created']->date( 'U' ) : 0;
+
 	// Get the array of product IDs in the order items.
 	$product_ids    = array_keys( $order_data['line_items'] );
 
@@ -155,7 +161,7 @@ function maybe_set_reminder_at_completed( $order_id, $order_data ) {
 		// Add my product ID and the date stamp.
 		$reminder_arr[] = array(
 			'product_id' => absint( $product_id ),
-			'timestamp'  => Utilities\calculate_relative_date( $product_id ),
+			'timestamp'  => Utilities\calculate_relative_date( $product_id, $start_stamp ),
 		);
 	}
 
@@ -174,7 +180,7 @@ function maybe_set_reminder_at_completed( $order_id, $order_data ) {
 	update_post_meta( $order_id, Core\META_PREFIX . 'review_reminder_data', $reminder_arr );
 
 	// Handle an action.
-	do_action( Core\HOOK_PREFIX . 'after_status_completed_reminder_set', $order_data, $order_id );
+	do_action( Core\HOOK_PREFIX . 'after_status_completed_reminder_set', $reminder_arr, $order_id, $product_ids, $order_data );
 }
 
 

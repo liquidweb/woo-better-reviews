@@ -430,6 +430,63 @@ function get_review_statuses( $array_keys = false ) {
 }
 
 /**
+ * Get the customer data by checking WP user stuff, then order meta.
+ *
+ * @param  integer $customer_id  The customer ID being checked.
+ * @param  integer $order_id     The order ID this is tied to.
+ *
+ * @return mixed
+ */
+function get_potential_customer_data( $customer_id = 0, $order_id = 0 ) {
+
+	// Bail if we don't have a customer ID or an order ID.
+	if ( empty( $customer_id ) && empty( $order_id ) ) {
+		return false;
+	}
+
+	// Try to get the customer ID if we have an order ID.
+	if ( empty( $customer_id ) && ! empty( $order_id ) ) {
+
+		// Get the customer ID.
+		$customer_id    = get_post_meta( $order_id, '_customer_user', true );
+	}
+
+	// Try to get the user object first.
+	$user_object    = get_user_by( 'id', absint( $customer_id ) );
+
+	// If we have no user object, return what we have.
+	if ( ! $user_object ) {
+
+		// Pull the info.
+		$customer_email = get_post_meta( $order_id, '_billing_email', true );
+
+		// Get the name stuff.
+		$customer_first = get_post_meta( $order_id, '_billing_first_name', true );
+		$customer_last  = get_post_meta( $order_id, '_billing_last_name', true );
+		$customer_name  = $customer_first . ' ' . $customer_last;
+
+		// Return the array.
+		return array(
+			'user-id' => $customer_id,
+			'email'   => $customer_email,
+			'name'    => esc_attr( $customer_name ),
+			'is-wp'   => false,
+		);
+	}
+
+	// Set the customer name.
+	$customer_name  = ! empty( $user_object->display_name ) ? $user_object->display_name : $user_object->first_name . ' ' . $customer_last;
+
+	// Since we have a user object, return the pieces.
+	return array(
+		'user-id' => $customer_id,
+		'email'   => $user_object->user_email,
+		'name'    => esc_attr( $customer_name ),
+		'is-wp'   => true,
+	);
+}
+
+/**
  * Get the attributes the product has assigned.
  *
  * @param  integer $product_id  The product ID we are checking attributes for.

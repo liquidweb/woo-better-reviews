@@ -17,4 +17,16 @@
 
 }
 
+.product-reminder-duration-wrap {
+
+	&.product-reminder-enabled-show {
+		display: block;
+	}
+
+	&.product-reminder-disabled-hide {
+		display: none;
+	}
+
+
+}
 

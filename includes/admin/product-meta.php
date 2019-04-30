@@ -163,13 +163,19 @@ function add_reminder_delay_meta() {
 	$wait_time_nmbr = ! empty( $wait_time_args['number'] ) ? $wait_time_args['number'] : '';
 	$wait_time_unit = ! empty( $wait_time_args['unit'] ) ? $wait_time_args['unit'] : '';
 
+	// Set and filter the wrapper class.
+	$wrapper_class  = apply_filters( Core\HOOK_PREFIX . 'product_meta_wrapper_class', 'show_if_simple show_if_variable hide_if_external hide_if_grouped' );
+
+	// Throw a group div around it.
+	echo '<div class="options_group wbr-reviews-reminder-product-meta">';
+
 	// Output our checkbox all Woo style.
 	woocommerce_wp_checkbox(
 		array(
 			'id'            => 'product-do-reminders',
 			'name'          => Core\META_PREFIX . 'send_reminders',
 			'value'         => $maybe_enabled,
-			'wrapper_class' => 'show_if_simple show_if_variable show_if_external hide_if_grouped',
+			'wrapper_class' => esc_attr( $wrapper_class ),
 			'label'         => __( 'Enable Reminders', 'woo-better-reviews' ),
 			'description'   => __( 'Send an email reminder for customers to leave product reviews.', 'woo-better-reviews' ),
 			'cbvalue'       => 'yes',
@@ -183,7 +189,8 @@ function add_reminder_delay_meta() {
 			'name'          => Core\META_PREFIX . 'reminder_wait',
 			'number'        => $wait_time_nmbr,
 			'unit'          => $wait_time_unit,
-			'wrapper_class' => 'show_if_simple show_if_variable show_if_external hide_if_grouped',
+			'enabled'       => $maybe_enabled,
+			'wrapper_class' => esc_attr( $wrapper_class ),
 			'label'         => __( 'Reminder Delay', 'woo-better-reviews' ),
 			'description'   => __( 'Set the amount of time from purchase to send the reminder.', 'woo-better-reviews' ),
 		)
@@ -199,6 +206,9 @@ function add_reminder_delay_meta() {
 
 	// Gimme some sweet nonce action.
 	wp_nonce_field( 'wbr_save_product_reminder_action', 'wbr_save_product_reminder_nonce', false, true );
+
+	// Close our div.
+	echo '</div>';
 }
 
 /**
@@ -232,33 +242,42 @@ function single_reminder_relative_date_field( $field ) {
 	$meta_nmbr  = ! empty( $field['number'] ) ? $field['number'] : $stored_arg['number'];
 	$meta_unit  = ! empty( $field['unit'] ) ? $field['unit'] : $stored_arg['unit'];
 
-	// Start rendering the field.
-	echo '<p class="form-field ' . esc_attr( $field['id'] ) . '_field ' . esc_attr( $field['wrapper_class'] ) . '">';
+	// Set the div wrapper class.
+	$display_cl = ! empty( $field['enabled'] ) && 'no' === sanitize_text_field( $field['enabled'] ) ? 'product-reminder-disabled-hide' : 'product-reminder-enabled-show';
 
-		// Render our field label.
-		echo '<label for="' . esc_attr( $field['id'] ) . '">' . wp_kses_post( $field['label'] ) . '</label>';
+	// Do the display div.
+	echo '<div class="product-reminder-duration-wrap ' . esc_attr( $display_cl ) . '">';
 
-		// Render the numerical portion,
-		echo '<input type="number" class="' . esc_attr( $field['class'] ) . '" style="' . esc_attr( $field['style'] ) . '" name="' . esc_attr( $field['name'] ) . '[number]" id="' . esc_attr( $field['id'] ) . '" value="' . esc_attr( $meta_nmbr ) . '" /> ';
+		// Start rendering the field.
+		echo '<p class="form-field ' . esc_attr( $field['id'] ) . '_field ' . esc_attr( $field['wrapper_class'] ) . '">';
 
-		// Now do the dropdown.
-		echo '<select name="' . esc_attr( $field['name'] ) . '[unit]" style="width: auto;">';
+			// Render our field label.
+			echo '<label for="' . esc_attr( $field['id'] ) . '">' . wp_kses_post( $field['label'] ) . '</label>';
 
-		// Loop each time period we have.
-		foreach ( $periods as $period_value => $period_label ) {
-			echo '<option value="' . esc_attr( $period_value ) . '"' . selected( $meta_unit, $period_value, false ) . '>' . esc_html( $period_label ) . '</option>';
-		}
+			// Render the numerical portion,
+			echo '<input type="number" class="' . esc_attr( $field['class'] ) . '" style="' . esc_attr( $field['style'] ) . '" name="' . esc_attr( $field['name'] ) . '[number]" id="' . esc_attr( $field['id'] ) . '" value="' . esc_attr( $meta_nmbr ) . '" /> ';
 
-		// Close up the select.
-		echo '</select>';
+			// Now do the dropdown.
+			echo '<select name="' . esc_attr( $field['name'] ) . '[unit]" style="width: auto;">';
 
-		// Check for a description field.
-		if ( ! empty( $field['description'] ) ) {
-			echo '<span class="description">' . wp_kses_post( $field['description'] ) . '</span>';
-		}
+			// Loop each time period we have.
+			foreach ( $periods as $period_value => $period_label ) {
+				echo '<option value="' . esc_attr( $period_value ) . '"' . selected( $meta_unit, $period_value, false ) . '>' . esc_html( $period_label ) . '</option>';
+			}
 
-	// Close the field paragraph.
-	echo '</p>';
+			// Close up the select.
+			echo '</select>';
+
+			// Check for a description field.
+			if ( ! empty( $field['description'] ) ) {
+				echo '<span class="description">' . wp_kses_post( $field['description'] ) . '</span>';
+			}
+
+		// Close the field paragraph.
+		echo '</p>';
+
+	// Close the display div.
+	echo '</div>';
 }
 
 /**

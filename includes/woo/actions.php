@@ -52,8 +52,13 @@ function run_after_purchase_triggers( $order_id ) {
 		return;
 	}
 
-	// Get the array of product IDs in the order items.
-	$product_ids    = array_keys( $order_data['line_items'] );
+	// Set a blank for the product IDs.
+	$product_ids    = array();
+
+	// Loop the line items and get the product IDs.
+	foreach ( $order_data['line_items'] as $line_item ) {
+		$product_ids[] = $line_item->get_product_id();
+	}
 
 	// Do the action that contains the line items.
 	do_action( Core\AFTER_PURCHASE_TRIGGER . 'order_line_items', $order_id, $product_ids, $order_data );

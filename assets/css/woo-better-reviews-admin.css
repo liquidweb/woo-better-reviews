@@ -75,6 +75,11 @@ body.woo-better-reviews-admin-body-class table.form-table .woo-better-reviews-se
   width: 65px;
   margin-right: 5px; }
 
+.product-reminder-duration-wrap.product-reminder-enabled-show {
+  display: block; }
+.product-reminder-duration-wrap.product-reminder-disabled-hide {
+  display: none; }
+
 .wp-list-table.productreviews .column-review_verified {
   width: 80px; }
 
