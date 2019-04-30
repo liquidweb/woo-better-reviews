@@ -1012,20 +1012,20 @@ function array_insert_after( $key, $array, $new_key, $new_value ) {
  *
  * @return void
  */
-function modify_cron_setup( $clear = true, $frequency = '' ) {
+function modify_reminder_cron( $clear = true, $frequency = '' ) {
 
 	// Pull in the existing one and remove it.
 	if ( ! empty( $clear ) ) {
 
 		// Grab the next scheduled stamp.
-		$timestamp  = wp_next_scheduled( Core\CRON_NAME );
+		$timestamp  = wp_next_scheduled( Core\REMINDER_CRON );
 
 		// Remove it from the schedule.
-		wp_unschedule_event( $timestamp, Core\CRON_NAME );
+		wp_unschedule_event( $timestamp, Core\REMINDER_CRON );
 	}
 
 	// Now schedule our new one, assuming we passed a new frequency.
 	if ( ! empty( $frequency ) ) {
-		wp_schedule_event( current_time( 'timestamp' ), sanitize_text_field( $frequency ), Core\CRON_NAME );
+		wp_schedule_event( current_time( 'timestamp' ), sanitize_text_field( $frequency ), Core\REMINDER_CRON );
 	}
 }

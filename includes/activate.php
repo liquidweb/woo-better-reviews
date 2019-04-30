@@ -31,8 +31,8 @@ function activate() {
 	set_initial_options();
 
 	// Schedule our cron job assuming it isn't there already.
-	if ( ! wp_next_scheduled( Core\CRON_NAME ) ) {
-		Utilities\modify_cron_setup( false, 'twicedaily' );
+	if ( ! wp_next_scheduled( Core\REMINDER_CRON ) ) {
+		Utilities\modify_reminder_cron( false, 'twicedaily' );
 	}
 
 	// Include our action so that we may add to this later.

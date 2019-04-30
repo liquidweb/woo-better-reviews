@@ -20,7 +20,7 @@ use LiquidWeb\WooBetterReviews\Utilities as Utilities;
 function deactivate() {
 
 	// Pull in our scheduled cron and unschedule it.
-	Utilities\modify_cron_setup( true, false );
+	Utilities\modify_reminder_cron( true, false );
 
 	// Include our action so that we may add to this later.
 	do_action( Core\HOOK_PREFIX . 'deactivate_process' );

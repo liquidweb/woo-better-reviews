@@ -17,7 +17,7 @@ use LiquidWeb\WooBetterReviews\Database as Database;
 /**
  * Start our engines.
  */
-add_action( Core\CRON_NAME, __NAMESPACE__ . '\maybe_send_reminders' );
+add_action( Core\REMINDER_CRON, __NAMESPACE__ . '\maybe_send_reminders' );
 
 /**
  * Our cron job to check for pending reminders.

@@ -65,8 +65,8 @@ define( __NAMESPACE__ . '\CHARSTCS_ANCHOR', 'woo-better-reviews-author-character
 define( __NAMESPACE__ . '\DB_VERS', '1' );
 define( __NAMESPACE__ . '\SCHEMA_KEY', HOOK_PREFIX . 'db_version' );
 
-// Set our cron function name constant.
-define( __NAMESPACE__ . '\CRON_NAME', 'wbr_process_reminders' );
+// Set our cron function name constants.
+define( __NAMESPACE__ . '\REMINDER_CRON', 'wbr_process_reminders' );
 
 // Load the multi-use files first.
 require_once __DIR__ . '/includes/helpers.php';
