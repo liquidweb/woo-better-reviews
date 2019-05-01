@@ -57,6 +57,7 @@ function modify_review_count_title( $title, $key ) {
 function load_review_reminder_email_class( $email_classes ) {
 
 	// Call in our email class, filtered.
+	// You should REALLY know what you're doing here.
 	$custom_class   = apply_filters( Core\HOOK_PREFIX . 'reminder_email_class', Core\INCLUDES_PATH . '/woo/email-class.php' );
 
 	// Bail if we don't have the file we said.
