@@ -39,6 +39,14 @@ if ( ! class_exists( 'WC_Email_Customer_Review_Reminder', false ) ) :
 		 */
 		public function __construct() {
 
+			// Set up our email placeholders.
+			$set_placeholders   = array(
+				'{site_title}'    => $this->get_blogname(),
+				'{order_date}'    => '',
+				'{order_number}'  => '',
+				'{purchase_list}' => '',
+			);
+
 			// Set our plugin as the template base for loading files.
 			$this->template_base  = Core\TEMPLATE_PATH . '/emails/';
 
@@ -49,14 +57,7 @@ if ( ! class_exists( 'WC_Email_Customer_Review_Reminder', false ) ) :
 			$this->description    = __( 'A reminder sent to customers to leave a review on a recent purchase.', 'woo-better-reviews' );
 			$this->template_html  = apply_filters( Core\HOOK_PREFIX . 'reminder_email_template_html', 'customer-review-reminder-html.php' );
 			$this->template_plain = apply_filters( Core\HOOK_PREFIX . 'reminder_email_template_plain', 'customer-review-reminder-plain.php' );
-			$this->placeholders   = array(
-				'{site_title}'   => $this->get_blogname(),
-				'{order_date}'   => '',
-				'{order_number}' => '',
-			);
-
-
-
+			$this->placeholders   = apply_filters( Core\HOOK_PREFIX . 'reminder_email_content_placeholders', $set_placeholders );
 
 			// Triggers.
 			// add_action( 'woocommerce_new_customer_note_notification', array( $this, 'trigger' ) );
@@ -72,7 +73,12 @@ if ( ! class_exists( 'WC_Email_Customer_Review_Reminder', false ) ) :
 		 * @return string
 		 */
 		public function get_default_subject() {
-			return __( 'Note added to your {site_title} order from {order_date}', 'woocommerce' );
+
+			// Set my email subject line.
+			$email_subject  = __( 'Leave a review for your recent purchases from {site_title}!', 'woo-better-reviews' );
+
+			// Return our string, filtered.
+			return apply_filters( Core\HOOK_PREFIX . 'reminder_email_content_subject', $email_subject );
 		}
 
 		/**
@@ -82,7 +88,12 @@ if ( ! class_exists( 'WC_Email_Customer_Review_Reminder', false ) ) :
 		 * @return string
 		 */
 		public function get_default_heading() {
-			return __( 'A note has been added to your order', 'woocommerce' );
+
+			// Set my email heading line.
+			$email_heading  = __( 'Your purchases from {order_date} are eligible for review.', 'woo-better-reviews' );
+
+			// Return our string, filtered.
+			return apply_filters( Core\HOOK_PREFIX . 'reminder_email_content_heading', $email_heading );
 		}
 
 		/**
@@ -157,6 +168,21 @@ if ( ! class_exists( 'WC_Email_Customer_Review_Reminder', false ) ) :
 					'email'         => $this,
 				)
 			);
+		}
+
+		/**
+		 * Email type options.
+		 *
+		 * @return array
+		 */
+		public function get_email_type_options() {
+			$types = array( 'plain' => __( 'Plain text', 'woo-better-reviews' ) );
+
+			if ( class_exists( 'DOMDocument' ) ) {
+				$types['html'] = __( 'HTML', 'woo-better-reviews' );
+			}
+
+			return $types;
 		}
 	}
 
