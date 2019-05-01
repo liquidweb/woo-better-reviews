@@ -2142,12 +2142,12 @@ function get_single_charstcs( $charstcs_id = 0, $purge = false ) {
 /**
  * Get all the order data for pending reminders.
  *
- * @param  string  $return_type  What type of return we want. Accepts "counts", "ids", or "dataset".
+ * @param  string  $return_type  What type of return we want. Accepts "filtered", "indexed", "counts", "ids", or "dataset".
  * @param  boolean $purge        Optional to purge the cache'd version before looking up.
  *
  * @return mixed
  */
-function get_reminder_order_data( $return_type = 'indexed', $purge = false ) {
+function get_reminder_order_data( $return_type = 'filtered', $purge = false ) {
 
 	// Set the key to use in our transient.
 	$ky = Core\HOOK_PREFIX . 'reminder_orders';
@@ -2225,6 +2225,10 @@ function get_reminder_order_data( $return_type = 'indexed', $purge = false ) {
 
 	// Now switch between my return types.
 	switch ( sanitize_text_field( $return_type ) ) {
+
+		case 'filtered' :
+			return Utilities\filter_reminder_data( $cached_dataset );
+			break;
 
 		case 'indexed' :
 			return $cached_dataset;

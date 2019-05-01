@@ -469,19 +469,25 @@ function get_potential_customer_data( $customer_id = 0, $order_id = 0 ) {
 		return array(
 			'user-id' => $customer_id,
 			'email'   => $customer_email,
+			'first'   => $customer_first,
+			'last'    => $customer_last,
 			'name'    => esc_attr( $customer_name ),
 			'is-wp'   => false,
 		);
 	}
 
-	// Set the customer name.
-	$customer_name  = ! empty( $user_object->display_name ) ? $user_object->display_name : $user_object->first_name . ' ' . $customer_last;
+	// Get the name stuff.
+	$customer_first = $user_object->first_name;
+	$customer_last  = $user_object->last_name;
+	$customer_name  = ! empty( $user_object->display_name ) ? $user_object->display_name : $customer_first . ' ' . $customer_last;
 
 	// Since we have a user object, return the pieces.
 	return array(
 		'user-id' => $customer_id,
 		'email'   => $user_object->user_email,
 		'name'    => esc_attr( $customer_name ),
+		'first'   => esc_attr( $customer_first ),
+		'last'    => esc_attr( $customer_last ),
 		'is-wp'   => true,
 	);
 }

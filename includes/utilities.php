@@ -1006,6 +1006,60 @@ function array_insert_after( $key, $array, $new_key, $new_value ) {
 }
 
 /**
+ * Take the full array of reminder data and filter it.
+ *
+ * @param  array  $reminder_data  The entire array of reminder data.
+ *
+ * @return array
+ */
+function filter_reminder_data( $reminder_data = array() ) {
+
+	// Check the requirements.
+	if ( empty( $reminder_data ) || ! is_array( $reminder_data ) ) {
+		return false;
+	}
+
+	// Set an empty array to return.
+	$filtered_array = array();
+
+	// Set my day.
+	$current_date   = (int) current_time( 'timestamp' );
+
+	// Loop the remains.
+	foreach ( $reminder_data as $order_id => $reminder_setup ) {
+
+		// Bail if no products exist.
+		if ( empty( $reminder_setup['products'] ) ) {
+			continue;
+		}
+
+		// Now loop the product ids and timestamps.
+		foreach ( $reminder_setup['products'] as $product_id => $timestamp ) {
+
+			// Remove those that don't hit the date.
+			if ( absint( $timestamp ) > absint( $current_date ) ) {
+				continue;
+			}
+
+			// Re-create the same array structure.
+			$filtered_array[ $order_id ]['products'][ $product_id ] = $timestamp;
+		}
+
+		// If no products exist, skip this entire set of data.
+		if ( empty( $filtered_array[ $order_id ]['products'] ) ) {
+			continue;
+		}
+
+		// Set the other two portions of the array.
+		$filtered_array[ $order_id ]['order-id'] = $order_id;
+		$filtered_array[ $order_id ]['customer'] = $reminder_setup['customer'];
+	}
+
+	// Return the array we have, which may be empty.
+	return $filtered_array;
+}
+
+/**
  * Take our existing cron job and update or remove the schedule.
  *
  * @param  boolean $clear      Whether to remove the existing one.

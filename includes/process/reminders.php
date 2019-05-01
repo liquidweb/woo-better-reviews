@@ -184,10 +184,126 @@ function maybe_set_reminder_at_completed( $order_id, $order_data ) {
 }
 
 /**
- * [send_reminder_to_customer description]
- * @param  array  $dataset [description]
- * @return [type]          [description]
+ * Build the email intro data.
+ *
+ * @param  array $reminder_data  All the data related to the reminder.
+ *
+ * @return array
  */
-function send_reminder_to_customer( $dataset = array() ) {
+function set_reminder_email_intro_args( $reminder_data = array() ) {
 
+	// Check for shiut.
+	if ( empty( $reminder_data ) || empty( $reminder_data['customer'] ) ) {
+		return;
+	}
+
+	// Pull out each portion we want to use.
+	$send_to_name   = $reminder_data['customer']['name'];
+	$send_to_email  = $reminder_data['customer']['email'];
+
+	// Set the string for the recipient.
+	$send_to_string = esc_attr( $send_to_name ) . ' <' . sanitize_email( $send_to_email ) . '>';
+
+	// Set a subject.
+	$email_subject  = 'Leave a review for your recent purchases!';
+
+	// Set up my intro arg array.
+	$set_intro_args = array(
+		'send-to' => $send_to_string,
+		'subject' => $email_subject,
+	);
+
+	// Return the content.
+	return apply_filters( Core\HOOK_PREFIX . 'reminder_email_intro_args', $set_intro_args, $reminder_data );
+}
+
+/**
+ * Build the email body.
+ *
+ * @param  array $reminder_data  All the data related to the reminder.
+ *
+ * @return HTML
+ */
+function set_reminder_email_body_content( $reminder_data = array() ) {
+
+	// Make sure we have the parts we need.
+	if ( empty( $reminder_data ) || empty( $reminder_data['products'] ) || empty( $reminder_data['customer'] ) ) {
+		return;
+	}
+
+	// Set the product IDs and customer data.
+	$customer_data  = $reminder_data['customer'];
+	$product_ids    = array_keys( $reminder_data['products'] );
+
+	// Also set the store name.
+	$store_name     = get_bloginfo( 'name' );
+
+	// Now build the body.
+	$email_content  = '';
+
+	// Build the intro sentences.
+	$email_content .= '<p>Hello ' . esc_attr( $customer_data['first'] ) . '! Recently, you made a purchase at our store and would appreciate it if you could leave a review!</p>';
+	$email_content .= '<p>In case you forgot, here is what you purchased:</p>';
+
+	// Start making a list.
+	$email_content .= '<ul>';
+
+	// Loop and name.
+	foreach ( $product_ids as $product_id ) {
+
+		// Pull out each part.
+		$product_name   = get_the_title( $product_id );
+		$product_link   = get_permalink( $product_id );
+
+		// Now make the list item.
+		$email_content .= '<li>' . esc_attr( $product_name ) . ' <small><a href="' . esc_url( $product_link ) . '#tab-reviews">(Review Link)</a></small></li>';
+	}
+
+	// Close up that list.
+	$email_content .= '</ul>';
+
+	// Add a closing sentence.
+	$email_content .= '<p>Thanks again for everyone here at ' . esc_attr( $store_name ) . '!';
+
+	// Add the account link if it's a WP user.
+	if ( false !== $customer_data['is-wp'] ) {
+
+		// Get the profile link.
+		$profile_link   = trailingslashit( wc_get_account_endpoint_url( '' ) );
+
+		// And add it.
+		$email_content .= ' <a href="' . esc_url( $profile_link ) . '">Click here to view your account profile</a>.';
+	}
+
+	// Close up the sentence.
+	$email_content .= '</p>';
+
+	// Return the content.
+	return apply_filters( Core\HOOK_PREFIX . 'reminder_email_body_content', $email_content, $reminder_data );
+}
+
+/**
+ * Build the email headers.
+ *
+ * @param  array $reminder_data  All the data related to the reminder.
+ *
+ * @return array
+ */
+function set_reminder_email_headers_array( $reminder_data = array() ) {
+
+	// Check for shiut.
+	if ( empty( $reminder_data ) ) {
+		return;
+	}
+
+	// Get the store info.
+	$store_name     = get_bloginfo( 'name' );
+	$store_email    = get_bloginfo( 'admin_email' );
+
+	// Set some email headers.
+	$set_headers[]  = 'Content-Type: text/html; charset=UTF-8';
+	$set_headers[]  = 'From: ' . esc_attr( $store_name ) . ' <' . sanitize_email( $store_email ) . '>';
+
+	// Return the headers.
+	return apply_filters( Core\HOOK_PREFIX . 'reminder_email_headers_array', $set_headers, $reminder_data );
 }
