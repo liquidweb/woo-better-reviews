@@ -236,7 +236,7 @@ function set_reminder_email_body_content( $reminder_data = array() ) {
 	$product_ids    = array_keys( $reminder_data['products'] );
 
 	// Also set the store name.
-	$store_name     = get_bloginfo( 'name' );
+	$store_name     = get_option( 'woocommerce_email_from_name' );
 
 	// Now build the body.
 	$email_content  = '';
@@ -297,8 +297,8 @@ function set_reminder_email_headers_array( $reminder_data = array() ) {
 	}
 
 	// Get the store info.
-	$store_name     = get_bloginfo( 'name' );
-	$store_email    = get_bloginfo( 'admin_email' );
+	$store_name     = get_option( 'woocommerce_email_from_name' );
+	$store_email    = get_option( 'woocommerce_email_from_address' );
 
 	// Set some email headers.
 	$set_headers[]  = 'Content-Type: text/html; charset=UTF-8';
