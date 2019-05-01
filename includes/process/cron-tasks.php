@@ -13,7 +13,7 @@ use LiquidWeb\WooBetterReviews as Core;
 use LiquidWeb\WooBetterReviews\Helpers as Helpers;
 use LiquidWeb\WooBetterReviews\Utilities as Utilities;
 use LiquidWeb\WooBetterReviews\Queries as Queries;
-use LiquidWeb\WooBetterReviews\Database as Database;
+use LiquidWeb\WooBetterReviews\Reminders as Reminders;
 
 /**
  * Start our engines.

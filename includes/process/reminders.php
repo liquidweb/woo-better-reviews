@@ -190,7 +190,7 @@ function maybe_set_reminder_at_completed( $order_id, $order_data ) {
  *
  * @return array
  */
-function set_reminder_email_intro_args( $reminder_data = array() ) {
+function build_reminder_email_intro_args( $reminder_data = array() ) {
 
 	// Check for shiut.
 	if ( empty( $reminder_data ) || empty( $reminder_data['customer'] ) ) {
@@ -224,7 +224,7 @@ function set_reminder_email_intro_args( $reminder_data = array() ) {
  *
  * @return HTML
  */
-function set_reminder_email_body_content( $reminder_data = array() ) {
+function build_reminder_email_body_content( $reminder_data = array() ) {
 
 	// Make sure we have the parts we need.
 	if ( empty( $reminder_data ) || empty( $reminder_data['products'] ) || empty( $reminder_data['customer'] ) ) {
@@ -289,7 +289,7 @@ function set_reminder_email_body_content( $reminder_data = array() ) {
  *
  * @return array
  */
-function set_reminder_email_headers_array( $reminder_data = array() ) {
+function build_reminder_email_headers_array( $reminder_data = array() ) {
 
 	// Check for shiut.
 	if ( empty( $reminder_data ) ) {
