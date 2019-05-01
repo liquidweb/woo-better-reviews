@@ -40,8 +40,9 @@ define( __NAMESPACE__ . '\URL', plugin_dir_url( __FILE__ ) );
 // Set our assets URL constant.
 define( __NAMESPACE__ . '\ASSETS_URL', URL . 'assets' );
 
-// Set our template path constant.
-define( __NAMESPACE__ . '\TEMPLATE_PATH', __DIR__ . '/templates/' );
+// Set our includes and template path constants.
+define( __NAMESPACE__ . '\INCLUDES_PATH', __DIR__ . '/includes' );
+define( __NAMESPACE__ . '\TEMPLATE_PATH', __DIR__ . '/templates' );
 
 // Set the prefix for our actions and filters.
 define( __NAMESPACE__ . '\HOOK_PREFIX', 'wc_better_reviews_' );

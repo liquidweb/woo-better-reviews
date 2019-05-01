@@ -20,6 +20,7 @@ use LiquidWeb\WooBetterReviews\Queries as Queries;
  * Start our engines.
  */
 add_filter( 'woocommerce_product_reviews_tab_title', __NAMESPACE__ . '\modify_review_count_title', 99, 2 );
+add_filter( 'woocommerce_email_classes', __NAMESPACE__ . '\load_review_reminder_email_class', 10 );
 
 /**
  * Check if we have a sorted review list and modify the count.
@@ -44,4 +45,31 @@ function modify_review_count_title( $title, $key ) {
 
 	// If we have filtered IDs, change my title.
 	return sprintf( __( 'Reviews (%s)', 'woocommerce' ), '<span class="wbr-review-tab-count">' . absint( $review_count ) . '</span>' );
+}
+
+/**
+ * Add our review reminder email class loader to the existing setup.
+ *
+ * @param  array $email_classes  All the currently available email classes.
+ *
+ * @return array                 Our modified setup.
+ */
+function load_review_reminder_email_class( $email_classes ) {
+
+	// Call in our email class, filtered.
+	$custom_class   = apply_filters( Core\HOOK_PREFIX . 'reminder_email_class', Core\INCLUDES_PATH . '/woo/email-class.php' );
+
+	// Bail if we don't have the file we said.
+	if ( ! file_exists( $custom_class ) ) {
+		return $email_classes;
+	}
+
+	// Load the template file.
+	require_once( $custom_class );
+
+	// Add our review reminder class.
+	$email_classes['WC_Email_Customer_Review_Reminder'] = new \WC_Email_Customer_Review_Reminder();
+
+	// Return the new array of classes.
+	return $email_classes;
 }
