@@ -27,11 +27,19 @@ add_action( Core\REMINDER_CRON, __NAMESPACE__ . '\maybe_send_reminders' );
  */
 function maybe_send_reminders() {
 
-	// First check for our reminder data.
-	$reminder_dataset   = Queries\get_reminder_order_data();
+	// Run the main check for being enabled.
+	$maybe_enabled  = Helpers\maybe_reminders_enabled();
+
+	// Bail if not enabled.
+	if ( ! $maybe_enabled ) {
+		return;
+	}
+
+	// Now fetch the dataset (possibly).
+	$reminder_data  = Queries\get_reminder_order_data();
 
 	// Bail without any data to handle.
-	if ( empty( $reminder_dataset ) ) {
+	if ( empty( $reminder_data ) ) {
 		return;
 	}
 }
