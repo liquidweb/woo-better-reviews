@@ -1,8 +1,8 @@
 <?php
 /**
- * Customer new account email
+ * Customer review reminder email
  *
- * This template can be overridden by copying it to yourtheme/woocommerce/emails/plain/customer-new-account.php.
+ * This template can be filtered in the main class.
  *
  * HOWEVER, on occasion WooCommerce will need to update template files and you
  * (the theme developer) will need to copy the new files to your theme to
@@ -16,23 +16,48 @@
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly.
+	exit;
 }
 
 echo '= ' . esc_html( $email_heading ) . " =\n\n";
 
 /* translators: %s Customer first name */
-echo sprintf( esc_html__( 'Hi %s,', 'woocommerce' ), esc_html( $user_login ) ) . "\n\n";
-/* translators: %1$s: Site title, %2$s: Username, %3$s: My account link */
-echo sprintf( esc_html__( 'Thanks for creating an account on %1$s. Your username is %2$s. You can access your account area to view orders, change your password, and more at: %3$s', 'woocommerce' ), esc_html( $blogname ), '<strong>' . esc_html( $user_login ) . '</strong>', esc_html( wc_get_page_permalink( 'myaccount' ) ) ) . "\n\n";
+echo sprintf( esc_html__( 'Hi %s,', 'woocommerce' ), esc_html( $order->get_billing_first_name() ) ) . "\n\n";
+echo esc_html__( 'The following note has been added to your order:', 'woocommerce' ) . "\n\n";
 
-if ( 'yes' === get_option( 'woocommerce_registration_generate_password' ) && $password_generated ) {
-	/* translators: %s Auto generated password */
-	echo sprintf( esc_html__( 'Your password has been automatically generated: %s.', 'woocommerce' ), esc_html( $user_pass ) ) . "\n\n";
-}
+echo "----------\n\n";
 
-echo esc_html__( 'We look forward to seeing you soon.', 'woocommerce' ) . "\n\n";
+echo wptexturize( $customer_note ) . "\n\n"; // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
+
+echo "----------\n\n";
+
+echo esc_html__( 'As a reminder, here are your order details:', 'woocommerce' ) . "\n\n";
+
+echo "=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n";
+
+/*
+ * @hooked WC_Emails::order_details() Shows the order details table.
+ * @hooked WC_Structured_Data::generate_order_data() Generates structured data.
+ * @hooked WC_Structured_Data::output_structured_data() Outputs structured data.
+ * @since 2.5.0
+ */
+do_action( 'woocommerce_email_order_details', $order, $sent_to_admin, $plain_text, $email );
 
 echo "\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n";
 
-echo apply_filters( 'woocommerce_email_footer_text', get_option( 'woocommerce_email_footer_text' ) ); // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
+/*
+ * @hooked WC_Emails::order_meta() Shows order meta data.
+ */
+do_action( 'woocommerce_email_order_meta', $order, $sent_to_admin, $plain_text, $email );
+
+/*
+ * @hooked WC_Emails::customer_details() Shows customer details
+ * @hooked WC_Emails::email_address() Shows email address
+ */
+do_action( 'woocommerce_email_customer_details', $order, $sent_to_admin, $plain_text, $email );
+
+echo esc_html__( 'Thanks for reading.', 'woocommerce' ) . "\n\n";
+
+echo "\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n";
+
+echo esc_html( apply_filters( 'woocommerce_email_footer_text', get_option( 'woocommerce_email_footer_text' ) ) );
