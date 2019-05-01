@@ -2147,7 +2147,7 @@ function get_single_charstcs( $charstcs_id = 0, $purge = false ) {
  *
  * @return mixed
  */
-function get_reminder_order_data( $return_type = 'dataset', $purge = false ) {
+function get_reminder_order_data( $return_type = 'indexed', $purge = false ) {
 
 	// Set the key to use in our transient.
 	$ky = Core\HOOK_PREFIX . 'reminder_orders';
@@ -2203,7 +2203,7 @@ function get_reminder_order_data( $return_type = 'dataset', $purge = false ) {
 			}
 
 			// Now set the key / value in the array.
-			$query_list[] = array(
+			$query_list[ $order_id ] = array(
 				'order-id' => $order_id,
 				'customer' => Helpers\get_potential_customer_data( 0, $order_id ),
 				'products' => wp_list_pluck( $order_meta, 'timestamp', 'product_id' ),
@@ -2226,8 +2226,12 @@ function get_reminder_order_data( $return_type = 'dataset', $purge = false ) {
 	// Now switch between my return types.
 	switch ( sanitize_text_field( $return_type ) ) {
 
-		case 'dataset' :
+		case 'indexed' :
 			return $cached_dataset;
+			break;
+
+		case 'dataset' :
+			return array_values( $cached_dataset );
 			break;
 
 		case 'ids' :
