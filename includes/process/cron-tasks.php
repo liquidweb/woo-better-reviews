@@ -43,31 +43,31 @@ function maybe_send_reminders() {
 		return;
 	}
 
+	// Pull in the file functions.
+	if ( ! class_exists( 'WC_Email_Customer_Review_Reminder' ) ) {
+		require_once Core\INCLUDES_PATH . '/woo/email-class.php';
+	}
+
+	// Call our review reminder email class.
+	$email_class    = new WC_Email_Customer_Review_Reminder();
+
 	// Now loop the reminder data and
 	foreach ( $reminder_batch as $order_id => $reminder_data ) {
 
-		// Bail if no products.
-		if ( empty( $reminder_data['products'] ) ) {
+		// Bail if no products or customer data.
+		if ( empty( $reminder_data['products'] ) || empty( $reminder_data['customer'] ) ) {
 			continue;
 		}
-		/*
-		// Set a subject.
-		$email_intro    = lcl_better_rvs_reminder_email_intro_build( $filtered_data );
 
-		// Now build the body.
-		$email_content  = lcl_better_rvs_reminder_email_content_build( $filtered_data );
+		// Set up our arguments needed in the email.
+		$email_args = array(
+			'order_id'  => $order_id,
+			'customer'  => $reminder_data['customer'],
+			'products'  => $reminder_data['products'],
+		);
 
-		// Set some email headers.
-		$email_headers  = lcl_better_rvs_reminder_email_headers_build( $filtered_data );
-
-		// Send mail.
-		$send_email = wp_mail( $email_intro['send-to'], $email_intro['subject'], $email_content, $email_headers );
-
-		// Die on a bad email.
-		if ( ! $send_email ) {
-			die( 'email failed' );
-		}
-		*/
+		// Send the email (maybe).
+		$email_class->send_reminder( $email_args );
 	}
 
 }

@@ -76,8 +76,17 @@ function load_review_reminder_email_class( $email_classes ) {
 	return $email_classes;
 }
 
-
-
+/**
+ * Filter out template stuff that we have to do because Woo.
+ *
+ * @param  string $template       The currently set template file.
+ * @param  string $template_name  Template name.
+ * @param  array  $args           Arguments. (default: array).
+ * @param  string $template_path  Template path. (default: '').
+ * @param  string $default_path   Default path. (default: '').
+ *
+ * @return string
+ */
 function load_review_reminder_email_templates( $template, $template_name, $args, $template_path, $default_path ) {
 
 	// Switch between the template names.
