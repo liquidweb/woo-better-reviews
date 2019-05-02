@@ -783,10 +783,11 @@ function get_admin_menu_link( $menu_slug = '' ) {
  * Return our base link, with function fallbacks.
  *
  * @param  string $menu_slug  Which tab slug to use. Defaults to the primary.
+ * @param  string $section    Add a secondary section ID to the query.
  *
  * @return string
  */
-function get_admin_tab_link( $tab_slug = '' ) {
+function get_admin_tab_link( $tab_slug = '', $section = '' ) {
 
 	// Bail if we aren't on the admin side.
 	if ( ! is_admin() ) {
@@ -798,6 +799,11 @@ function get_admin_tab_link( $tab_slug = '' ) {
 
 	// Set up my args.
 	$setup_args = array( 'page' => 'wc-settings', 'tab' => esc_attr( $tab_slug ) );
+
+	// Add the optional section.
+	if ( ! empty( $section ) ) {
+		$setup_args['section'] = esc_attr( $section );
+	}
 
 	// Return the link with our args.
 	return add_query_arg( $setup_args, admin_url( 'admin.php' ) );

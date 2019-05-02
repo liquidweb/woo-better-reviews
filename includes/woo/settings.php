@@ -22,6 +22,7 @@ use WP_Error;
  */
 add_filter( 'woocommerce_products_general_settings', __NAMESPACE__ . '\filter_woo_review_settings', 99 );
 add_filter( 'woocommerce_settings_tabs_array', __NAMESPACE__ . '\add_review_settings_tab', 50 );
+add_action( 'woocommerce_admin_field_linkedtext', __NAMESPACE__ . '\output_settings_linkedtext' );
 add_action( 'woocommerce_settings_tabs_wbr_settings', __NAMESPACE__ . '\display_settings_tab' );
 add_action( 'woocommerce_update_options_wbr_settings', __NAMESPACE__ . '\update_review_settings' );
 
@@ -260,6 +261,13 @@ function get_settings() {
 			'class'   => 'woo-better-reviews-settings-date-group',
 		),
 
+		'templateshow' => array(
+			'title'   => __( 'Email Template', 'woo-better-reviews' ),
+			'linked'  => sprintf( __( '<a href="%s">Click here</a> to view and edit the email template.', 'woo-better-reviews' ), Helpers\get_admin_tab_link( 'email', 'wc_email_customer_review_reminder' ) ),
+			'id'      => Core\OPTION_PREFIX . 'template_show',
+			'type'    => 'linkedtext',
+		),
+
 		// Close up the reminders section.
 		'remindsection_end' => array( 'type' => 'sectionend', 'id' => Core\TAB_BASE . '_remind_settings_section_end' ),
 	);
@@ -269,55 +277,27 @@ function get_settings() {
 }
 
 /**
- * Output our custom subtitle section
+ * Output our custom linked text section.
  *
  * @param  array $args  The field args we set up.
  *
  * @return HTML
  */
-function output_settings_subtitle( $args ) {
+function output_settings_linkedtext( $args ) {
 
-	// Bail if we don't have a title.
-	if ( empty( $args['title'] ) ) {
-		return;
-	}
+	// Set our args up.
+	$set_title  = ! empty( $args['title'] ) ? $args['title'] : '';
+	$set_linked = ! empty( $args['linked'] ) ? $args['linked'] : '';
 
 	// Do the table stuff.
 	echo '<tr valign="top">';
 
-		echo '<th scope="row" class="titledesc">&nbsp;</th>';
+		// Output the title.
+		echo '<th scope="row" class="titledesc">' . esc_html( $set_title ) . '</th>';
 
-		echo '<td>';
+		// Do the link text.
+		echo '<td>' . wp_kses_post( $set_linked ) . '</td>';
 
-		// Handle the first subtitle output.
-		if ( ! empty( $args['title'] ) ) {
-			echo '<h4 class="woo-better-reviews-admin-settings-subtitle">' . esc_html( $args['title'] ) . '</h4>';
-		}
-
-		// Handle the text output.
-		if ( ! empty( $args['desc'] ) ) {
-			echo wp_kses_post( wpautop( wptexturize( $args['desc'] ) ) );
-		}
-		echo '</td>';
+	// Close the table.
 	echo '</tr>';
-
-	/*
-		<th scope="row" class="titledesc">
-			<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['title'] ); ?> <?php echo $tooltip_html; // WPCS: XSS ok. ?></label>
-		</th>
-		<td class="forminp forminp-<?php echo esc_attr( sanitize_title( $value['type'] ) ); ?>">
-			<input
-				name="<?php echo esc_attr( $value['id'] ); ?>"
-				id="<?php echo esc_attr( $value['id'] ); ?>"
-				type="<?php echo esc_attr( $value['type'] ); ?>"
-				style="<?php echo esc_attr( $value['css'] ); ?>"
-				value="<?php echo esc_attr( $option_value ); ?>"
-				class="<?php echo esc_attr( $value['class'] ); ?>"
-				placeholder="<?php echo esc_attr( $value['placeholder'] ); ?>"
-				<?php echo implode( ' ', $custom_attributes ); // WPCS: XSS ok. ?>
-				/><?php echo esc_html( $value['suffix'] ); ?> <?php echo $description; // WPCS: XSS ok. ?>
-		</td>
-
-	 */
-
 }

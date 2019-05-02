@@ -77,7 +77,7 @@ class WC_Email_Customer_Review_Reminder extends WC_Email {
 		$tab_link   = Helpers\get_admin_tab_link();
 
 		// Set the description text.
-		$setup_desc = sprintf( __( 'A reminder sent to customers to leave a review on a recent purchase. <a href="%s">%s</a> for additional settings.', 'woo-better-reviews' ), esc_url( $tab_link ), 'Click Here' );
+		$setup_desc = sprintf( __( 'A reminder sent to customers to leave a review on a recent purchase. <a href="%s">Click here</a> for additional settings.', 'woo-better-reviews' ), esc_url( $tab_link ) );
 
 		// __( 'A reminder sent to customers to leave a review on a recent purchase.', 'woo-better-reviews' )
 		// Return our string, filtered.
