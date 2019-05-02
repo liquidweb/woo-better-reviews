@@ -37,7 +37,7 @@ class WC_Email_Customer_Review_Reminder extends WC_Email {
 	 *
 	 * @var string
 	 */
-	public $reminder_data;
+	public $email_reminder;
 
 	/**
 	 * Constructor.
@@ -46,34 +46,31 @@ class WC_Email_Customer_Review_Reminder extends WC_Email {
 
 		// Set up our email placeholders.
 		$set_placeholders   = array(
-			'{site_title}'    => '',
+			'{site_title}'    => $this->get_blogname(),
 			'{order_date}'    => '',
 			'{order_number}'  => '',
 		);
 
 		// Set my email heading and subject lines.
-		$email_heading  = __( 'Your purchases from {order_date} are eligible for review.', 'woo-better-reviews' );
-		$email_subject  = __( 'Leave a review for your recent purchases from {site_title}!', 'woo-better-reviews' );
+		// $email_heading  = __( 'Your purchases from {order_date} are eligible for review.', 'woo-better-reviews' );
+		// $email_subject  = __( 'Leave a review for your recent purchases from {site_title}!', 'woo-better-reviews' );
 
 		// Set the content items for the email class.
 		$this->id             = 'customer_review_reminder';
 		$this->customer_email = true;
 		$this->title          = __( 'Review Reminder', 'woo-better-reviews' );
 		$this->description    = $this->get_setup_description();
-		$this->heading        = apply_filters( Core\HOOK_PREFIX . 'reminder_email_content_heading', $email_heading );
-		$this->subject        = apply_filters( Core\HOOK_PREFIX . 'reminder_email_content_subject', $email_subject );
 		$this->placeholders   = apply_filters( Core\HOOK_PREFIX . 'reminder_email_content_placeholders', $set_placeholders );
 
+		$this->heading        = $this->format_string( $this->get_default_heading() );
+		$this->subject        = $this->format_string( $this->get_default_subject() );
+
 		// Load up the template base and the individual files.
-		$this->template_base  = apply_filters( Core\HOOK_PREFIX . 'reminder_email_template_base', Core\TEMPLATE_PATH . '/emails/' );
 		$this->template_html  = apply_filters( Core\HOOK_PREFIX . 'reminder_email_template_html', 'customer-review-reminder-html.php' );
 		$this->template_plain = apply_filters( Core\HOOK_PREFIX . 'reminder_email_template_plain', 'customer-review-reminder-plain.php' );
+		$this->template_base  = apply_filters( Core\HOOK_PREFIX . 'reminder_email_template_base', Core\TEMPLATE_PATH . '/emails/' );
 
-		// Triggers.
-		// add_action( Core\REMINDER_CRON, array( $this, 'trigger' ) );
-		// add_action( 'woocommerce_new_customer_note_notification', array( $this, 'trigger' ) );
-
-		// Set this to "manual" since it's a delay.
+		// Set this to "manual" since the trigger is called via the cron job.
 		$this->manual = true;
 
 		// Call parent constructor.
@@ -98,24 +95,47 @@ class WC_Email_Customer_Review_Reminder extends WC_Email {
 	}
 
 	/**
+	 * Get email heading.
+	 *
+	 * @return string
+	 */
+	public function get_default_heading() {
+
+		// Set my email heading line.
+		$email_heading  = __( 'Your purchases from {order_date} are eligible for review.', 'woo-better-reviews' );
+
+		// Return it filtered.
+		return apply_filters( Core\HOOK_PREFIX . 'reminder_email_content_heading', $email_heading );
+	}
+
+	/**
+	 * Get email subject.
+	 *
+	 * @return string
+	 */
+	public function get_default_subject() {
+
+		// Set my email subject line.
+		$email_subject  = __( 'Leave a review for your recent purchases from {site_title}!', 'woo-better-reviews' );
+
+		// Return it filtered.
+		return apply_filters( Core\HOOK_PREFIX . 'reminder_email_content_subject', $email_subject );
+	}
+
+	/**
 	 * Prepare and send the reminder via the cron job.
 	 *
 	 * @param array
 	 */
-	public function send_reminders( $reminder_data = false ) {
+	public function send_reminder( $email_reminder = false ) {
 
-		// Fetch the reminder data if we don't have it.
-		if ( empty( $reminder_data ) || ! is_array( $reminder_data ) ) {
-			$reminder_data = Queries\get_reminder_order_data();
-		}
-
-		// Now if it's still empty, just bail.
-		if ( empty( $reminder_data ) || ! is_array( $reminder_data ) ) {
+		// Bail if it's empty or not an array.
+		if ( empty( $email_reminder ) || ! is_array( $email_reminder ) ) {
 			return;
 		}
 
 		// Send the data to the trigger.
-		$this->trigger( $reminder_data );
+		$this->trigger( $email_reminder );
 	}
 
 	/**
@@ -125,7 +145,7 @@ class WC_Email_Customer_Review_Reminder extends WC_Email {
 	 */
 	public function trigger( $args ) {
 
-		preprint( $args, true );
+		// preprint( $args, true );
 
 		// Call the locale for emails.
 		$this->setup_locale();
@@ -135,8 +155,9 @@ class WC_Email_Customer_Review_Reminder extends WC_Email {
 
 			// Set the default args.
 			$default_args   = array(
-				'order_id'      => '',
-				'reminder_data' => '',
+				'order_id'  => '',
+				'recipient' => '',
+				'content'   => '',
 			);
 
 			// Filter in what we have with what was passed.
@@ -144,7 +165,6 @@ class WC_Email_Customer_Review_Reminder extends WC_Email {
 
 			// Pull out the two pieces.
 			$order_id       = $setup_args['order_id'];
-			$reminder_data  = $setup_args['reminder_data'];
 
 			// Assuming we have an order ID, do the things.
 			if ( $order_id ) {
@@ -154,9 +174,19 @@ class WC_Email_Customer_Review_Reminder extends WC_Email {
 
 				// Set the whole object.
 				if ( $this->object ) {
-					$this->recipient                      = $this->object->get_billing_email();
-					$this->reminder_data                  = Queries\get_reminder_order_data();
-					$this->placeholders['{site_name}']    = $this->get_blogname();
+
+					// Do some checks for things.
+					$recipient  = ! empty( $setup_args['recipient'] ) ? $setup_args['recipient'] : $this->object->get_billing_email();
+
+					// Set up the secondary parts of the object.
+					$this->recipient = $recipient;
+
+					// Set the content.
+					if ( ! empty( $setup_args['content'] ) ) {
+						$this->content = $setup_args['content'];
+					}
+
+					// Set the placeholders.
 					$this->placeholders['{order_date}']   = wc_format_datetime( $this->object->get_date_created() );
 					$this->placeholders['{order_number}'] = $this->object->get_order_number();
 				}
@@ -173,6 +203,27 @@ class WC_Email_Customer_Review_Reminder extends WC_Email {
 	}
 
 	/**
+	 * Get email headers.
+	 *
+	 * @return string
+	 */
+	public function get_headers() {
+
+		// Set an empty.
+		$build  = '';
+
+		// Add the content type automatically.
+		$build .= 'Content-Type: ' . $this->get_content_type() . "\r\n";
+
+		// Set the name and email from.
+		$build .= 'From: ' . $this->get_from_name() . ' <' . $this->get_from_address() . '>' . "\r\n";
+		$build .= 'Reply-to: ' . $this->get_from_name() . ' <' . $this->get_from_address() . '>' . "\r\n";
+
+		// Return it filtered.
+		return apply_filters( Core\HOOK_PREFIX . 'reminder_email_headers', $build, $this->object );
+	}
+
+	/**
 	 * Get content html.
 	 *
 	 * @return string
@@ -181,12 +232,13 @@ class WC_Email_Customer_Review_Reminder extends WC_Email {
 
 		// Set up the base args for the HTML email.
 		$base_args  = array(
-			'order'         => $this->object,
-			'email_heading' => $this->get_heading(),
-			'reminder_data' => $this->reminder_data,
-			'sent_to_admin' => false,
-			'plain_text'    => false,
-			'email'         => $this,
+			'order'          => $this->object,
+			'email_heading'  => $this->get_heading(),
+			'recipient'      => $this->recipient,
+			'content'        => $this->format_string( $this->content ),
+			'sent_to_admin'  => false,
+			'plain_text'     => false,
+			'email'          => $this,
 		);
 
 		// Filter the args.
@@ -205,11 +257,12 @@ class WC_Email_Customer_Review_Reminder extends WC_Email {
 
 		// Set up the base args for the plain text email.
 		$base_args  = array(
-			'order'         => $this->object,
-			'reminder_data' => $this->reminder_data,
-			'sent_to_admin' => false,
-			'plain_text'    => true,
-			'email'         => $this,
+			'order'          => $this->object,
+			'recipient'      => $this->recipient,
+			'content'        => wp_strip_all_tags( $this->content ),
+			'sent_to_admin'  => false,
+			'plain_text'     => true,
+			'email'          => $this,
 		);
 
 		// Filter the args.

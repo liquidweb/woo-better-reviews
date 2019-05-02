@@ -21,6 +21,7 @@ use LiquidWeb\WooBetterReviews\Queries as Queries;
  */
 add_filter( 'woocommerce_product_reviews_tab_title', __NAMESPACE__ . '\modify_review_count_title', 99, 2 );
 add_filter( 'woocommerce_email_classes', __NAMESPACE__ . '\load_review_reminder_email_class', 10 );
+add_filter( 'wc_get_template', __NAMESPACE__ . '\load_review_reminder_email_templates', 99, 5 );
 
 /**
  * Check if we have a sorted review list and modify the count.
@@ -73,4 +74,28 @@ function load_review_reminder_email_class( $email_classes ) {
 
 	// Return the new array of classes.
 	return $email_classes;
+}
+
+
+
+function load_review_reminder_email_templates( $template, $template_name, $args, $template_path, $default_path ) {
+
+	// Switch between the template names.
+	switch ( esc_attr( $template_name ) ) {
+
+		// Send the HTML.
+		case 'customer-review-reminder-html.php' :
+			return Core\TEMPLATE_PATH . '/emails/customer-review-reminder-html.php';
+			break;
+
+		// Send the plain.
+		case 'customer-review-reminder-plain.php' :
+			return Core\TEMPLATE_PATH . '/emails/customer-review-reminder-plain.php';
+			break;
+
+		// End all case breaks.
+	}
+
+	// Nothing custom, so return what we had.
+	return $template;
 }
