@@ -21,42 +21,34 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 echo '= ' . esc_html( $email_heading ) . " =\n\n";
 
-/* translators: %s Customer first name */
-echo sprintf( esc_html__( 'Hi %s,', 'woocommerce' ), esc_html( $order->get_billing_first_name() ) ) . "\n\n";
-echo esc_html__( 'The following note has been added to your order:', 'woocommerce' ) . "\n\n";
-
-echo "----------\n\n";
-
-echo wptexturize( $customer_note ) . "\n\n"; // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
-
-echo "----------\n\n";
-
-echo esc_html__( 'As a reminder, here are your order details:', 'woocommerce' ) . "\n\n";
-
 echo "=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n";
 
-/*
- * @hooked WC_Emails::order_details() Shows the order details table.
- * @hooked WC_Structured_Data::generate_order_data() Generates structured data.
- * @hooked WC_Structured_Data::output_structured_data() Outputs structured data.
- * @since 2.5.0
- */
-do_action( 'woocommerce_email_order_details', $order, $sent_to_admin, $plain_text, $email );
+// Handle the intro.
+echo esc_html( $sections['introduction'] ) . "\n\n";
 
-echo "\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n";
+echo "----------\n\n";
 
-/*
- * @hooked WC_Emails::order_meta() Shows order meta data.
- */
-do_action( 'woocommerce_email_order_meta', $order, $sent_to_admin, $plain_text, $email );
+// Output the intro to the product list.
+echo esc_html__( 'In case you forgot, here is what you purchased:', 'woo-better-reviews' ) . "\n\n";
 
-/*
- * @hooked WC_Emails::customer_details() Shows customer details
- * @hooked WC_Emails::email_address() Shows email address
- */
-do_action( 'woocommerce_email_customer_details', $order, $sent_to_admin, $plain_text, $email );
+// Loop and name.
+foreach ( $sections['product_list'] as $product_id ) {
 
-echo esc_html__( 'Thanks for reading.', 'woocommerce' ) . "\n\n";
+	// Pull out each part.
+	$product_name   = get_the_title( $product_id );
+	$product_link   = get_permalink( $product_id );
+
+	// Now make the list item.
+	echo "\t" . '--' . esc_attr( $product_name ) . "\n";
+	echo "\t" . '   ' .esc_html__( 'Review Link', 'woo-better-reviews' ) . ': ' . esc_url( $product_link ) . '#tab-reviews' . "\n\n";
+}
+
+echo "----------\n\n";
+
+// Handle the intro.
+echo esc_html( $sections['closing'] ) . "\n\n";
+
+echo "----------\n\n";
 
 echo "\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n";
 

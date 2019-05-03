@@ -251,7 +251,7 @@ class WC_Email_Customer_Review_Reminder extends WC_Email {
 			'order'          => $this->object,
 			'email_heading'  => $this->get_heading(),
 			'recipient'      => $this->recipient,
-			'sections'       => $this->build_html_email_sections(),
+			'sections'       => $this->build_email_body_sections(),
 			'sent_to_admin'  => false,
 			'plain_text'     => false,
 			'email'          => $this,
@@ -274,8 +274,9 @@ class WC_Email_Customer_Review_Reminder extends WC_Email {
 		// Set up the base args for the plain text email.
 		$base_args  = array(
 			'order'          => $this->object,
+			'email_heading'  => $this->get_heading(),
 			'recipient'      => $this->recipient,
-			'content'        => wp_strip_all_tags( $this->content ),
+			'sections'       => $this->build_email_body_sections(),
 			'sent_to_admin'  => false,
 			'plain_text'     => true,
 			'email'          => $this,
@@ -293,7 +294,7 @@ class WC_Email_Customer_Review_Reminder extends WC_Email {
 	 *
 	 * @return HTML
 	 */
-	public function build_html_email_sections() {
+	public function build_email_body_sections() {
 
 		// Set an array of the sections.
 		$body_args = array(
@@ -331,53 +332,6 @@ class WC_Email_Customer_Review_Reminder extends WC_Email {
 	}
 
 	/**
-	 * Set up the product list for the email.
-	 *
-	 * @param  array $product_list  The product data we have.
-	 *
-	 * @return HTML
-	 */
-	public function get_content_product_list_array( $product_list = array() ) {
-
-		// Bail without product data.
-		if ( empty( $product_list ) ) {
-			return;
-		}
-
-		// Pull the product keys.
-		$product_ids    = array_keys( $product_list );
-
-		// Now build the body.
-		$email_content  = array();
-
-		// Add the intro line.
-		// $email_content .= 'In case you forgot, here is what you purchased:' . "\n";
-
-		// Set the unordered list.
-		// $email_content .= '<ul>';
-
-		// Loop and name.
-		foreach ( $product_ids as $product_id ) {
-
-			// Pull out each part.
-			$product_name   = get_the_title( $product_id );
-			$product_link   = get_permalink( $product_id );
-
-			// Now make the list item.
-			// $email_content .= '<li>' . esc_attr( $product_name ) . ' <small><a href="' . esc_url( $product_link ) . '#tab-reviews">(' . esc_html__( 'Review Link', 'woo-better-reviews' ) . ')</a></small></li>';
-			$email_content[] = array(
-				'title' => get_the_title( $product_id ),
-			);
-		}
-
-		// Close up the list.
-		// $email_content .= '</ul>';
-
-		// Return it filtered.
-		return apply_filters( Core\HOOK_PREFIX . 'reminder_email_content_body_product_list_array', $email_content, $this->order_id );
-	}
-
-	/**
 	 * Set up the closing text for the email.
 	 *
 	 * @param  array $customer_data  The customer data we have.
@@ -400,8 +354,21 @@ class WC_Email_Customer_Review_Reminder extends WC_Email {
 			// Get the profile link.
 			$profile_link   = trailingslashit( wc_get_account_endpoint_url( '' ) );
 
-			// And add the content
-			$email_content .= sprintf( __( ' <a href="%s">Click here to view your account profile</a>.', 'woo-better-reviews' ), esc_url( $profile_link ) );
+			// If this is an HTML, do that.
+			if ( 'html' === $this->email_type ) {
+
+				// And add the content.
+				$email_content .= sprintf( __( ' <a href="%s">Click here to view your account profile</a>.', 'woo-better-reviews' ), esc_url( $profile_link ) );
+			}
+
+			// If this is an plain, do that.
+			if ( 'plain' === $this->email_type ) {
+
+				// And add the content.
+				$email_content .= sprintf( __( ' Click here to view your account profile:  %s', 'woo-better-reviews' ), esc_url( $profile_link ) );
+			}
+
+			// Nothing else.
 		}
 
 		// Return it filtered.
