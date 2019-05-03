@@ -178,7 +178,7 @@ class WC_Email_Customer_Review_Reminder extends WC_Email {
 
 			// Set each part of our data as needed.
 			$customer_data  = $setup_args['customer'];
-			$product_list   = $setup_args['products'];
+			$product_list   = array_keys( $setup_args['products'] );
 
 			// Pull out the two pieces.
 			$order_id       = $setup_args['order_id'];
@@ -200,8 +200,6 @@ class WC_Email_Customer_Review_Reminder extends WC_Email {
 					$this->customer  = $customer_data;
 					$this->products  = $product_list;
 					$this->order_id  = $order_id;
-
-					$this->content   = $this->build_email_body( $customer_data, $product_list, $order_id );
 
 					// Set the rest of the placeholders.
 					$this->placeholders['{order_date}']     = wc_format_datetime( $this->object->get_date_created() );
@@ -253,7 +251,7 @@ class WC_Email_Customer_Review_Reminder extends WC_Email {
 			'order'          => $this->object,
 			'email_heading'  => $this->get_heading(),
 			'recipient'      => $this->recipient,
-			'content'        => $this->format_string( $this->content ),
+			'sections'       => $this->build_html_email_sections(),
 			'sent_to_admin'  => false,
 			'plain_text'     => false,
 			'email'          => $this,
@@ -295,29 +293,30 @@ class WC_Email_Customer_Review_Reminder extends WC_Email {
 	 *
 	 * @return HTML
 	 */
-	public function build_email_body() {
+	public function build_html_email_sections() {
 
-		// Set an empty var.
-		$email_setup    = '';
+		// Set an array of the sections.
+		$body_args = array(
+			'introduction' => $this->get_content_body_introduction( $this->customer ),
+			'product_list' => $this->products,
+			'closing'      => $this->get_content_body_closing( $this->customer ),
+		);
 
-		// Pull each part.
-		$email_setup   .= $this->get_email_body_intro_text( $this->customer, $this->order_id );
-		$email_setup   .= $this->get_email_body_product_list( $this->products, $this->order_id );
-		$email_setup   .= $this->get_email_body_closing_text( $this->customer, $this->order_id );
+		// Filter all the known strings.
+		$body_args = array_map( array( $this, 'format_string' ), $body_args );
 
-		// Return the build.
-		return apply_filters( Core\HOOK_PREFIX . 'reminder_email_content_body', $email_setup );
+		// Return the filtered array.
+		return apply_filters( Core\HOOK_PREFIX . 'reminder_email_html_content_body_args', $body_args, $this->order_id );
 	}
 
 	/**
 	 * Set up the intro text for the email.
 	 *
-	 * @param  array   $customer_data  The customer data we have.
-	 * @param  integer $order_id       The ID of the order this is tied to.
+	 * @param  array $customer_data  The customer data we have.
 	 *
 	 * @return HTML
 	 */
-	public function get_email_body_intro_text( $customer_data = array(), $order_id = 0 ) {
+	public function get_content_body_introduction( $customer_data = array() ) {
 
 		// Bail without customer data.
 		if ( empty( $customer_data ) ) {
@@ -328,18 +327,17 @@ class WC_Email_Customer_Review_Reminder extends WC_Email {
 		$email_content  = __( 'Hello {customer_first}! Recently, you made a purchase at our store and would appreciate it if you could leave a review!', 'woo-better-reviews' );
 
 		// Return it filtered.
-		return apply_filters( Core\HOOK_PREFIX . 'reminder_email_content_body_intro_text', wpautop( $email_content ), $order_id );
+		return apply_filters( Core\HOOK_PREFIX . 'reminder_email_content_body_introduction', $email_content, $this->order_id );
 	}
 
 	/**
 	 * Set up the product list for the email.
 	 *
-	 * @param  array   $product_list  The product data we have.
-	 * @param  integer $order_id      The ID of the order this is tied to.
+	 * @param  array $product_list  The product data we have.
 	 *
 	 * @return HTML
 	 */
-	public function get_email_body_product_list( $product_list = array(), $order_id = 0 ) {
+	public function get_content_product_list_array( $product_list = array() ) {
 
 		// Bail without product data.
 		if ( empty( $product_list ) ) {
@@ -350,13 +348,13 @@ class WC_Email_Customer_Review_Reminder extends WC_Email {
 		$product_ids    = array_keys( $product_list );
 
 		// Now build the body.
-		$email_content  = '';
+		$email_content  = array();
 
 		// Add the intro line.
-		$email_content .= 'In case you forgot, here is what you purchased:' . "\n";
+		// $email_content .= 'In case you forgot, here is what you purchased:' . "\n";
 
 		// Set the unordered list.
-		$email_content .= '<ul>';
+		// $email_content .= '<ul>';
 
 		// Loop and name.
 		foreach ( $product_ids as $product_id ) {
@@ -366,25 +364,27 @@ class WC_Email_Customer_Review_Reminder extends WC_Email {
 			$product_link   = get_permalink( $product_id );
 
 			// Now make the list item.
-			$email_content .= '<li>' . esc_attr( $product_name ) . ' <small><a href="' . esc_url( $product_link ) . '#tab-reviews">(' . esc_html__( 'Review Link', 'woo-better-reviews' ) . ')</a></small></li>';
+			// $email_content .= '<li>' . esc_attr( $product_name ) . ' <small><a href="' . esc_url( $product_link ) . '#tab-reviews">(' . esc_html__( 'Review Link', 'woo-better-reviews' ) . ')</a></small></li>';
+			$email_content[] = array(
+				'title' => get_the_title( $product_id ),
+			);
 		}
 
 		// Close up the list.
-		$email_content .= '</ul>';
+		// $email_content .= '</ul>';
 
 		// Return it filtered.
-		return apply_filters( Core\HOOK_PREFIX . 'reminder_email_content_body_product_list', wpautop( $email_content ), $order_id );
+		return apply_filters( Core\HOOK_PREFIX . 'reminder_email_content_body_product_list_array', $email_content, $this->order_id );
 	}
 
 	/**
 	 * Set up the closing text for the email.
 	 *
-	 * @param  array   $customer_data  The customer data we have.
-	 * @param  integer $order_id       The ID of the order this is tied to.
+	 * @param  array $customer_data  The customer data we have.
 	 *
 	 * @return HTML
 	 */
-	public function get_email_body_closing_text( $customer_data = array(), $order_id = 0 ) {
+	public function get_content_body_closing( $customer_data = array() ) {
 
 		// Bail without customer data.
 		if ( empty( $customer_data ) ) {
@@ -405,7 +405,7 @@ class WC_Email_Customer_Review_Reminder extends WC_Email {
 		}
 
 		// Return it filtered.
-		return apply_filters( Core\HOOK_PREFIX . 'reminder_email_content_body_closing_text', wpautop( $email_content ), $order_id );
+		return apply_filters( Core\HOOK_PREFIX . 'reminder_email_content_body_closing', $email_content, $this->order_id );
 	}
 
 	/**
