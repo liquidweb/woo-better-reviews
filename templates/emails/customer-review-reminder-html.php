@@ -1,18 +1,8 @@
 <?php
 /**
- * Customer review reminder email
- *
- * This template can be filtered in the main class.
- *
- * HOWEVER, on occasion WooCommerce will need to update template files and you
- * (the theme developer) will need to copy the new files to your theme to
- * maintain compatibility. We try to do this as little as possible, but it does
- * happen. When this occurs the version of the template file will be bumped and
- * the readme will list any important changes.
+ * The HTML template for the review reminder email.
  *
  * @see https://docs.woocommerce.com/document/template-structure/
- * @package WooCommerce/Templates/Emails
- * @version 3.5.2
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -28,7 +18,7 @@ do_action( 'woocommerce_email_header', $email_heading, $email );
 echo '<p>' . wp_kses_post( $sections['introduction'] ) . '</p>';
 
 // Output the intro to the product list.
-echo '<p>' . esc_html__( 'In case you forgot, here is what you purchased:', 'woo-better-reviews' ) . '</p>';
+echo '<p>' . esc_html__( 'As a reminder, here is what you purchased:', 'woo-better-reviews' ) . '</p>';
 
 // Output the list wrapper.
 echo '<ul>';
