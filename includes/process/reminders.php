@@ -204,13 +204,7 @@ function remove_completed_reminders( $order_id = 0, $product_list = array() ) {
 	// If we don't have any (odd) then changed the other key and bail.
 	if ( empty( $reminder_meta ) ) {
 
-		// Change the status.
-		update_post_meta( $order_id, Core\META_PREFIX . 'review_reminder_status', 'empty' );
-
-		// Delete the dataset key all together.
-		delete_post_meta( $order_id, Core\META_PREFIX . 'review_reminder_data' );
-
-		// Purge the meta.
+		// Purge ALL the meta.
 		Utilities\purge_order_reminder_meta( $order_id );
 
 		// And return.
@@ -231,9 +225,6 @@ function remove_completed_reminders( $order_id = 0, $product_list = array() ) {
 
 		// Delete the dataset key all together.
 		delete_post_meta( $order_id, Core\META_PREFIX . 'review_reminder_data' );
-
-		// Purge the meta.
-		Utilities\purge_order_reminder_meta( $order_id );
 
 		// And return.
 		return;
@@ -266,9 +257,6 @@ function remove_completed_reminders( $order_id = 0, $product_list = array() ) {
 
 		// Delete the dataset key all together.
 		delete_post_meta( $order_id, Core\META_PREFIX . 'review_reminder_data' );
-
-		// Purge the meta.
-		Utilities\purge_order_reminder_meta( $order_id );
 
 		// And return.
 		return;
