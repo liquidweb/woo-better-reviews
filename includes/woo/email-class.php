@@ -217,7 +217,7 @@ class WC_Email_Customer_Review_Reminder extends WC_Email {
 	}
 
 	/**
-	 * Get email headers.
+	 * Set up and return our filtered email headers.
 	 *
 	 * @return string
 	 */
@@ -236,9 +236,9 @@ class WC_Email_Customer_Review_Reminder extends WC_Email {
 	}
 
 	/**
-	 * Get content html.
+	 * Set up and return our filtered HTML formatted content.
 	 *
-	 * @return string
+	 * @return HTML
 	 */
 	public function get_content_html() {
 
@@ -261,7 +261,7 @@ class WC_Email_Customer_Review_Reminder extends WC_Email {
 	}
 
 	/**
-	 * Get content plain.
+	 * Set up and return our filtered plain text formatted content.
 	 *
 	 * @return string
 	 */
@@ -324,7 +324,7 @@ class WC_Email_Customer_Review_Reminder extends WC_Email {
 		$email_content  = __( 'Hello {customer_first}! Recently, you made a purchase at our store and would appreciate it if you could leave a review!', 'woo-better-reviews' );
 
 		// Return it filtered.
-		return apply_filters( Core\HOOK_PREFIX . 'reminder_email_content_body_introduction', $email_content, $this->order_id );
+		return apply_filters( Core\HOOK_PREFIX . 'reminder_email_content_body_introduction', $email_content, $customer_data, $this->order_id );
 	}
 
 	/**
@@ -350,25 +350,33 @@ class WC_Email_Customer_Review_Reminder extends WC_Email {
 			// Get the profile link.
 			$profile_link   = trailingslashit( wc_get_account_endpoint_url( '' ) );
 
-			// If this is an HTML, do that.
-			if ( 'html' === $this->email_type ) {
+			// Switch through the two available types.
+			switch ( esc_attr( $this->email_type ) ) {
 
-				// And add the content.
-				$email_content .= sprintf( __( ' <a href="%s">Click here to view your account profile</a>.', 'woo-better-reviews' ), esc_url( $profile_link ) );
-			}
+				// Set the HTML version.
+				case 'html' :
 
-			// If this is an plain, do that.
-			if ( 'plain' === $this->email_type ) {
+					// Add the content.
+					$email_content .= sprintf( __( ' <a href="%s">Click here to view your account profile</a>.', 'woo-better-reviews' ), esc_url( $profile_link ) );
 
-				// And add the content.
-				$email_content .= sprintf( __( ' Click here to view your account profile:  %s', 'woo-better-reviews' ), esc_url( $profile_link ) );
+					// And break.
+					break;
+
+				// Set the plain text version.
+				case 'plain' :
+
+					// Add the content.
+					$email_content .= sprintf( __( ' Click here to view your account profile:  %s', 'woo-better-reviews' ), esc_url( $profile_link ) );
+
+					// And break.
+					break;
 			}
 
 			// Nothing else.
 		}
 
 		// Return it filtered.
-		return apply_filters( Core\HOOK_PREFIX . 'reminder_email_content_body_closing', $email_content, $this->order_id );
+		return apply_filters( Core\HOOK_PREFIX . 'reminder_email_content_body_closing', $email_content, $customer_data, $this->order_id );
 	}
 
 	/**
@@ -387,7 +395,7 @@ class WC_Email_Customer_Review_Reminder extends WC_Email {
 		}
 
 		// Return the resulting array.
-		return $types;
+		return apply_filters( Core\HOOK_PREFIX . 'reminder_email_option_types', $types );
 	}
 
 	/**
@@ -431,7 +439,7 @@ class WC_Email_Customer_Review_Reminder extends WC_Email {
 			),
 		);
 
-		// Now set the actual fields.
+		// Now set the actual fields with a filter.
 		$this->form_fields = apply_filters( Core\HOOK_PREFIX . 'reminder_email_admin_settings', $settings_args );
 	}
 
