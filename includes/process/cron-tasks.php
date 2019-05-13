@@ -32,7 +32,7 @@ function maybe_send_reminders() {
 
 	// Bail if not enabled.
 	if ( ! $maybe_enabled ) {
-		return;
+		return false;
 	}
 
 	// Now fetch the dataset (possibly).
@@ -40,8 +40,11 @@ function maybe_send_reminders() {
 
 	// Bail without any data to handle.
 	if ( empty( $reminder_batch ) ) {
-		return;
+		return false;
 	}
+
+	// Set an empty send count.
+	$send_count = 0;
 
 	// Pull in the file functions.
 	if ( ! class_exists( 'WC_Email_Customer_Review_Reminder' ) ) {
@@ -49,13 +52,18 @@ function maybe_send_reminders() {
 	}
 
 	// Call our review reminder email class.
-	$email_class    = new WC_Email_Customer_Review_Reminder();
+	$email_class    = new \WC_Email_Customer_Review_Reminder();
 
 	// Now loop the reminder data and
 	foreach ( $reminder_batch as $order_id => $reminder_data ) {
 
 		// Bail if no products or customer data.
 		if ( empty( $reminder_data['products'] ) || empty( $reminder_data['customer'] ) ) {
+
+			// Purge ALL the meta.
+			Utilities\purge_order_reminder_meta( $order_id );
+
+			// And go on to the next.
 			continue;
 		}
 
@@ -75,10 +83,14 @@ function maybe_send_reminders() {
 
 			// Run our cleanup function.
 			Reminders\remove_completed_reminders( $order_id, $product_list );
+
+			// Increment the send count.
+			$send_count++;
 		}
 
 		// Maybe do an error return, but it's cron so not sure what.
 	}
 
-	// I believe we are done here.
+	// I believe we are done here, so return a boolean.
+	return absint( $send_count ) > 0 ? true : false;
 }
