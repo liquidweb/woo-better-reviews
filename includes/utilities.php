@@ -1051,7 +1051,7 @@ function filter_reminder_data( $reminder_data = array() ) {
 		}
 
 		// Set the other two portions of the array.
-		$filtered_array[ $order_id ]['order-id'] = $order_id;
+		$filtered_array[ $order_id ]['order_id'] = $order_id;
 		$filtered_array[ $order_id ]['customer'] = $reminder_setup['customer'];
 	}
 

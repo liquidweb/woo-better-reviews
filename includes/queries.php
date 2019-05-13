@@ -2204,7 +2204,7 @@ function get_reminder_order_data( $return_type = 'filtered', $purge = false ) {
 
 			// Now set the key / value in the array.
 			$query_list[ $order_id ] = array(
-				'order-id' => $order_id,
+				'order_id' => $order_id,
 				'customer' => Helpers\get_potential_customer_data( 0, $order_id ),
 				'products' => wp_list_pluck( $order_meta, 'timestamp', 'product_id' ),
 			);
@@ -2221,7 +2221,6 @@ function get_reminder_order_data( $return_type = 'filtered', $purge = false ) {
 		// And change the variable to do the things.
 		$cached_dataset = $query_list;
 	}
-	// preprint( $cached_dataset, true );
 
 	// Now switch between my return types.
 	switch ( sanitize_text_field( $return_type ) ) {
