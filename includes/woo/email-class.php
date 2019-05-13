@@ -156,7 +156,7 @@ class WC_Email_Customer_Review_Reminder extends WC_Email {
 
 		// Bail right away without any args to process.
 		if ( empty( $passed_args ) || ! is_array( $passed_args ) ) {
-			return;
+			return false;
 		}
 
 		// Call the locale for emails.
@@ -174,7 +174,7 @@ class WC_Email_Customer_Review_Reminder extends WC_Email {
 
 		// Bail if any piece or section is missing.
 		if ( empty( $setup_args['order_id'] ) || empty( $setup_args['customer'] ) || empty( $setup_args['products'] ) ) {
-			return;
+			return false;
 		}
 
 		// Set each part of our data as needed.
@@ -187,33 +187,40 @@ class WC_Email_Customer_Review_Reminder extends WC_Email {
 		// Pull out and set the object.
 		$this->object = wc_get_order( $order_id );
 
-		// Set the whole object.
-		if ( $this->object ) {
-
-			// Do some checks for things.
-			$recipient  = ! empty( $customer_data['email'] ) ? $customer_data['email'] : $this->object->get_billing_email();
-
-			// Set up the secondary parts of the object.
-			$this->recipient = $recipient;
-			$this->customer  = $customer_data;
-			$this->products  = $product_list;
-			$this->order_id  = $order_id;
-
-			// Set the rest of the placeholders.
-			$this->placeholders['{order_date}']     = wc_format_datetime( $this->object->get_date_created() );
-			$this->placeholders['{order_number}']   = $this->object->get_order_number();
-			$this->placeholders['{customer_name}']  = $customer_data['name'];
-			$this->placeholders['{customer_first}'] = $customer_data['first'];
-			$this->placeholders['{customer_last}']  = $customer_data['last'];
+		// Bail if we don't have the resulting object.
+		if ( ! $this->object ) {
+			return false;
 		}
 
-		// Do the thing for the thing.
-		if ( $this->is_enabled() && $this->get_recipient() ) {
-			$this->send( $this->get_recipient(), $this->get_subject(), $this->get_content(), $this->get_headers(), $this->get_attachments() );
+		// Do some checks for things.
+		$recipient  = ! empty( $customer_data['email'] ) ? $customer_data['email'] : $this->object->get_billing_email();
+
+		// Set up the secondary parts of the object.
+		$this->recipient = $recipient;
+		$this->customer  = $customer_data;
+		$this->products  = $product_list;
+		$this->order_id  = $order_id;
+
+		// Set the rest of the placeholders.
+		$this->placeholders['{order_date}']     = wc_format_datetime( $this->object->get_date_created() );
+		$this->placeholders['{order_number}']   = $this->object->get_order_number();
+		$this->placeholders['{customer_name}']  = $customer_data['name'];
+		$this->placeholders['{customer_first}'] = $customer_data['first'];
+		$this->placeholders['{customer_last}']  = $customer_data['last'];
+
+		// Bail out if we don't have these two.
+		if ( ! $this->is_enabled() || ! $this->get_recipient() ) {
+			return false;
 		}
+
+		// Attempt to send the email.
+		$attempt_email  = $this->send( $this->get_recipient(), $this->get_subject(), $this->get_content(), $this->get_headers(), $this->get_attachments() );
 
 		// Go back to whence we came.
 		$this->restore_locale();
+
+		// Return a boolean based on the return status.
+		return false !== $attempt_email ? true : false;
 	}
 
 	/**
@@ -321,7 +328,7 @@ class WC_Email_Customer_Review_Reminder extends WC_Email {
 		}
 
 		// Set up the intro data.
-		$email_content  = __( 'Hello {customer_first}! Recently, you made a purchase at our store and would appreciate it if you could leave a review!', 'woo-better-reviews' );
+		$email_content  = __( 'Hello {customer_first}! Recently, you made a purchase at our store on {order_date} and we would appreciate it if you could leave a review!', 'woo-better-reviews' );
 
 		// Return it filtered.
 		return apply_filters( Core\HOOK_PREFIX . 'reminder_email_content_body_introduction', $email_content, $customer_data, $this->order_id );
