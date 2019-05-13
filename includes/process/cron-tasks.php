@@ -13,7 +13,7 @@ use LiquidWeb\WooBetterReviews as Core;
 use LiquidWeb\WooBetterReviews\Helpers as Helpers;
 use LiquidWeb\WooBetterReviews\Utilities as Utilities;
 use LiquidWeb\WooBetterReviews\Queries as Queries;
-// use LiquidWeb\WooBetterReviews\Reminders as Reminders;
+use LiquidWeb\WooBetterReviews\Reminders as Reminders;
 
 /**
  * Start our engines.
@@ -69,10 +69,16 @@ function maybe_send_reminders() {
 
 		// Confirm the trigger was successful.
 		if ( false !== $trigger_email ) {
-			// need something to say "done".
+
+			// Pull the product list.
+			$product_list   = array_keys( $reminder_data['products'] );
+
+			// Run our cleanup function.
+			Reminders\remove_completed_reminders( $order_id, $product_list );
 		}
 
 		// Maybe do an error return, but it's cron so not sure what.
 	}
 
+	// I believe we are done here.
 }
