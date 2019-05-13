@@ -54,10 +54,6 @@ class WC_Email_Customer_Review_Reminder extends WC_Email {
 			'{customer_last}'  => '',
 		);
 
-		// Set my email heading and subject lines.
-		// $email_heading  = __( 'Your purchases from {order_date} are eligible for review.', 'woo-better-reviews' );
-		// $email_subject  = __( 'Leave a review for your recent purchases from {site_title}!', 'woo-better-reviews' );
-
 		// Set the content items for the email class.
 		$this->id             = 'customer_review_reminder';
 		$this->customer_email = true;
@@ -65,6 +61,7 @@ class WC_Email_Customer_Review_Reminder extends WC_Email {
 		$this->description    = $this->get_setup_description();
 		$this->placeholders   = apply_filters( Core\HOOK_PREFIX . 'reminder_email_content_placeholders', $set_placeholders );
 
+		// Pull in our default subject and heading strings.
 		$this->heading        = $this->format_string( $this->get_default_heading() );
 		$this->subject        = $this->format_string( $this->get_default_subject() );
 
@@ -151,64 +148,63 @@ class WC_Email_Customer_Review_Reminder extends WC_Email {
 	}
 
 	/**
-	 * Trigger.
+	 * Our actual trigger function, which begins the email sending.
 	 *
-	 * @param array $args Email arguments.
+	 * @param array $passed_args  The array of required email arguments passed via the cron.
 	 */
-	public function trigger( $args ) {
+	public function trigger( $passed_args ) {
 
-		// preprint( $args, true );
+		// Bail right away without any args to process.
+		if ( empty( $passed_args ) || ! is_array( $passed_args ) ) {
+			return;
+		}
 
 		// Call the locale for emails.
 		$this->setup_locale();
 
-		// Run checking with the args.
-		if ( ! empty( $args ) ) {
+		// Set the default args.
+		$default_args   = array(
+			'order_id'  => '',
+			'customer'  => '',
+			'products'  => '',
+		);
 
-			// Set the default args.
-			$default_args   = array(
-				'order_id'  => '',
-				'customer'  => '',
-				'products'  => '',
-			);
+		// Filter in what we have with what was passed.
+		$setup_args     = wp_parse_args( $passed_args, $default_args );
 
-			// Filter in what we have with what was passed.
-			$setup_args     = wp_parse_args( $args, $default_args );
-			// preprint( $setup_args, true );
+		// Bail if any piece or section is missing.
+		if ( empty( $setup_args['order_id'] ) || empty( $setup_args['customer'] ) || empty( $setup_args['products'] ) ) {
+			return;
+		}
 
-			// Set each part of our data as needed.
-			$customer_data  = $setup_args['customer'];
-			$product_list   = array_keys( $setup_args['products'] );
+		// Set each part of our data as needed.
+		$customer_data  = $setup_args['customer'];
+		$product_list   = is_array( $setup_args['products'] ) ? array_keys( $setup_args['products'] ) : false;
 
-			// Pull out the two pieces.
-			$order_id       = $setup_args['order_id'];
+		// Pull and  sanitize the order ID.
+		$order_id       = absint( $setup_args['order_id'] );
 
-			// Assuming we have an order ID, do the things.
-			if ( $order_id ) {
+		// Pull out and set the object.
+		$this->object = wc_get_order( $order_id );
 
-				// Pull out and set the object.
-				$this->object = wc_get_order( $order_id );
+		// Set the whole object.
+		if ( $this->object ) {
 
-				// Set the whole object.
-				if ( $this->object ) {
+			// Do some checks for things.
+			$recipient  = ! empty( $customer_data['email'] ) ? $customer_data['email'] : $this->object->get_billing_email();
 
-					// Do some checks for things.
-					$recipient  = ! empty( $customer_data['email'] ) ? $customer_data['email'] : $this->object->get_billing_email();
+			// Set up the secondary parts of the object.
+			$this->recipient = $recipient;
+			$this->customer  = $customer_data;
+			$this->products  = $product_list;
+			$this->order_id  = $order_id;
 
-					// Set up the secondary parts of the object.
-					$this->recipient = $recipient;
-					$this->customer  = $customer_data;
-					$this->products  = $product_list;
-					$this->order_id  = $order_id;
-
-					// Set the rest of the placeholders.
-					$this->placeholders['{order_date}']     = wc_format_datetime( $this->object->get_date_created() );
-					$this->placeholders['{order_number}']   = $this->object->get_order_number();
-					$this->placeholders['{customer_name}']  = $customer_data['name'];
-					$this->placeholders['{customer_first}'] = $customer_data['first'];
-					$this->placeholders['{customer_last}']  = $customer_data['last'];
-				}
-			}
+			// Set the rest of the placeholders.
+			$this->placeholders['{order_date}']     = wc_format_datetime( $this->object->get_date_created() );
+			$this->placeholders['{order_number}']   = $this->object->get_order_number();
+			$this->placeholders['{customer_name}']  = $customer_data['name'];
+			$this->placeholders['{customer_first}'] = $customer_data['first'];
+			$this->placeholders['{customer_last}']  = $customer_data['last'];
 		}
 
 		// Do the thing for the thing.
