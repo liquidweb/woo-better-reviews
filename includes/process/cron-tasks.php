@@ -59,15 +59,15 @@ function maybe_send_reminders() {
 			continue;
 		}
 
-		// Set up our arguments needed in the email.
-		$email_args = array(
-			'order_id'  => $order_id,
-			'customer'  => $reminder_data['customer'],
-			'products'  => $reminder_data['products'],
-		);
+		// If the order ID is missing, add it back.
+		if ( empty( $reminder_data['order_id'] ) ) {
+			$reminder_data['order_id'] = absint( $order_id );
+		}
 
 		// Send the email (maybe).
-		$email_class->send_reminder( $email_args );
+		$trigger_email  = $email_class->trigger( $reminder_data );
+
+		// Confirm the trigger was successful.
 	}
 
 }
