@@ -68,6 +68,11 @@ function maybe_send_reminders() {
 		$trigger_email  = $email_class->trigger( $reminder_data );
 
 		// Confirm the trigger was successful.
+		if ( false !== $trigger_email ) {
+			// need something to say "done".
+		}
+
+		// Maybe do an error return, but it's cron so not sure what.
 	}
 
 }
