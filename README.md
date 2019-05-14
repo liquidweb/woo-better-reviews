@@ -2,9 +2,9 @@
 **Contributors:** [liquidweb](https://profiles.wordpress.org/liquidweb), [norcross](https://profiles.wordpress.org/norcross)  
 **Tags:** woocommerce, reviews  
 **Requires at least:** 5.0  
-**Tested up to:** 5.1.1  
+**Tested up to:** 5.2.0  
 **Requires PHP:** 5.6.0  
-**Stable tag:** 0.3.0-dev  
+**Stable tag:** 0.3.0  
 **License:** MIT  
 **License URI:** https://opensource.org/licenses/MIT  
 
@@ -73,7 +73,8 @@ Yes.
 ## Changelog ##
 
 ### 0.3.0 ###
-* something at some point
+* added email reminders for product reviews
+* lots and lots of code cleanup
 
 ### 0.2.0 ###
 * adding CLI command for converting existing reviews.
