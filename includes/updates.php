@@ -15,7 +15,8 @@ use LiquidWeb\WooBetterReviews\Helpers as Helpers;
 /**
  * Start our engines.
  */
-add_action( 'upgrader_process_complete', __NAMESPACE__ . '\run_update_functions', 10, 2 );
+add_action( 'upgrader_process_complete', __NAMESPACE__ . '\set_pending_updates', 10, 2 );
+add_action( 'plugins_loaded', __NAMESPACE__ . '\run_pending_updates' );
 
 /**
  * Run this after all the WP updates are done to see if we need to run anything.
@@ -25,7 +26,7 @@ add_action( 'upgrader_process_complete', __NAMESPACE__ . '\run_update_functions'
  *
  * @return void
  */
-function run_update_functions( $upgrader_object, $hook_extra ) {
+function set_pending_updates( $upgrader_object, $hook_extra ) {
 
 	// Make sure we have an action, and we are indeed updating something.
 	if ( empty( $hook_extra['action'] ) || 'update' !== sanitize_text_field( $hook_extra['action'] ) ) {
@@ -50,7 +51,12 @@ function run_update_functions( $upgrader_object, $hook_extra ) {
 
 		// If we have no stored version, this is like version 0.0.3.
 		if ( empty( $stored_version ) ) {
-			update_version_zero_point_zero_point_three();
+
+			// Set the transient to handle the update.
+			set_transient( Core\OPTION_PREFIX . 'update_transient', '0.0.3' );
+
+			// And break.
+			break;
 		}
 
 		// Now check the versions as they come in.
@@ -58,8 +64,15 @@ function run_update_functions( $upgrader_object, $hook_extra ) {
 
 			// Do the 0.0.3 check.
 			if ( version_compare( $stored_version, '0.0.3', '<=' ) ) {
-				update_version_zero_point_zero_point_three();
+
+				// Set the transient to handle the update.
+				set_transient( Core\OPTION_PREFIX . 'update_transient', '0.0.3' );
+
+				// And break.
+				break;
 			}
+
+			// Additional updates will go here later.
 		}
 
 		// No more looping of the plugins.
@@ -69,14 +82,48 @@ function run_update_functions( $upgrader_object, $hook_extra ) {
 }
 
 /**
+ * Check for our update transients and act accordingly.
+ *
+ * @return void
+ */
+function run_pending_updates() {
+
+	// First check for the transient.
+	$maybe_updated  = get_transient( Core\OPTION_PREFIX . 'update_transient' );
+
+	// Bail if we have no transient at all.
+	if ( empty( $maybe_updated ) ) {
+		return;
+	}
+
+	// Switch through and handle the updates we have.
+	switch ( esc_attr( $maybe_updated ) ) {
+
+		// Run the first upgrade function we have.
+		case '0.0.3' :
+
+			// Run the update.
+			update_version_zero_point_zero_point_three();
+
+			// And break.
+			break;
+
+		// More update cases will run here.
+	}
+
+	// Update the plugin version key.
+	update_option( Core\OPTION_PREFIX . 'plugin_version', Core\VERS );
+
+	// Delete the transient we had just set.
+	delete_transient( Core\OPTION_PREFIX . 'update_transient' );
+}
+
+/**
  * Run our functions when upgrading to version 0.0.3 of the plugin.
  *
  * @return void
  */
 function update_version_zero_point_zero_point_three() {
-
-	// Set our actual version key.
-	update_option( Core\OPTION_PREFIX . 'plugin_version', Core\VERS );
 
 	// We are enabling the review reminders.
 	update_option( Core\OPTION_PREFIX . 'send_reminders', 'yes' );
