@@ -16,7 +16,7 @@ use LiquidWeb\WooBetterReviews\Helpers as Helpers;
  * Start our engines.
  */
 add_action( 'upgrader_process_complete', __NAMESPACE__ . '\set_pending_updates', 10, 2 );
-add_action( 'plugins_loaded', __NAMESPACE__ . '\run_pending_updates' );
+add_action( 'admin_notices', __NAMESPACE__ . '\run_pending_updates' );
 
 /**
  * Run this after all the WP updates are done to see if we need to run anything.
@@ -96,6 +96,9 @@ function run_pending_updates() {
 		return;
 	}
 
+	// Set a blank notice text (since not all will require).
+	$notice_message = '';
+
 	// Switch through and handle the updates we have.
 	switch ( esc_attr( $maybe_updated ) ) {
 
@@ -104,6 +107,9 @@ function run_pending_updates() {
 
 			// Run the update.
 			update_version_zero_point_zero_point_three();
+
+			// Set our notice text.
+			$notice_message = sprintf( __( 'Better Reviews for WooCommerce has been updated and review reminder emails have been activated! <a href="%s">Click here</a> to change the settings or disable the feature.', 'woo-better-reviews' ), Helpers\get_admin_tab_link() );
 
 			// And break.
 			break;
@@ -116,6 +122,19 @@ function run_pending_updates() {
 
 	// Delete the transient we had just set.
 	delete_transient( Core\OPTION_PREFIX . 'update_transient' );
+
+	// Now show the message if we have one.
+	if ( ! empty( $notice_message ) ) {
+
+		// Start the notice markup.
+		echo '<div class="notice notice-info is-dismissible">';
+
+			// Display the actual message.
+			echo '<p><strong>' . wp_kses_post( $notice_message ) . '</strong></p>';
+
+		// And close the div.
+		echo '</div>';
+	}
 }
 
 /**
