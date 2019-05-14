@@ -124,6 +124,7 @@ require_once __DIR__ . '/includes/process/convert-existing.php';
 
 // Load the triggered file loads.
 require_once __DIR__ . '/includes/activate.php';
+require_once __DIR__ . '/includes/updates.php';
 require_once __DIR__ . '/includes/deactivate.php';
 require_once __DIR__ . '/includes/uninstall.php';
 

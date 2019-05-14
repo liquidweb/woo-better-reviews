@@ -1,6 +1,6 @@
 <?php
 /**
- * Our uninstall call
+ * Our uninstall call.
  *
  * @package WooBetterReviews
  */
