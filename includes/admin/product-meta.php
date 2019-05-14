@@ -20,8 +20,26 @@ use WP_Error;
 /**
  * Start our engines.
  */
-add_action( 'add_meta_boxes_product', __NAMESPACE__ . '\load_attribute_metabox' );
+add_action( 'add_meta_boxes_product', __NAMESPACE__ . '\filter_default_review_metaboxes', 11 );
+add_action( 'add_meta_boxes_product', __NAMESPACE__ . '\load_attribute_metabox', 15 );
+add_action( 'woocommerce_product_options_advanced', __NAMESPACE__ . '\add_reminder_delay_meta' );
+add_action( 'save_post_product', __NAMESPACE__ . '\save_reminder_delay_meta', 10, 2 );
 add_action( 'save_post_product', __NAMESPACE__ . '\save_product_attributes', 10, 2 );
+
+/**
+ * Removes the default reviews metabox in leiu of our own.
+ *
+ * @param object $post  The entire WP_Post object.
+ *
+ * @return void
+ */
+function filter_default_review_metaboxes( $post ) {
+
+	// This is the box being removed.
+	remove_meta_box( 'commentsdiv', 'product', 'normal' );
+
+	// @@todo this will eventually load ours.
+}
 
 /**
  * Load the metabox for applying review attributes.
@@ -123,6 +141,200 @@ function attribute_metabox( $post, $callback ) {
 
 	// Gimme some sweet nonce action.
 	echo wp_nonce_field( 'wbr_save_product_meta_action', 'wbr_save_product_meta_nonce', false, false );
+}
+
+/**
+ * Display the fields for custom reminder info.
+ *
+ * @return HTML
+ */
+function add_reminder_delay_meta() {
+
+	// Call our global.
+	global $post;
+
+	// Check to see if we are enabled.
+	$maybe_enabled  = Helpers\maybe_reminders_enabled( $post->ID, 'strings' );
+
+	// Get the wait time.
+	$wait_time_args = get_post_meta( $post->ID, Core\META_PREFIX . 'reminder_wait', true );
+
+	// Now parse out each one.
+	$wait_time_nmbr = ! empty( $wait_time_args['number'] ) ? $wait_time_args['number'] : '';
+	$wait_time_unit = ! empty( $wait_time_args['unit'] ) ? $wait_time_args['unit'] : '';
+
+	// Set and filter the wrapper class.
+	$wrapper_class  = apply_filters( Core\HOOK_PREFIX . 'product_meta_wrapper_class', 'show_if_simple show_if_variable hide_if_external hide_if_grouped' );
+
+	// Throw a group div around it.
+	echo '<div class="options_group wbr-reviews-reminder-product-meta">';
+
+	// Output our checkbox all Woo style.
+	woocommerce_wp_checkbox(
+		array(
+			'id'            => 'product-do-reminders',
+			'name'          => Core\META_PREFIX . 'send_reminders',
+			'value'         => $maybe_enabled,
+			'wrapper_class' => esc_attr( $wrapper_class ),
+			'label'         => __( 'Enable Reminders', 'woo-better-reviews' ),
+			'description'   => __( 'Send an email reminder for customers to leave product reviews.', 'woo-better-reviews' ),
+			'cbvalue'       => 'yes',
+		)
+	);
+
+	// Do our custom relative date field.
+	single_reminder_relative_date_field(
+		array(
+			'id'            => 'product-reminder-wait',
+			'name'          => Core\META_PREFIX . 'reminder_wait',
+			'number'        => $wait_time_nmbr,
+			'unit'          => $wait_time_unit,
+			'enabled'       => $maybe_enabled,
+			'wrapper_class' => esc_attr( $wrapper_class ),
+			'label'         => __( 'Reminder Delay', 'woo-better-reviews' ),
+			'description'   => __( 'Set the amount of time from purchase to send the reminder.', 'woo-better-reviews' ),
+		)
+	);
+
+	// Output our hidden trigger field all Woo style.
+	woocommerce_wp_hidden_input(
+		array(
+			'id'    => 'product-reminders-trigger',
+			'value' => true,
+		)
+	);
+
+	// Gimme some sweet nonce action.
+	wp_nonce_field( 'wbr_save_product_reminder_action', 'wbr_save_product_reminder_nonce', false, true );
+
+	// Close our div.
+	echo '</div>';
+}
+
+/**
+ * Build out the relative date field, same as the admin settings.
+ *
+ * @param  array $field  The field args being passed.
+ *
+ * @return HTML
+ */
+function single_reminder_relative_date_field( $field ) {
+
+	// Set the time windows.
+	$periods      = array(
+		'days'   => __( 'Day(s)', 'woocommerce' ),
+		'weeks'  => __( 'Week(s)', 'woocommerce' ),
+		'months' => __( 'Month(s)', 'woocommerce' ),
+		'years'  => __( 'Year(s)', 'woocommerce' ),
+	);
+
+	// Pull out all the various field info needed.
+	$field['class']         = isset( $field['class'] ) ? $field['class'] : 'relative-date';
+	$field['style']         = isset( $field['style'] ) ? $field['style'] : '';
+	$field['wrapper_class'] = isset( $field['wrapper_class'] ) ? $field['wrapper_class'] : '';
+	$field['name']          = isset( $field['name'] ) ? $field['name'] : $field['id'];
+	$field['label']         = isset( $field['label'] ) ? $field['label'] : '';
+
+	// Pull our the array value.
+	$stored_arg = get_option( Core\OPTION_PREFIX . 'reminder_wait', array( 'number' => '2', 'unit' => 'weeks' ) );
+
+	// Pull out the meta value based on what was passed.
+	$meta_nmbr  = ! empty( $field['number'] ) ? $field['number'] : $stored_arg['number'];
+	$meta_unit  = ! empty( $field['unit'] ) ? $field['unit'] : $stored_arg['unit'];
+
+	// Set the div wrapper class.
+	$display_cl = ! empty( $field['enabled'] ) && 'no' === sanitize_text_field( $field['enabled'] ) ? 'product-reminder-disabled-hide' : 'product-reminder-enabled-show';
+
+	// Do the display div.
+	echo '<div class="product-reminder-duration-wrap ' . esc_attr( $display_cl ) . '">';
+
+		// Start rendering the field.
+		echo '<p class="form-field ' . esc_attr( $field['id'] ) . '_field ' . esc_attr( $field['wrapper_class'] ) . '">';
+
+			// Render our field label.
+			echo '<label for="' . esc_attr( $field['id'] ) . '">' . wp_kses_post( $field['label'] ) . '</label>';
+
+			// Render the numerical portion,
+			echo '<input type="number" class="' . esc_attr( $field['class'] ) . '" style="' . esc_attr( $field['style'] ) . '" name="' . esc_attr( $field['name'] ) . '[number]" id="' . esc_attr( $field['id'] ) . '" value="' . esc_attr( $meta_nmbr ) . '" /> ';
+
+			// Now do the dropdown.
+			echo '<select name="' . esc_attr( $field['name'] ) . '[unit]" style="width: auto;">';
+
+			// Loop each time period we have.
+			foreach ( $periods as $period_value => $period_label ) {
+				echo '<option value="' . esc_attr( $period_value ) . '"' . selected( $meta_unit, $period_value, false ) . '>' . esc_html( $period_label ) . '</option>';
+			}
+
+			// Close up the select.
+			echo '</select>';
+
+			// Check for a description field.
+			if ( ! empty( $field['description'] ) ) {
+				echo '<span class="description">' . wp_kses_post( $field['description'] ) . '</span>';
+			}
+
+		// Close the field paragraph.
+		echo '</p>';
+
+	// Close the display div.
+	echo '</div>';
+}
+
+/**
+ * Save whether or not the reminders are active on the product.
+ *
+ * @param  integer $post_id  The individual post ID.
+ * @param  object  $post     The entire post object.
+ *
+ * @return void
+ */
+function save_reminder_delay_meta( $post_id, $post ) {
+
+	// Bail if it isn't an actual product.
+	if ( 'product' !== get_post_type( $post_id ) ) {
+		return;
+	}
+
+	// Make sure the current user has the ability to save.
+	if ( ! current_user_can( 'edit_post', $post_id ) ) {
+		return;
+	}
+
+	// Check for the triggr.
+	if ( empty( $_POST['product-reminders-trigger'] ) ) {
+		return;
+	}
+
+	// Do our nonce check. ALWAYS A NONCE CHECK.
+	if ( empty( $_POST['wbr_save_product_reminder_nonce'] ) || ! wp_verify_nonce( $_POST['wbr_save_product_reminder_nonce'], 'wbr_save_product_reminder_action' ) ) {
+		wp_die( __( 'Your security nonce failed.', 'woo-better-reviews' ) );
+	}
+
+	// Handle the enabled flag based on what was passed.
+	$reminder_flag  = ! empty( $_POST[ Core\META_PREFIX . 'send_reminders'] ) ? 'yes' : 'no';
+
+	// Update the meta.
+	update_post_meta( $post_id, Core\META_PREFIX . 'send_reminder', $reminder_flag );
+
+	// If we have a yes, also save the time length.
+	if ( 'yes' === $reminder_flag ) {
+
+		// Find the reminder meta.
+		$reminder_wait  = ! empty( $_POST[ Core\META_PREFIX . 'reminder_wait'] ) ? $_POST[ Core\META_PREFIX . 'reminder_wait'] : array();
+
+		// Pull out the stored array value.
+		$option_setting = get_option( Core\OPTION_PREFIX . 'reminder_wait', array( 'number', 2, 'unit' => 'weeks' ) );
+
+		// Pull out the meta value based on what was passed.
+		$reminder_nmbr  = ! empty( $reminder_wait['number'] ) ? $reminder_wait['number'] : $option_setting['number'];
+		$reminder_unit  = ! empty( $reminder_wait['unit'] ) ? $reminder_wait['unit'] : $option_setting['unit'];
+
+		// Handle the metadata based on what was passed.
+		$reminder_args  = array( 'number' => absint( $reminder_nmbr ), 'unit' => esc_attr( $reminder_unit ) );
+
+		// Update the meta.
+		update_post_meta( $post_id, Core\META_PREFIX . 'reminder_wait', $reminder_args );
+	}
 }
 
 /**

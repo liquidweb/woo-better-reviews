@@ -1,0 +1,32 @@
+
+.woocommerce_options_panel {
+
+	.product-reminder-wait_field {
+
+		input.relative-date {
+			width: 65px;
+			margin-right: 5px;
+		}
+
+		.description {
+		//	display: inline-block;
+		//	width: 100%;
+		}
+
+	}
+
+}
+
+.product-reminder-duration-wrap {
+
+	&.product-reminder-enabled-show {
+		display: block;
+	}
+
+	&.product-reminder-disabled-hide {
+		display: none;
+	}
+
+
+}
+

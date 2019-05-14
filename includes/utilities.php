@@ -187,6 +187,76 @@ function calculate_average_attribute_scoring( $attribute_set = array() ) {
 }
 
 /**
+ * Calculate our timestamp based on today.
+ *
+ * @param  integer $product_id   The product we're calcing on.
+ * @param  integer $start_stamp  What timestamp to begin on. Will default to right now.
+ *
+ * @return integer
+ */
+function calculate_relative_date( $product_id = 0, $start_stamp = 0 ) {
+
+	// Get the date array from the product.
+	$date_array = get_post_meta( $product_id, Core\META_PREFIX . 'reminder_wait', true );
+
+	// Pull the option.
+	if ( empty( $date_array ) ) {
+		$date_array = get_option( Core\OPTION_PREFIX . 'reminder_wait', 0 );
+	}
+
+	// Bail without a date array.
+	if ( empty( $date_array ) ) {
+		return;
+	}
+
+	// Make sure we have a good array.
+	$date_build = wc_parse_relative_date_option( $date_array );
+
+	// Set our beginning.
+	$date_begin = ! empty( $start_stamp ) ? absint( $start_stamp ) : (int) current_time( 'timestamp' );
+
+	// Set a fallback.
+	$set_durate = 2 * WEEK_IN_SECONDS;
+
+	// Handle my different unit types.
+	switch ( esc_attr( $date_build['unit'] ) ) {
+
+		case 'day' :
+		case 'days' :
+
+			// Set the constant times the number.
+			$set_durate = absint( $date_build['number'] ) * DAY_IN_SECONDS;
+			break;
+
+		case 'week' :
+		case 'weeks' :
+
+			// Set the constant times the number.
+			$set_durate = absint( $date_build['number'] ) * WEEK_IN_SECONDS;
+			break;
+
+		case 'month' :
+		case 'months' :
+
+			// Set the constant times the number.
+			$set_durate = absint( $date_build['number'] ) * MONTH_IN_SECONDS;
+			break;
+
+		case 'year' :
+		case 'years' :
+
+			// Set the constant times the number.
+			$set_durate = absint( $date_build['number'] ) * YEAR_IN_SECONDS;
+			break;
+
+		// End all case breaks.
+	}
+
+	// Now return the time from today.
+	return absint( $date_begin ) + absint( $set_durate );
+}
+
+/**
  * Take our review and format it for schema insertion.
  *
  * @param  object  $review  The entire review object.
@@ -757,6 +827,18 @@ function delete_related_review_data( $review_id = 0 ) {
 }
 
 /**
+ * Delete the meta related to an order reminder.
+ *
+ * @param  integer $order_id  The order ID we are deleting.
+ *
+ * @return void
+ */
+function purge_order_reminder_meta( $order_id = 0 ) {
+	delete_post_meta( $order_id, Core\META_PREFIX . 'review_reminder_status' );
+	delete_post_meta( $order_id, Core\META_PREFIX . 'review_reminder_data' );
+}
+
+/**
  * Purge one or many transients based on what's happening.
  *
  * @param  string $key     A single transient key.
@@ -921,4 +1003,84 @@ function array_insert_after( $key, $array, $new_key, $new_value ) {
 
 	// Return the resulting array.
 	return $updated_array;
+}
+
+/**
+ * Take the full array of reminder data and filter it.
+ *
+ * @param  array  $reminder_data  The entire array of reminder data.
+ *
+ * @return array
+ */
+function filter_reminder_data( $reminder_data = array() ) {
+
+	// Check the requirements.
+	if ( empty( $reminder_data ) || ! is_array( $reminder_data ) ) {
+		return false;
+	}
+
+	// Set an empty array to return.
+	$filtered_array = array();
+
+	// Set my day.
+	$current_date   = (int) current_time( 'timestamp' );
+
+	// Loop the remains.
+	foreach ( $reminder_data as $order_id => $reminder_setup ) {
+
+		// Bail if no products exist.
+		if ( empty( $reminder_setup['products'] ) ) {
+			continue;
+		}
+
+		// Now loop the product ids and timestamps.
+		foreach ( $reminder_setup['products'] as $product_id => $timestamp ) {
+
+			// Remove those that don't hit the date.
+			if ( absint( $timestamp ) > absint( $current_date ) ) {
+				continue;
+			}
+
+			// Re-create the same array structure.
+			$filtered_array[ $order_id ]['products'][ $product_id ] = $timestamp;
+		}
+
+		// If no products exist, skip this entire set of data.
+		if ( empty( $filtered_array[ $order_id ]['products'] ) ) {
+			continue;
+		}
+
+		// Set the other two portions of the array.
+		$filtered_array[ $order_id ]['order_id'] = $order_id;
+		$filtered_array[ $order_id ]['customer'] = $reminder_setup['customer'];
+	}
+
+	// Return the array we have, which may be empty.
+	return $filtered_array;
+}
+
+/**
+ * Take our existing cron job and update or remove the schedule.
+ *
+ * @param  boolean $clear      Whether to remove the existing one.
+ * @param  string  $frequency  The new frequency we wanna use.
+ *
+ * @return void
+ */
+function modify_reminder_cron( $clear = true, $frequency = '' ) {
+
+	// Pull in the existing one and remove it.
+	if ( ! empty( $clear ) ) {
+
+		// Grab the next scheduled stamp.
+		$timestamp  = wp_next_scheduled( Core\REMINDER_CRON );
+
+		// Remove it from the schedule.
+		wp_unschedule_event( $timestamp, Core\REMINDER_CRON );
+	}
+
+	// Now schedule our new one, assuming we passed a new frequency.
+	if ( ! empty( $frequency ) ) {
+		wp_schedule_event( current_time( 'timestamp' ), sanitize_text_field( $frequency ), Core\REMINDER_CRON );
+	}
 }

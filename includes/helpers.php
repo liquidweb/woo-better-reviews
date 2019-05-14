@@ -36,6 +36,23 @@ function get_table_args( $keys = false ) {
 }
 
 /**
+ * Check to see if reviews are enabled.
+ *
+ * @return mixed
+ */
+function get_stored_plugin_version() {
+
+	// Pull out the stored version.
+	$stored_version = get_option( Core\OPTION_PREFIX . 'plugin_version', false );
+
+	// If no version exists, then we never ran it.
+	if ( empty( $stored_version ) ) {
+
+	}
+
+}
+
+/**
  * Compare the table name to our allowed items.
  *
  * @param  string $table_name  The name (slug) of the table.
@@ -78,6 +95,71 @@ function maybe_reviews_enabled( $product_id = 0 ) {
 
 	// Return this boolean.
 	return false !== $is_enabled ? true : false;
+}
+
+/**
+ * Check to see if reminders are enabled.
+ *
+ * @param  integer $product_id   The ID of the individual product.
+ * @param  string  $return_type  How to return the result. Boolean or string.
+ *
+ * @return boolean
+ */
+function maybe_reminders_enabled( $product_id = 0, $return_type = 'boolean' ) {
+
+	// Check the base setting first.
+	$all_reminders  = get_option( Core\OPTION_PREFIX . 'send_reminders', 0 );
+
+	// Set the boolean and string returns.
+	$return_boolean = ! empty( $all_reminders ) && 'yes' === sanitize_text_field( $all_reminders ) ? true : false;
+	$return_strings = ! empty( $all_reminders ) && 'yes' === sanitize_text_field( $all_reminders ) ? 'yes' : 'no';
+
+	// Return right away if no product ID was passed.
+	if ( empty( $product_id ) ) {
+		return 'strings' === sanitize_text_field( $return_type ) ? $return_strings : $return_boolean;
+	}
+
+	// First get all the meta keys for the product.
+	$all_metadata   = get_post_meta( $product_id );
+
+	// Set our meta key as a variable.
+	$single_metakey = Core\META_PREFIX . 'send_reminder';
+
+	// If no keys exist at all, or our single meta key isn't, return the global.
+	if ( empty( $all_metadata ) || ! isset( $all_metadata[ $single_metakey ] ) ) {
+		return 'strings' === sanitize_text_field( $return_type ) ? $return_strings : $return_boolean;
+	}
+
+	// Now pull the single product meta.
+	$one_reminder   = $all_metadata[ $single_metakey ][0];
+
+	// Set the boolean and string returns.
+	$single_boolean = ! empty( $one_reminder ) && 'yes' === sanitize_text_field( $one_reminder ) ? true : false;
+	$single_strings = ! empty( $one_reminder ) && 'yes' === sanitize_text_field( $one_reminder ) ? 'yes' : 'no';
+
+	// Now return the results.
+	return 'strings' === sanitize_text_field( $return_type ) ? $single_strings : $single_boolean;
+}
+
+/**
+ * Check the order status against the ones we will allow.
+ *
+ * @param  string $order_status  The status being checked.
+ *
+ * @return boolean
+ */
+function maybe_allowed_status( $order_status ) {
+
+	// Bail without a status to check.
+	if ( empty( $order_status ) ) {
+		return false;
+	}
+
+	// Set our allowed statuses.
+	$allowed_statuses   = apply_filters( Core\OPTION_PREFIX . 'reminder_order_statuses', array( 'completed' ) );
+
+	// Return the boolean based on the match.
+	return empty( $allowed_statuses ) || ! in_array( $order_status, $allowed_statuses ) ? false : true;
 }
 
 /**
@@ -365,6 +447,69 @@ function get_review_statuses( $array_keys = false ) {
 }
 
 /**
+ * Get the customer data by checking WP user stuff, then order meta.
+ *
+ * @param  integer $customer_id  The customer ID being checked.
+ * @param  integer $order_id     The order ID this is tied to.
+ *
+ * @return mixed
+ */
+function get_potential_customer_data( $customer_id = 0, $order_id = 0 ) {
+
+	// Bail if we don't have a customer ID or an order ID.
+	if ( empty( $customer_id ) && empty( $order_id ) ) {
+		return false;
+	}
+
+	// Try to get the customer ID if we have an order ID.
+	if ( empty( $customer_id ) && ! empty( $order_id ) ) {
+
+		// Get the customer ID.
+		$customer_id    = get_post_meta( $order_id, '_customer_user', true );
+	}
+
+	// Try to get the user object first.
+	$user_object    = get_user_by( 'id', absint( $customer_id ) );
+
+	// If we have no user object, return what we have.
+	if ( ! $user_object ) {
+
+		// Pull the info.
+		$customer_email = get_post_meta( $order_id, '_billing_email', true );
+
+		// Get the name stuff.
+		$customer_first = get_post_meta( $order_id, '_billing_first_name', true );
+		$customer_last  = get_post_meta( $order_id, '_billing_last_name', true );
+		$customer_name  = $customer_first . ' ' . $customer_last;
+
+		// Return the array.
+		return array(
+			'user-id' => $customer_id,
+			'email'   => $customer_email,
+			'first'   => $customer_first,
+			'last'    => $customer_last,
+			'name'    => esc_attr( $customer_name ),
+			'is-wp'   => false,
+		);
+	}
+
+	// Get the name stuff.
+	$customer_first = $user_object->first_name;
+	$customer_last  = $user_object->last_name;
+	$customer_name  = ! empty( $user_object->display_name ) ? $user_object->display_name : $customer_first . ' ' . $customer_last;
+
+	// Since we have a user object, return the pieces.
+	return array(
+		'user-id' => $customer_id,
+		'email'   => $user_object->user_email,
+		'name'    => esc_attr( $customer_name ),
+		'first'   => esc_attr( $customer_first ),
+		'last'    => esc_attr( $customer_last ),
+		'is-wp'   => true,
+	);
+}
+
+/**
  * Get the attributes the product has assigned.
  *
  * @param  integer $product_id  The product ID we are checking attributes for.
@@ -584,6 +729,43 @@ function get_scoring_stars_display( $product_id = 0, $review_score = 0, $include
 }
 
 /**
+ * Check if we are on the admin settings tab.
+ *
+ * @param  string $hook  Optional hook sent from some actions.
+ *
+ * @return boolean
+ */
+function maybe_admin_settings_tab( $hook = '' ) {
+
+	// Can't be the admin tab if we aren't admin.
+	if ( ! is_admin() ) {
+		return false;
+	}
+
+	// Set an array of allowed hooks.
+	$allowed_hooks  = array(
+		'edit.php',
+		'post.php',
+		'toplevel_page_' . Core\REVIEWS_ANCHOR,
+		'reviews_page_' . Core\ATTRIBUTES_ANCHOR,
+		'reviews_page_' . Core\CHARSTCS_ANCHOR,
+	);
+
+	// Check the hook if we passed one.
+	if ( ! empty( $hook ) && in_array( $hook, $allowed_hooks ) ) {
+		return true;
+	}
+
+	// Check the tab portion and return true if it matches.
+	if ( ! empty( $_GET['tab'] ) && Core\TAB_BASE === sanitize_text_field( wp_unslash( $_GET['tab'] ) ) ) {
+		return true;
+	}
+
+	// Nothing left to check, so go false.
+	return false;
+}
+
+/**
  * Return our base link, with function fallbacks.
  *
  * @param  string $menu_slug  Which menu slug to use. Defaults to the primary.
@@ -612,6 +794,36 @@ function get_admin_menu_link( $menu_slug = '' ) {
 
 	// Return using the function.
 	return menu_page_url( $menu_slug, false );
+}
+
+/**
+ * Return our base link, with function fallbacks.
+ *
+ * @param  string $menu_slug  Which tab slug to use. Defaults to the primary.
+ * @param  string $section    Add a secondary section ID to the query.
+ *
+ * @return string
+ */
+function get_admin_tab_link( $tab_slug = '', $section = '' ) {
+
+	// Bail if we aren't on the admin side.
+	if ( ! is_admin() ) {
+		return false;
+	}
+
+	// Set my slug.
+	$tab_slug   = ! empty( $tab_slug ) ? trim( $tab_slug ) : trim( Core\TAB_BASE );
+
+	// Set up my args.
+	$setup_args = array( 'page' => 'wc-settings', 'tab' => esc_attr( $tab_slug ) );
+
+	// Add the optional section.
+	if ( ! empty( $section ) ) {
+		$setup_args['section'] = esc_attr( $section );
+	}
+
+	// Return the link with our args.
+	return add_query_arg( $setup_args, admin_url( 'admin.php' ) );
 }
 
 /**
