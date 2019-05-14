@@ -93,6 +93,7 @@ function set_initial_options() {
 
 	// Set our actual option flags.
 	update_option( 'woocommerce_enable_reviews', 'yes' );
+	update_option( Core\OPTION_PREFIX . 'plugin_version', Core\VERS );
 	update_option( Core\OPTION_PREFIX . 'allow_anonymous', 'no' );
 	update_option( Core\OPTION_PREFIX . 'global_attributes', 'yes' );
 	update_option( Core\OPTION_PREFIX . 'send_reminders', 'yes' );

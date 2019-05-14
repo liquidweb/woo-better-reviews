@@ -36,6 +36,23 @@ function get_table_args( $keys = false ) {
 }
 
 /**
+ * Check to see if reviews are enabled.
+ *
+ * @return mixed
+ */
+function get_stored_plugin_version() {
+
+	// Pull out the stored version.
+	$stored_version = get_option( Core\OPTION_PREFIX . 'plugin_version', false );
+
+	// If no version exists, then we never ran it.
+	if ( empty( $stored_version ) ) {
+
+	}
+
+}
+
+/**
  * Compare the table name to our allowed items.
  *
  * @param  string $table_name  The name (slug) of the table.
