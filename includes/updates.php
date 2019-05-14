@@ -96,6 +96,9 @@ function run_pending_updates() {
 		return;
 	}
 
+	// Set our settings tab link since we may need it.
+	$settings_tab   = Helpers\get_admin_tab_link();
+
 	// Set a blank notice text (since not all will require).
 	$notice_message = '';
 
@@ -109,7 +112,7 @@ function run_pending_updates() {
 			update_version_zero_point_zero_point_three();
 
 			// Set our notice text.
-			$notice_message = sprintf( __( 'Better Reviews for WooCommerce has been updated and review reminder emails have been activated! <a href="%s">Click here</a> to change the settings or disable the feature.', 'woo-better-reviews' ), Helpers\get_admin_tab_link() );
+			$notice_message = sprintf( __( 'Better Reviews for WooCommerce has been updated and review reminder emails have been activated! <a href="%s">Click here</a> to change the settings or disable the feature.', 'woo-better-reviews' ), esc_url( $settings_tab ) );
 
 			// And break.
 			break;
