@@ -101,6 +101,7 @@ function run_pending_updates() {
 
 	// Set a blank notice text (since not all will require).
 	$notice_message = '';
+	$notice_display = 'notice-info';
 
 	// Switch through and handle the updates we have.
 	switch ( esc_attr( $maybe_updated ) ) {
@@ -130,7 +131,7 @@ function run_pending_updates() {
 	if ( ! empty( $notice_message ) ) {
 
 		// Start the notice markup.
-		echo '<div class="notice notice-info is-dismissible">';
+		echo '<div class="notice ' . esc_attr( $notice_display ) . ' is-dismissible">';
 
 			// Display the actual message.
 			echo '<p><strong>' . wp_kses_post( $notice_message ) . '</strong></p>';
