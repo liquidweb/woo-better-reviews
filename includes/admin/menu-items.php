@@ -51,7 +51,7 @@ function add_quick_link( $links, $file ) {
 	}
 
 	// Fetch our setting links.
-	$settings_page  = add_query_arg( array( 'tab' => 'products' ), Helpers\get_admin_menu_link( 'wc-settings' ) );;
+	$settings_page  = add_query_arg( array( 'tab' => 'products' ), Helpers\get_admin_menu_link( 'wc-settings' ) );
 	$reviews_page   = Helpers\get_admin_menu_link( Core\REVIEWS_ANCHOR );
 
 	// Now create the link markup.
