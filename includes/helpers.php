@@ -45,11 +45,27 @@ function get_stored_plugin_version() {
 	// Pull out the stored version.
 	$stored_version = get_option( Core\OPTION_PREFIX . 'plugin_version', false );
 
-	// If no version exists, then we never ran it.
+	// If no version exists, then it hasn't been run.
 	if ( empty( $stored_version ) ) {
 
+		// Set the option itself.
+		update_option( Core\OPTION_PREFIX . 'plugin_version', Core\VERS );
+
+		// And return the version.
+		return Core\VERS;
 	}
 
+	// Return the stored version.
+	return $stored_version;
+}
+
+/**
+ * Check to see if WooCommerce is installed and active.
+ *
+ * @return boolean
+ */
+function maybe_woo_activated() {
+	return class_exists( 'woocommerce' ) ? true : false;
 }
 
 /**

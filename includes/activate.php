@@ -21,6 +21,19 @@ use LiquidWeb\WooBetterReviews\Queries as Queries;
  */
 function activate() {
 
+	// Do the check for WooCommerce being active.
+	$maybe_woo  = Helpers\maybe_woo_activated();
+
+	// Deactivate if we aren't Woo'd.
+	if ( ! $maybe_woo ) {
+
+		// Deactivate the plugin.
+		deactivate_plugins( Core\BASE );
+
+		// And display the notice.
+		wp_die( sprintf( __( 'Using the Better Reviews for WooCommerce plugin required that you have WooCommerce installed and activated. <a href="%s">Click here</a> to return to the plugins page.', 'woo-better-reviews' ), admin_url( '/plugins.php' ) ) );
+	}
+
 	// Run the check on the DB table.
 	Database\maybe_install_tables();
 
