@@ -10,6 +10,7 @@ namespace LiquidWeb\WooBetterReviews\Activate;
 
 // Set our aliases.
 use LiquidWeb\WooBetterReviews as Core;
+use LiquidWeb\WooBetterReviews\Helpers as Helpers;
 use LiquidWeb\WooBetterReviews\Utilities as Utilities;
 use LiquidWeb\WooBetterReviews\Database as Database;
 use LiquidWeb\WooBetterReviews\Queries as Queries;
