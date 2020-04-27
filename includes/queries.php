@@ -20,8 +20,6 @@ use WP_Error;
 /**
  * Get all the reviews.
  *
- * @param  string  $return_type  What type of return we want. Accepts "counts", "objects", or fields.
- * @param  boolean $date_order   If the date order should be maintained on the field returns.
  * @param  boolean $purge        Optional to purge the cache'd version before looking up.
  *
  * @return mixed
