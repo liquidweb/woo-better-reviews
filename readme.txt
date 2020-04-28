@@ -1,5 +1,5 @@
 === Better Reviews For WooCommerce ===
-Contributors: liquidweb, norcross
+Contributors: nexcess, norcross
 Tags: woocommerce, reviews
 Requires at least: 5.0
 Tested up to: 5.2.0
