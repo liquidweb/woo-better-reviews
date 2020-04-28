@@ -8,9 +8,9 @@
  */
 
 // Set our aliases.
-use LiquidWeb\WooBetterReviews as Core;
-use LiquidWeb\WooBetterReviews\Helpers as Helpers;
-use LiquidWeb\WooBetterReviews\Queries as Queries;
+use Nexcess\WooBetterReviews as Core;
+use Nexcess\WooBetterReviews\Helpers as Helpers;
+use Nexcess\WooBetterReviews\Queries as Queries;
 
 // Don't load without direct.
 if ( ! defined( 'ABSPATH' ) ) {

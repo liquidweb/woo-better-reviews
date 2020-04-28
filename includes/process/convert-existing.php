@@ -6,14 +6,14 @@
  */
 
 // Declare our namespace.
-namespace LiquidWeb\WooBetterReviews\ConvertExisting;
+namespace Nexcess\WooBetterReviews\ConvertExisting;
 
 // Set our aliases.
-use LiquidWeb\WooBetterReviews as Core;
-use LiquidWeb\WooBetterReviews\Helpers as Helpers;
-use LiquidWeb\WooBetterReviews\Utilities as Utilities;
-use LiquidWeb\WooBetterReviews\Queries as Queries;
-use LiquidWeb\WooBetterReviews\Database as Database;
+use Nexcess\WooBetterReviews as Core;
+use Nexcess\WooBetterReviews\Helpers as Helpers;
+use Nexcess\WooBetterReviews\Utilities as Utilities;
+use Nexcess\WooBetterReviews\Queries as Queries;
+use Nexcess\WooBetterReviews\Database as Database;
 
 // And pull in any other namespaces.
 use WP_Error;

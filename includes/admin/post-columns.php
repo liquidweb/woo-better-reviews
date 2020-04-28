@@ -6,11 +6,11 @@
  */
 
 // Declare our namespace.
-namespace LiquidWeb\WooBetterReviews\Admin\PostColumns;
+namespace Nexcess\WooBetterReviews\Admin\PostColumns;
 
 // Set our aliases.
-use LiquidWeb\WooBetterReviews as Core;
-use LiquidWeb\WooBetterReviews\Helpers as Helpers;
+use Nexcess\WooBetterReviews as Core;
+use Nexcess\WooBetterReviews\Helpers as Helpers;
 
 // And pull in any other namespaces.
 use WP_Error;

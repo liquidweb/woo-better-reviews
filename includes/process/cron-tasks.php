@@ -6,14 +6,14 @@
  */
 
 // Declare our namespace.
-namespace LiquidWeb\WooBetterReviews\CronTasks;
+namespace Nexcess\WooBetterReviews\CronTasks;
 
 // Set our aliases.
-use LiquidWeb\WooBetterReviews as Core;
-use LiquidWeb\WooBetterReviews\Helpers as Helpers;
-use LiquidWeb\WooBetterReviews\Utilities as Utilities;
-use LiquidWeb\WooBetterReviews\Queries as Queries;
-use LiquidWeb\WooBetterReviews\Reminders as Reminders;
+use Nexcess\WooBetterReviews as Core;
+use Nexcess\WooBetterReviews\Helpers as Helpers;
+use Nexcess\WooBetterReviews\Utilities as Utilities;
+use Nexcess\WooBetterReviews\Queries as Queries;
+use Nexcess\WooBetterReviews\Reminders as Reminders;
 
 /**
  * Start our engines.

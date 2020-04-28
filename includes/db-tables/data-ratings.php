@@ -6,11 +6,11 @@
  */
 
 // Declare our namespace.
-namespace LiquidWeb\WooBetterReviews\Tables\Ratings;
+namespace Nexcess\WooBetterReviews\Tables\Ratings;
 
 // Set our aliases.
-use LiquidWeb\WooBetterReviews as Core;
-use LiquidWeb\WooBetterReviews\Database as Database;
+use Nexcess\WooBetterReviews as Core;
+use Nexcess\WooBetterReviews\Database as Database;
 
 // And pull in any other namespaces.
 use WP_Error;

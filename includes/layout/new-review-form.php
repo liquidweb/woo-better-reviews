@@ -6,15 +6,15 @@
  */
 
 // Declare our namespace.
-namespace LiquidWeb\WooBetterReviews\Layout\NewReviewForm;
+namespace Nexcess\WooBetterReviews\Layout\NewReviewForm;
 
 // Set our aliases.
-use LiquidWeb\WooBetterReviews as Core;
-use LiquidWeb\WooBetterReviews\Helpers as Helpers;
-use LiquidWeb\WooBetterReviews\Utilities as Utilities;
-use LiquidWeb\WooBetterReviews\Queries as Queries;
-use LiquidWeb\WooBetterReviews\FormData as FormData;
-use LiquidWeb\WooBetterReviews\FormFields as FormFields;
+use Nexcess\WooBetterReviews as Core;
+use Nexcess\WooBetterReviews\Helpers as Helpers;
+use Nexcess\WooBetterReviews\Utilities as Utilities;
+use Nexcess\WooBetterReviews\Queries as Queries;
+use Nexcess\WooBetterReviews\FormData as FormData;
+use Nexcess\WooBetterReviews\FormFields as FormFields;
 
 /**
  * Set up the portion displaying the 'leave a review' title.

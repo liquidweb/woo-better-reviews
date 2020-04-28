@@ -8,13 +8,13 @@
  */
 
 // Declare our namespace.
-namespace LiquidWeb\WooBetterReviews\SchemaMarkup;
+namespace Nexcess\WooBetterReviews\SchemaMarkup;
 
 // Set our aliases.
-use LiquidWeb\WooBetterReviews as Core;
-use LiquidWeb\WooBetterReviews\Helpers as Helpers;
-use LiquidWeb\WooBetterReviews\Utilities as Utilities;
-use LiquidWeb\WooBetterReviews\Queries as Queries;
+use Nexcess\WooBetterReviews as Core;
+use Nexcess\WooBetterReviews\Helpers as Helpers;
+use Nexcess\WooBetterReviews\Utilities as Utilities;
+use Nexcess\WooBetterReviews\Queries as Queries;
 
 /**
  * Start our engines.

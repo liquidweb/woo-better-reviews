@@ -6,10 +6,10 @@
  */
 
 // Declare our namespace.
-namespace LiquidWeb\WooBetterReviews\WooActions;
+namespace Nexcess\WooBetterReviews\WooActions;
 
 // Set our aliases.
-use LiquidWeb\WooBetterReviews as Core;
+use Nexcess\WooBetterReviews as Core;
 
 /**
  * Start our engines.

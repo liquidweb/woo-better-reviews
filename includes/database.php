@@ -6,18 +6,18 @@
  */
 
 // Declare our namespace.
-namespace LiquidWeb\WooBetterReviews\Database;
+namespace Nexcess\WooBetterReviews\Database;
 
 // Set our aliases.
-use LiquidWeb\WooBetterReviews as Core;
-use LiquidWeb\WooBetterReviews\Helpers as Helpers;
+use Nexcess\WooBetterReviews as Core;
+use Nexcess\WooBetterReviews\Helpers as Helpers;
 
 // Set the various table aliases.
-use LiquidWeb\WooBetterReviews\Tables\Content as Content;
-use LiquidWeb\WooBetterReviews\Tables\AuthorMeta as AuthorMeta;
-use LiquidWeb\WooBetterReviews\Tables\Ratings as Ratings;
-use LiquidWeb\WooBetterReviews\Tables\Attributes as Attributes;
-use LiquidWeb\WooBetterReviews\Tables\Characteristics as Characteristics;
+use Nexcess\WooBetterReviews\Tables\Content as Content;
+use Nexcess\WooBetterReviews\Tables\AuthorMeta as AuthorMeta;
+use Nexcess\WooBetterReviews\Tables\Ratings as Ratings;
+use Nexcess\WooBetterReviews\Tables\Attributes as Attributes;
+use Nexcess\WooBetterReviews\Tables\Characteristics as Characteristics;
 
 // And pull in any other namespaces.
 use WP_Error;
