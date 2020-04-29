@@ -6,11 +6,11 @@
  */
 
 // Declare our namespace.
-namespace LiquidWeb\WooBetterReviews\Utilities;
+namespace Nexcess\WooBetterReviews\Utilities;
 
 // Set our aliases.
-use LiquidWeb\WooBetterReviews as Core;
-use LiquidWeb\WooBetterReviews\Queries as Queries;
+use Nexcess\WooBetterReviews as Core;
+use Nexcess\WooBetterReviews\Queries as Queries;
 
 /**
  * Check the constants we know about during an Ajax call.

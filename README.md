@@ -1,5 +1,5 @@
 # Better Reviews For WooCommerce #
-**Contributors:** [liquidweb](https://profiles.wordpress.org/liquidweb), [norcross](https://profiles.wordpress.org/norcross)  
+**Contributors:** [nexcess](https://profiles.wordpress.org/nexcess), [norcross](https://profiles.wordpress.org/norcross)  
 **Tags:** woocommerce, reviews  
 **Requires at least:** 5.0  
 **Tested up to:** 5.2.0  

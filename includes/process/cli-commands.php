@@ -6,15 +6,15 @@
  */
 
 // Declare our namespace (same as the main).
-namespace LiquidWeb\WooBetterReviews;
+namespace Nexcess\WooBetterReviews;
 
 // Set our aliases.
-use LiquidWeb\WooBetterReviews as Core;
-use LiquidWeb\WooBetterReviews\Helpers as Helpers;
-use LiquidWeb\WooBetterReviews\Utilities as Utilities;
-use LiquidWeb\WooBetterReviews\Queries as Queries;
-use LiquidWeb\WooBetterReviews\Database as Database;
-use LiquidWeb\WooBetterReviews\ConvertExisting as ConvertExisting;
+use Nexcess\WooBetterReviews as Core;
+use Nexcess\WooBetterReviews\Helpers as Helpers;
+use Nexcess\WooBetterReviews\Utilities as Utilities;
+use Nexcess\WooBetterReviews\Queries as Queries;
+use Nexcess\WooBetterReviews\Database as Database;
+use Nexcess\WooBetterReviews\ConvertExisting as ConvertExisting;
 
 // Pull in the CLI items.
 use WP_CLI;

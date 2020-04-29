@@ -6,11 +6,11 @@
  */
 
 // Declare our namespace.
-namespace LiquidWeb\WooBetterReviews\Helpers;
+namespace Nexcess\WooBetterReviews\Helpers;
 
 // Set our aliases.
-use LiquidWeb\WooBetterReviews as Core;
-use LiquidWeb\WooBetterReviews\Queries as Queries;
+use Nexcess\WooBetterReviews as Core;
+use Nexcess\WooBetterReviews\Queries as Queries;
 
 /**
  * Set the key / value pair for all our custom tables.

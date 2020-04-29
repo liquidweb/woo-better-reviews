@@ -6,18 +6,18 @@
  */
 
 // Declare our namespace.
-namespace LiquidWeb\WooBetterReviews\ViewOutput;
+namespace Nexcess\WooBetterReviews\ViewOutput;
 
 // Set our aliases.
-use LiquidWeb\WooBetterReviews as Core;
-use LiquidWeb\WooBetterReviews\Helpers as Helpers;
-use LiquidWeb\WooBetterReviews\Utilities as Utilities;
-use LiquidWeb\WooBetterReviews\Queries as Queries;
-use LiquidWeb\WooBetterReviews\FormFields as FormFields;
-use LiquidWeb\WooBetterReviews\Layout\ReviewList as LayoutReviewList;
-use LiquidWeb\WooBetterReviews\Layout\ReviewAggregate as LayoutReviewAggregate;
-use LiquidWeb\WooBetterReviews\Layout\NewReviewForm as LayoutNewReviewForm;
-use LiquidWeb\WooBetterReviews\Layout\SingleReview as LayoutSingleReview;
+use Nexcess\WooBetterReviews as Core;
+use Nexcess\WooBetterReviews\Helpers as Helpers;
+use Nexcess\WooBetterReviews\Utilities as Utilities;
+use Nexcess\WooBetterReviews\Queries as Queries;
+use Nexcess\WooBetterReviews\FormFields as FormFields;
+use Nexcess\WooBetterReviews\Layout\ReviewList as LayoutReviewList;
+use Nexcess\WooBetterReviews\Layout\ReviewAggregate as LayoutReviewAggregate;
+use Nexcess\WooBetterReviews\Layout\NewReviewForm as LayoutNewReviewForm;
+use Nexcess\WooBetterReviews\Layout\SingleReview as LayoutSingleReview;
 
 // And pull in any other namespaces.
 use WP_Error;

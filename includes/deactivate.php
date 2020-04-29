@@ -6,11 +6,11 @@
  */
 
 // Declare our namespace.
-namespace LiquidWeb\WooBetterReviews\Deactivate;
+namespace Nexcess\WooBetterReviews\Deactivate;
 
 // Set our aliases.
-use LiquidWeb\WooBetterReviews as Core;
-use LiquidWeb\WooBetterReviews\Utilities as Utilities;
+use Nexcess\WooBetterReviews as Core;
+use Nexcess\WooBetterReviews\Utilities as Utilities;
 
 /**
  * Delete various options when deactivating the plugin.

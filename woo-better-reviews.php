@@ -1,11 +1,11 @@
 <?php
 /**
  * Plugin Name: Better Reviews For WooCommerce
- * Plugin URI:  https://github.com/liquidweb/woo-better-reviews
+ * Plugin URI:  https://www.nexcess.net
  * Description: Like reviews, only way better.
  * Version:     0.4.0-dev
- * Author:      Liquid Web
- * Author URI:  https://www.liquidweb.com
+ * Author:      Nexcess
+ * Author URI:  https://www.nexcess.net
  * Text Domain: woo-better-reviews
  * Domain Path: /languages
  * WC requires at least: 3.5.0
@@ -17,7 +17,7 @@
  */
 
 // Declare our namespace.
-namespace LiquidWeb\WooBetterReviews;
+namespace Nexcess\WooBetterReviews;
 
 // Call our CLI namespace.
 use WP_CLI;

@@ -6,12 +6,12 @@
  */
 
 // Declare our namespace.
-namespace LiquidWeb\WooBetterReviews\Uninstall;
+namespace Nexcess\WooBetterReviews\Uninstall;
 
 // Set our aliases.
-use LiquidWeb\WooBetterReviews as Core;
-use LiquidWeb\WooBetterReviews\Utilities as Utilities;
-use LiquidWeb\WooBetterReviews\Database as Database;
+use Nexcess\WooBetterReviews as Core;
+use Nexcess\WooBetterReviews\Utilities as Utilities;
+use Nexcess\WooBetterReviews\Database as Database;
 
 /**
  * Delete various options when uninstalling the plugin.
