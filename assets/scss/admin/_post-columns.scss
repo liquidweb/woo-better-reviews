@@ -1,5 +1,20 @@
 
+
+
 .manage-column.column-wbr-count {}
+
+thead {
+
+	th#wbr-count {
+		width: 125px;
+	}
+
+	th#wbr-average {
+		width: 135px;
+	}
+
+
+}
 
 .column-wbr-count {
 
@@ -7,4 +22,5 @@
 		padding: 1px 3px;
 		font-size: 14px;
 	}
+
 }

@@ -150,6 +150,10 @@ function maybe_adjust_reminder_cron() {
  */
 function get_settings() {
 
+	// Set the text for the global product attributes, since it has some markup.
+	$setup_global_attributes_label  = __( 'Make reviewable attributes global.', 'woo-better-reviews' );
+	$setup_global_attributes_label .= ' <span class="woo-better-reviews-inline-label-text">' . __( '(Apply each created attribute to every product)', 'woo-better-reviews' ) . '</span>';
+
 	// Set up our array, including default Woo items.
 	$setup_args = array(
 
@@ -220,7 +224,7 @@ function get_settings() {
 
 		'gloablattributes' => array(
 			'title'    => __( 'Product Attributes', 'woo-better-reviews' ),
-			'desc'     => __( 'Apply each created attribute to every product', 'woo-better-reviews' ),
+			'desc'     => $setup_global_attributes_label,
 			'id'       => Core\OPTION_PREFIX . 'global_attributes',
 			'type'     => 'checkbox',
 			'default'  => 'yes',

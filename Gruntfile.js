@@ -130,9 +130,8 @@ module.exports = function( grunt ) {
     sass: {
       dist: {
         options: {
-        style: 'nested',
-        unixNewlines: true
-      },
+          style: 'compressed'
+        },
         expand: true,
         cwd: 'assets/scss',
         src: ['*.scss'],
@@ -141,10 +140,8 @@ module.exports = function( grunt ) {
       },
       dev: {
         options: {
-        style: 'nested',
-        lineNumbers: true,
-        unixNewlines: true
-      },
+          style: 'expanded'
+        },
         expand: true,
         cwd: 'assets/scss',
         src: ['*.scss'],
@@ -152,7 +149,6 @@ module.exports = function( grunt ) {
         ext: '.css'
       },
     },
-
     // Minify CSS
     cssmin: {
       minify: {

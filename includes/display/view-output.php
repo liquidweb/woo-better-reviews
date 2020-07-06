@@ -342,8 +342,20 @@ function display_new_review_form( $product_id = 0, $echo = true ) {
 			// Handle the inputs themselves.
 			$build .= LayoutNewReviewForm\set_review_form_content_fields_view( $product_id );
 
-			// Now get the author fields.
-			$build .= LayoutNewReviewForm\set_review_form_author_fields_view( get_current_user_id() );
+			// The whole set of author pieces goes inside a div.
+			$build .= '<div class="woo-better-reviews-rating-new-review-fields woo-better-reviews-rating-author-fields">';
+
+				// Handle the intro to the fields.
+				$build .= LayoutNewReviewForm\set_review_form_author_intro_fields_view( get_current_user_id() );
+
+				// Now get the standard author fields.
+				$build .= LayoutNewReviewForm\set_review_form_author_base_fields_view( get_current_user_id() );
+
+				// Now get the author fields.
+				$build .= LayoutNewReviewForm\set_review_form_author_charstcs_fields_view( get_current_user_id() );
+
+			// Close up the author box.
+			$build .= '</div>';
 
 			// Output the submit actions.
 			$build .= LayoutNewReviewForm\set_review_form_submit_action_fields_view( $product_id );
