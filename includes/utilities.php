@@ -897,6 +897,7 @@ function purge_transients( $key = '', $group = '', $custom = array() ) {
 						delete_transient( Core\HOOK_PREFIX . 'approved_reviews_for_product_' . $id );
 						delete_transient( Core\HOOK_PREFIX . 'review_count_product' . $id );
 						delete_transient( Core\HOOK_PREFIX . 'attributes_product' . $id );
+						delete_transient( Core\HOOK_PREFIX . 'author_charstcs_product' . $id );
 					}
 				}
 

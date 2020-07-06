@@ -312,37 +312,39 @@ function set_review_form_content_fields_view( $product_id = 0 ) {
 /**
  * Set up the portion displaying the introduction to author input entry fields.
  *
- * @param  integer $author_id  The author ID we are displaying this for.
+ * @param  integer $author_id   The author ID we are displaying this for.
+ * @param  integer $product_id  The product ID we are displaying this on.
  *
  * @return HTML
  */
-function set_review_form_author_intro_fields_view( $author_id = 0 ) {
+function set_review_form_author_title_view( $author_id = 0, $product_id = 0 ) {
 
 	// Set my author field title.
-	$author_view_h3 = apply_filters( Core\HOOK_PREFIX . 'review_form_author_intro_fields_title', __( 'Tell us about yourself', 'woo-better-reviews' ), $author_id );
+	$author_view_h3 = apply_filters( Core\HOOK_PREFIX . 'review_form_author_title', __( 'Tell us about yourself', 'woo-better-reviews' ), $author_id, $product_id );
 
 	// Set an actual title.
 	$display_view   = '<h3 class="woo-better-reviews-rating-author-fields-title">' . esc_html( $author_view_h3 ) . '</h3>';
 
 	// Return it, filtered.
-	return apply_filters( Core\HOOK_PREFIX . 'review_form_author_intro_fields_view', $display_view, array(), $author_id );
+	return apply_filters( Core\HOOK_PREFIX . 'review_form_author_title_view', $display_view, array(), $author_id, $product_id );
 }
 
 /**
  * Set up the portion displaying the basic author input entry fields.
  *
- * @param  integer $author_id  The author ID we are displaying this for.
+ * @param  integer $author_id   The author ID we are displaying this for.
+ * @param  integer $product_id  The product ID we are displaying this on.
  *
  * @return HTML
  */
-function set_review_form_author_base_fields_view( $author_id = 0 ) {
+function set_review_form_author_base_fields_view( $author_id = 0, $product_id = 0 ) {
 
 	// Get my form fields.
 	$fieldset_data  = FormData\get_review_author_base_form_fields( $author_id );
 
 	// Bail without the fields to display.
 	if ( empty( $fieldset_data ) ) {
-		return apply_filters( Core\HOOK_PREFIX . 'review_form_author_base_fields_view', '', null, $author_id );
+		return apply_filters( Core\HOOK_PREFIX . 'review_form_author_base_fields_view', '', null, $author_id, $product_id );
 	}
 
 	// First set the empty.
@@ -414,24 +416,25 @@ function set_review_form_author_base_fields_view( $author_id = 0 ) {
 	}
 
 	// Return it, filtered.
-	return apply_filters( Core\HOOK_PREFIX . 'review_form_author_base_fields_view', $display_view, $fieldset_data, $author_id );
+	return apply_filters( Core\HOOK_PREFIX . 'review_form_author_base_fields_view', $display_view, $fieldset_data, $author_id, $product_id );
 }
 
 /**
  * Set up the portion displaying the author charstcs input entry fields.
  *
- * @param  integer $author_id  The author ID we are displaying this for.
+ * @param  integer $author_id   The author ID we are displaying this for.
+ * @param  integer $product_id  The product ID we are displaying this on.
  *
  * @return HTML
  */
-function set_review_form_author_charstcs_fields_view( $author_id = 0 ) {
+function set_review_form_author_charstcs_fields_view( $author_id = 0, $product_id = 0 ) {
 
 	// Get my form fields.
-	$fieldset_data  = FormData\get_review_author_charstcs_form_fields( $author_id );
+	$fieldset_data  = FormData\get_review_author_charstcs_form_fields( $author_id, $product_id );
 
 	// Bail without the fields to display.
 	if ( empty( $fieldset_data ) ) {
-		return apply_filters( Core\HOOK_PREFIX . 'review_form_author_charstcs_fields_view', '', null, $author_id );
+		return apply_filters( Core\HOOK_PREFIX . 'review_form_author_charstcs_fields_view', '', null, $author_id, $product_id );
 	}
 
 	// First set the empty.
@@ -503,17 +506,18 @@ function set_review_form_author_charstcs_fields_view( $author_id = 0 ) {
 	}
 
 	// Return it, filtered.
-	return apply_filters( Core\HOOK_PREFIX . 'review_form_author_charstcs_fields_view', $display_view, $fieldset_data, $author_id );
+	return apply_filters( Core\HOOK_PREFIX . 'review_form_author_charstcs_fields_view', $display_view, $fieldset_data, $author_id, $product_id );
 }
 
 /**
  * Set up the portion displaying the content entry fields.
  *
- * @param  integer $product_id  The product ID we are displaying for.
+ * @param  integer $author_id   The author ID we are displaying this for.
+ * @param  integer $product_id  The product ID we are displaying this on.
  *
  * @return HTML
  */
-function set_review_form_submit_action_fields_view( $product_id = 0 ) {
+function set_review_form_submit_action_fields_view( $author_id = 0, $product_id = 0 ) {
 
 	// Bail without the parts we want.
 	if ( empty( $product_id ) ) {
@@ -525,7 +529,7 @@ function set_review_form_submit_action_fields_view( $product_id = 0 ) {
 
 	// Bail without buttons.
 	if ( empty( $fieldset_data ) ) {
-		return apply_filters( Core\HOOK_PREFIX . 'review_form_submit_actions_fields_view', '', null, $product_id );
+		return apply_filters( Core\HOOK_PREFIX . 'review_form_submit_actions_fields_view', '', null, $author_id, $product_id );
 	}
 
 	// First set the empty.
@@ -561,18 +565,18 @@ function set_review_form_submit_action_fields_view( $product_id = 0 ) {
 	$display_view  .= '</div>';
 
 	// Return it, filtered.
-	return apply_filters( Core\HOOK_PREFIX . 'review_form_submit_actions_fields_view', $display_view, $fieldset_data, $product_id );
+	return apply_filters( Core\HOOK_PREFIX . 'review_form_submit_actions_fields_view', $display_view, $fieldset_data, $author_id, $product_id );
 }
 
 /**
  * Set up the portion displaying the hidden meta entry fields.
  *
- * @param  integer $product_id  The product ID we are displaying for.
- * @param  integer $author_id   The possible author ID we are displaying for.
+ * @param  integer $author_id   The author ID we are displaying this for.
+ * @param  integer $product_id  The product ID we are displaying this on.
  *
  * @return HTML
  */
-function set_review_form_hidden_meta_fields_view( $product_id = 0, $author_id = 0 ) {
+function set_review_form_hidden_meta_fields_view( $author_id = 0, $product_id = 0 ) {
 
 	// Bail without the parts we want.
 	if ( empty( $product_id ) ) {
@@ -584,7 +588,7 @@ function set_review_form_hidden_meta_fields_view( $product_id = 0, $author_id = 
 
 	// Bail without buttons.
 	if ( empty( $fieldset_data ) ) {
-		return apply_filters( Core\HOOK_PREFIX . 'review_form_hidden_meta_fields_view', '', null, $product_id, $author_id );
+		return apply_filters( Core\HOOK_PREFIX . 'review_form_hidden_meta_fields_view', '', null, $author_id, $product_id );
 	}
 
 	// First set the empty.
@@ -602,5 +606,5 @@ function set_review_form_hidden_meta_fields_view( $product_id = 0, $author_id = 
 	}
 
 	// Return it, filtered.
-	return apply_filters( Core\HOOK_PREFIX . 'review_form_hidden_meta_fields_view', $display_view, $fieldset_data, $product_id, $author_id );
+	return apply_filters( Core\HOOK_PREFIX . 'review_form_hidden_meta_fields_view', $display_view, $fieldset_data, $author_id, $product_id );
 }

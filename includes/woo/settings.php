@@ -154,6 +154,10 @@ function get_settings() {
 	$setup_global_attributes_label  = __( 'Make reviewable attributes global.', 'woo-better-reviews' );
 	$setup_global_attributes_label .= ' <span class="woo-better-reviews-inline-label-text">' . __( '(Apply each created attribute to every product)', 'woo-better-reviews' ) . '</span>';
 
+	// Set the text for the global review author characteristics / traits, since it has some markup.
+	$setup_global_charstcs_label    = __( 'Make review author traits global.', 'woo-better-reviews' );
+	$setup_global_charstcs_label   .= ' <span class="woo-better-reviews-inline-label-text">' . __( '(Apply each created trait to every review author)', 'woo-better-reviews' ) . '</span>';
+
 	// Set up our array, including default Woo items.
 	$setup_args = array(
 
@@ -230,6 +234,16 @@ function get_settings() {
 			'default'  => 'yes',
 			'class'    => 'woo-better-reviews-settings-checkbox',
 			'desc_tip' => sprintf( __( '<a href="%s">Click here</a> to view and edit your product review attributes.', 'woo-better-reviews' ), Helpers\get_admin_menu_link( Core\ATTRIBUTES_ANCHOR ) ),
+		),
+
+		'gloablcharstcs' => array(
+			'title'    => __( 'Review Author Traits', 'woo-better-reviews' ),
+			'desc'     => $setup_global_charstcs_label,
+			'id'       => Core\OPTION_PREFIX . 'global_charstcs',
+			'type'     => 'checkbox',
+			'default'  => 'yes',
+			'class'    => 'woo-better-reviews-settings-checkbox',
+			'desc_tip' => sprintf( __( '<a href="%s">Click here</a> to view and edit your review author traits.', 'woo-better-reviews' ), Helpers\get_admin_menu_link( Core\CHARSTCS_ANCHOR ) ),
 		),
 
 		// Include my section end.

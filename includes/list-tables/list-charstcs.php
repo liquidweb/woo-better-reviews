@@ -35,8 +35,8 @@ class WooBetterReviews_ListCharstcs extends WP_List_Table {
 
 		// Set parent defaults.
 		parent::__construct( array(
-			'singular' => __( 'Product Characteristic', 'woo-better-reviews' ),
-			'plural'   => __( 'Product Characteristics', 'woo-better-reviews' ),
+			'singular' => __( 'Review Author Trait', 'woo-better-reviews' ),
+			'plural'   => __( 'Review Author Traits', 'woo-better-reviews' ),
 			'ajax'     => false,
 		) );
 	}
@@ -119,7 +119,7 @@ class WooBetterReviews_ListCharstcs extends WP_List_Table {
 	public function display() {
 
 		// Handle our search output.
-		$this->search_box( __( 'Search Attributes', 'woo-better-reviews' ), 'attributes' );
+		$this->search_box( __( 'Search Traits', 'woo-better-reviews' ), 'attributes' );
 
 		// And handle the display.
 		echo '<form class="woo-better-reviews-admin-form" id="woo-better-reviews-admin-attributes-form" method="post">';
@@ -282,7 +282,7 @@ class WooBetterReviews_ListCharstcs extends WP_List_Table {
 
 		// Make a basic array of the actions we wanna include.
 		$setup  = array(
-			'wbr_bulk_delete' => __( 'Delete Characteristics', 'woo-better-reviews' ),
+			'wbr_bulk_delete' => __( 'Delete Review Author Traits', 'woo-better-reviews' ),
 		);
 
 		// Return it filtered.
@@ -382,7 +382,7 @@ class WooBetterReviews_ListCharstcs extends WP_List_Table {
 		$id = absint( $item['id'] );
 
 		// Return my checkbox.
-		return '<input type="checkbox" name="charstcs-ids[]" class="woo-better-reviews-admin-checkbox" id="cb-' . $id . '" value="' . $id . '" /><label for="cb-' . $id . '" class="screen-reader-text">' . __( 'Select characteristic', 'woo-better-reviews' ) . '</label>';
+		return '<input type="checkbox" name="charstcs-ids[]" class="woo-better-reviews-admin-checkbox" id="cb-' . $id . '" value="' . $id . '" /><label for="cb-' . $id . '" class="screen-reader-text">' . __( 'Select trait', 'woo-better-reviews' ) . '</label>';
 	}
 
 	/**
@@ -722,7 +722,7 @@ class WooBetterReviews_ListCharstcs extends WP_List_Table {
 			'edit' => array(
 				'nonce'  => wp_create_nonce( 'wbr_edit_single_' . $charstcs_id ),
 				'label'  => __( 'Edit', 'woo-better-reviews' ),
-				'title'  => __( 'Edit Characteristic', 'woo-better-reviews' ),
+				'title'  => __( 'Edit Trait', 'woo-better-reviews' ),
 				'data'   => array(
 					'item-id'   => $charstcs_id,
 					'item-type' => 'charstcs',
@@ -733,7 +733,7 @@ class WooBetterReviews_ListCharstcs extends WP_List_Table {
 			'delete' => array(
 				'nonce'  => wp_create_nonce( 'wbr_delete_single_' . $charstcs_id ),
 				'label'  => __( 'Delete', 'woo-better-reviews' ),
-				'title'  => __( 'Delete Characteristic', 'woo-better-reviews' ),
+				'title'  => __( 'Delete Trait', 'woo-better-reviews' ),
 				'data'   => array(
 					'item-id'   => $charstcs_id,
 					'item-type' => 'charstcs',
@@ -795,7 +795,7 @@ class WooBetterReviews_ListCharstcs extends WP_List_Table {
 	 * @return string
 	 */
 	public function no_items() {
-		_e( 'No characteristics found.', 'woo-better-reviews' );
+		_e( 'No traits found.', 'woo-better-reviews' );
 	}
 
 	/**

@@ -346,22 +346,22 @@ function display_new_review_form( $product_id = 0, $echo = true ) {
 			$build .= '<div class="woo-better-reviews-rating-new-review-fields woo-better-reviews-rating-author-fields">';
 
 				// Handle the intro to the fields.
-				$build .= LayoutNewReviewForm\set_review_form_author_intro_fields_view( get_current_user_id() );
+				$build .= LayoutNewReviewForm\set_review_form_author_title_view( get_current_user_id(), $product_id );
 
 				// Now get the standard author fields.
-				$build .= LayoutNewReviewForm\set_review_form_author_base_fields_view( get_current_user_id() );
+				$build .= LayoutNewReviewForm\set_review_form_author_base_fields_view( get_current_user_id(), $product_id );
 
 				// Now get the author fields.
-				$build .= LayoutNewReviewForm\set_review_form_author_charstcs_fields_view( get_current_user_id() );
+				$build .= LayoutNewReviewForm\set_review_form_author_charstcs_fields_view( get_current_user_id(), $product_id );
 
 			// Close up the author box.
 			$build .= '</div>';
 
 			// Output the submit actions.
-			$build .= LayoutNewReviewForm\set_review_form_submit_action_fields_view( $product_id );
+			$build .= LayoutNewReviewForm\set_review_form_submit_action_fields_view( get_current_user_id(), $product_id );
 
 			// Output the hidden stuff.
-			$build .= LayoutNewReviewForm\set_review_form_hidden_meta_fields_view( $product_id, get_current_user_id() );
+			$build .= LayoutNewReviewForm\set_review_form_hidden_meta_fields_view( get_current_user_id(), $product_id );
 
 			// Add actions for before and after fields.
 			$build .= do_action( Core\HOOK_PREFIX . 'after_new_review_form_after', $product_id );

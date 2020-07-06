@@ -77,20 +77,30 @@ function load_admin_menus() {
 
 	// Load my top-level admin menu.
 	add_menu_page(
-		get_menu_page_title( 'reviews' ),
-		__( 'Reviews', 'woo-better-reviews' ),
+		__( 'Product Reviews', 'woo-better-reviews' ),
+		__( 'Product Reviews', 'woo-better-reviews' ),
 		$user_menu_cap,
 		Core\REVIEWS_ANCHOR,
-		__NAMESPACE__ . '\load_reviews_list_page',
+		null,
         'dashicons-feedback',
         '58.8'
     );
+
+	// Add a secondary page so we have a better label.
+	add_submenu_page(
+		Core\REVIEWS_ANCHOR,
+		get_menu_page_title( 'reviews' ),
+		__( 'All Reviews', 'woo-better-reviews' ),
+		$user_menu_cap,
+		Core\REVIEWS_ANCHOR,
+		__NAMESPACE__ . '\load_reviews_list_page'
+	);
 
 	// Add the attributes page.
 	add_submenu_page(
 		Core\REVIEWS_ANCHOR,
 		get_menu_page_title( 'attributes' ),
-		__( 'Attributes','woo-better-reviews' ),
+		__( 'Review Attributes','woo-better-reviews' ),
 		$user_menu_cap,
 		Core\ATTRIBUTES_ANCHOR,
 		__NAMESPACE__ . '\load_product_attributes_page'
@@ -100,7 +110,7 @@ function load_admin_menus() {
 	add_submenu_page(
 		Core\REVIEWS_ANCHOR,
 		get_menu_page_title( 'characteristics' ),
-		__( 'Characteristics', 'woo-better-reviews' ),
+		__( 'Author Traits', 'woo-better-reviews' ),
 		$user_menu_cap,
 		Core\CHARSTCS_ANCHOR,
 		__NAMESPACE__ . '\load_author_characteristics_page'
@@ -152,19 +162,19 @@ function get_menu_page_title( $menu = '' ) {
 		case 'reviews' :
 
 			// Make and return my label.
-			return ! $isedit ? __( 'Reviews', 'woo-better-reviews' ) : __( 'Edit Review', 'woo-better-reviews' );
+			return ! $isedit ? __( 'Product Reviews', 'woo-better-reviews' ) : __( 'Edit Product Review', 'woo-better-reviews' );
 			break;
 
 		case 'attributes' :
 
 			// Make and return my label.
-			return ! $isedit ? __( 'Product Attributes', 'woo-better-reviews' ) : __( 'Edit Attribute', 'woo-better-reviews' );
+			return ! $isedit ? __( 'Product Attributes', 'woo-better-reviews' ) : __( 'Edit Product Attribute', 'woo-better-reviews' );
 			break;
 
 		case 'characteristics' :
 
 			// Make and return my label.
-			return ! $isedit ? __( 'Review Author Characteristics', 'woo-better-reviews' ) : __( 'Edit Characteristic', 'woo-better-reviews' );
+			return ! $isedit ? __( 'Review Author Traits', 'woo-better-reviews' ) : __( 'Edit Review Author Trait', 'woo-better-reviews' );
 			break;
 
 		// No more case breaks, no more menues.

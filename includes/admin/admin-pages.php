@@ -689,7 +689,7 @@ function load_add_new_charstcs_form( $action = '' ) {
 	$build .= '<div class="form-wrap woo-better-reviews-form-wrap">';
 
 		// Title it.
-		$build .= '<h2>' . esc_html__( 'Add New Characteristic', 'woo-better-reviews' ) . '</h2>';
+		$build .= '<h2>' . esc_html__( 'Add New Review Author Trait', 'woo-better-reviews' ) . '</h2>';
 
 		// Now set the actual form itself.
 		$build .= '<form id="woo-better-reviews-add-characteristic" class="woo-better-reviews-admin-form" method="post" action="' . esc_url( $action ) . '">';
@@ -768,7 +768,7 @@ function load_add_new_charstcs_form( $action = '' ) {
 
 			// Output the submit button.
 			$build .= '<p class="submit woo-better-reviews-add-new-submit-wrap">';
-				$build .= get_submit_button( __( 'Add New Characteristic', 'woo-better-reviews' ), 'primary', 'add-new-charstc', false );
+				$build .= get_submit_button( __( 'Add New Review Author Trait', 'woo-better-reviews' ), 'primary', 'add-new-charstc', false );
 			$build .= '</p>';
 
 		// Close up the form markup.
@@ -952,7 +952,7 @@ function load_edit_single_charstcs_form( $action ) {
 			$build .= '<p class="submit">';
 
 				// The actual submit button.
-				$build .= get_submit_button( __( 'Update Characteristic', 'woo-better-reviews' ), 'primary', 'edit-existing-charstcs', false );
+				$build .= get_submit_button( __( 'Update Review Author Trait', 'woo-better-reviews' ), 'primary', 'edit-existing-charstcs', false );
 
 				// Our cancel link.
 				$build .= '<span class="cancel-edit-link-wrap">';

@@ -97,10 +97,10 @@ function get_review_author_base_form_fields( $author_id = 0, $only_keys = false 
  *
  * @return array
  */
-function get_review_author_charstcs_form_fields( $author_id = 0, $only_keys = false ) {
+function get_review_author_charstcs_form_fields( $author_id = 0, $product_id = 0, $only_keys = false ) {
 
 	// Get all my characteristics.
-	$fetch_charstcs = Queries\get_all_charstcs( 'display' );
+	$fetch_charstcs = Queries\get_charstcs_for_product( $product_id, 'display' );
 
 	// Bail without any to display.
 	if ( empty( $fetch_charstcs ) ) {
@@ -115,12 +115,16 @@ function get_review_author_charstcs_form_fields( $author_id = 0, $only_keys = fa
 			continue;
 		}
 
+		// See if we have a description.
+		$maybe_desc = ! empty( $charstcs['desc'] ) ? $charstcs['desc'] : '';
+
 		// Set our array key.
 		$array_key  = sanitize_html_class( $charstcs['slug'] );
 
 		// And add it.
 		$setup[ $array_key ] = array(
 			'label'         => esc_html( $charstcs['name'] ),
+			'desc'          => $maybe_desc,
 			'type'          => 'dropdown',
 			'required'      => false,
 			'include-empty' => true,

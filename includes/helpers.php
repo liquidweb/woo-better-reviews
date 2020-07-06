@@ -263,6 +263,20 @@ function maybe_review_verified( $author_id = 0, $author_email = '', $product_id 
 }
 
 /**
+ * Check to see if review author characteristics are globally enabled.
+ *
+ * @return boolean
+ */
+function maybe_charstcs_global() {
+
+	// Check the Woo setting first.
+	$are_global = get_option( Core\OPTION_PREFIX . 'global_charstcs', 'no' );
+
+	// Return a basic boolean.
+	return ! empty( $are_global ) && 'yes' === sanitize_text_field( $are_global ) ? true : false;
+}
+
+/**
  * Check to see if product attributes are globally enabled.
  *
  * @return boolean
@@ -540,10 +554,31 @@ function get_selected_product_attributes( $product_id = 0 ) {
 	}
 
 	// Get the selected attributes (if any).
-	$maybe_attributes   = get_post_meta( $product_id, Core\META_PREFIX . 'product_attributes', true );
+	$maybe_has_meta = get_post_meta( $product_id, Core\META_PREFIX . 'product_attributes', true );
 
 	// Return false if none are stored.
-	return empty( $maybe_attributes ) ? false : $maybe_attributes;
+	return empty( $maybe_has_meta ) ? false : $maybe_has_meta;
+}
+
+/**
+ * Get the review author traits the product has assigned.
+ *
+ * @param  integer $product_id  The product ID we are checking attributes for.
+ *
+ * @return mixed
+ */
+function get_selected_product_charstcs( $product_id = 0 ) {
+
+	// Bail without a product ID.
+	if ( empty( $product_id ) ) {
+		return false;
+	}
+
+	// Get the selected characteristics / traits (if any).
+	$maybe_has_meta = get_post_meta( $product_id, Core\META_PREFIX . 'product_author_charstcs', true );
+
+	// Return false if none are stored.
+	return empty( $maybe_has_meta ) ? false : $maybe_has_meta;
 }
 
 /**
@@ -972,31 +1007,31 @@ function get_error_notice_text( $return_code = '' ) {
 			break;
 
 		case 'charstcs-added' :
-			return __( 'The new characteristic has been added.', 'woo-better-reviews' );
+			return __( 'The new review author trait has been added.', 'woo-better-reviews' );
 			break;
 
 		case 'charstcs-updated' :
-			return __( 'The selected characteristic has been updated.', 'woo-better-reviews' );
+			return __( 'The selected review author trait has been updated.', 'woo-better-reviews' );
 			break;
 
 		case 'charstcs-deleted' :
-			return __( 'The selected characteristic has been deleted.', 'woo-better-reviews' );
+			return __( 'The selected review author trait has been deleted.', 'woo-better-reviews' );
 			break;
 
 		case 'charstcs-deleted-bulk' :
-			return __( 'The selected characteristics have been deleted.', 'woo-better-reviews' );
+			return __( 'The selected review author traits have been deleted.', 'woo-better-reviews' );
 			break;
 
 		case 'missing-charstcs-args' :
-			return __( 'The required characteristic arguments were not provided.', 'woo-better-reviews' );
+			return __( 'The required review author trait arguments were not provided.', 'woo-better-reviews' );
 			break;
 
 		case 'charstcs-update-failed' :
-			return __( 'The characteristic could not be updated at this time.', 'woo-better-reviews' );
+			return __( 'The review author trait could not be updated at this time.', 'woo-better-reviews' );
 			break;
 
 		case 'charstcs-delete-failed' :
-			return __( 'The selected characteristic could not be deleted at this time.', 'woo-better-reviews' );
+			return __( 'The selected review author trait could not be deleted at this time.', 'woo-better-reviews' );
 			break;
 
 		case 'missing-item-id' :
