@@ -11,12 +11,6 @@
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) exit;
 
-// We need to make sure the REST API classes are loaded.
-if ( ! class_exists( 'WC_REST_Product_Reviews_Controller' ) ) {
-	require_once \Nexcess\WooBetterReviews\WOO_V3_CONTROLLERS . 'class-wc-rest-controller.php';
-	require_once \Nexcess\WooBetterReviews\WOO_V3_CONTROLLERS . 'class-wc-rest-product-reviews-controller.php';
-}
-
 /**
  * REST API Product Reviews Controller Class.
  *
