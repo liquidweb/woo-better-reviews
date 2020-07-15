@@ -1,8 +1,8 @@
 <?php
 /**
- * Plugin Name: Better Reviews For WooCommerce
+ * Plugin Name: Better Product Reviews For WooCommerce
  * Plugin URI:  https://www.nexcess.net
- * Description: Like reviews, only way better.
+ * Description: Like regular product reviews, only way better.
  * Version:     0.4.0-dev
  * Author:      Nexcess
  * Author URI:  https://www.nexcess.net
