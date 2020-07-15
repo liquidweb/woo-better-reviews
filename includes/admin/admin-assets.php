@@ -61,8 +61,11 @@ function load_admin_body_class( $classes ) {
 
 	// Confirm we are on an allowed hook.
 	if ( false !== $maybe_load ) {
-		$classes .= ' woo-better-reviews-admin-body-class';
+		$classes .= ' woo-better-reviews-admin-woo-tab-class';
 	}
+
+	// And then add a generic body class.
+	$classes .= ' woo-better-reviews-admin-body-class';
 
 	// And send back the string.
 	return $classes;

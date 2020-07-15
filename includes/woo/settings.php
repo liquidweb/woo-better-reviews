@@ -152,7 +152,7 @@ function get_settings() {
 
 	// Set the text for the global product attributes, since it has some markup.
 	$setup_global_attributes_label  = __( 'Make reviewable attributes global.', 'woo-better-reviews' );
-	$setup_global_attributes_label .= ' <span class="woo-better-reviews-inline-label-text">' . __( '(Apply each created attribute to every product)', 'woo-better-reviews' ) . '</span>';
+	$setup_global_attributes_label .= ' <span class="woo-better-reviews-inline-label-text">' . __( '(Apply each created review attribute to every product)', 'woo-better-reviews' ) . '</span>';
 
 	// Set the text for the global review author characteristics / traits, since it has some markup.
 	$setup_global_charstcs_label    = __( 'Make review author traits global.', 'woo-better-reviews' );
@@ -185,7 +185,7 @@ function get_settings() {
 
 		'enable' => array(
 			'title'    => __( 'Enable Reviews', 'woo-better-reviews' ),
-			'desc'     => __( 'Use the Better Reviews for WooCommerce plugin', 'woo-better-reviews' ),
+			'desc'     => __( 'Use the Better Product Reviews for WooCommerce plugin', 'woo-better-reviews' ),
 			'id'       => 'woocommerce_enable_reviews', // @@todo figure out if setting key should be different.
 			'type'     => 'checkbox',
 			'default'  => 'yes',
@@ -227,7 +227,7 @@ function get_settings() {
 		),
 
 		'gloablattributes' => array(
-			'title'    => __( 'Product Attributes', 'woo-better-reviews' ),
+			'title'    => __( 'Product Review Attributes', 'woo-better-reviews' ),
 			'desc'     => $setup_global_attributes_label,
 			'id'       => Core\OPTION_PREFIX . 'global_attributes',
 			'type'     => 'checkbox',
