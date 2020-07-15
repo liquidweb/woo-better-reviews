@@ -22,6 +22,7 @@ use Nexcess\WooBetterReviews\Queries as Queries;
 add_filter( 'woocommerce_product_reviews_tab_title', __NAMESPACE__ . '\modify_review_count_title', 99, 2 );
 add_filter( 'woocommerce_email_classes', __NAMESPACE__ . '\load_review_reminder_email_class', 10 );
 add_filter( 'wc_get_template', __NAMESPACE__ . '\load_review_reminder_email_templates', 99, 5 );
+add_filter( 'woocommerce_rest_api_get_rest_namespaces', __NAMESPACE__ . '\load_custom_api_classes' );
 
 /**
  * Check if we have a sorted review list and modify the count.
@@ -107,4 +108,24 @@ function load_review_reminder_email_templates( $template, $template_name, $args,
 
 	// Nothing custom, so return what we had.
 	return $template;
+}
+
+/**
+ * Replace the product review class with our own.
+ *
+ * @param  array $namespace_routes  List of Namespaces and Main controller classes.
+ *
+ * @return array
+ */
+function load_custom_api_classes( $namespace_routes ) {
+
+	// Define our class for the product reviews.
+	// Replaces the existing WC_REST_Product_Reviews_Controller.
+	$define_reviews_class   = 'Nexcess_WBR_REST_Reviews_Controller';
+
+	// Now swap out the class.
+	$namespace_routes['wc/v3']['product-reviews'] = $define_reviews_class;
+
+	// Return the routes.
+	return $namespace_routes;
 }
