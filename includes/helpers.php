@@ -799,7 +799,9 @@ function maybe_admin_settings_tab( $hook = '' ) {
 		'post.php',
 		'toplevel_page_' . Core\REVIEWS_ANCHOR,
 		'reviews_page_' . Core\ATTRIBUTES_ANCHOR,
+		'product-reviews_page_' . Core\ATTRIBUTES_ANCHOR,
 		'reviews_page_' . Core\CHARSTCS_ANCHOR,
+		'product-reviews_page_' . Core\CHARSTCS_ANCHOR,
 	);
 
 	// Check the hook if we passed one.
