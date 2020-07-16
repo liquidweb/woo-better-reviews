@@ -4,8 +4,7 @@
  *
  * Handles requests to /products/reviews.
  *
- * @package Automattic/WooCommerce/RestApi
- * @since   3.5.0
+ * @package WooBetterReviews
  */
 
 // Exit if accessed directly.
@@ -14,7 +13,9 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 /**
  * REST API Product Reviews Controller Class.
  *
- * @package Automattic/WooCommerce/RestApi
+ * original: /woocommerce/packages/woocommerce-rest-api/src/Controllers/Version3/class-wc-rest-product-reviews-controller.php
+ *
+ * @package WooBetterReviews
  * @extends WC_REST_Product_Reviews_Controller via WC_REST_Controller
  */
 class Nexcess_WBR_REST_Reviews_Controller extends WC_REST_Product_Reviews_Controller {

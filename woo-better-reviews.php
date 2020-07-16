@@ -44,9 +44,6 @@ define( __NAMESPACE__ . '\ASSETS_URL', URL . 'assets' );
 define( __NAMESPACE__ . '\INCLUDES_PATH', __DIR__ . '/includes' );
 define( __NAMESPACE__ . '\TEMPLATE_PATH', __DIR__ . '/templates' );
 
-// Set the V3 REST API controllers.
-define( __NAMESPACE__ . '\WOO_V3_CONTROLLERS', WP_PLUGIN_DIR . '/woocommerce/packages/woocommerce-rest-api/src/Controllers/Version3/' );
-
 // Set the prefix for our actions and filters.
 define( __NAMESPACE__ . '\HOOK_PREFIX', 'wc_better_reviews_' );
 
