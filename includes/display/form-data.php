@@ -99,8 +99,8 @@ function get_review_author_base_form_fields( $author_id = 0, $only_keys = false 
  */
 function get_review_author_charstcs_form_fields( $author_id = 0, $product_id = 0, $only_keys = false ) {
 
-	// Get all my characteristics.
-	$fetch_charstcs = Queries\get_charstcs_for_product( $product_id, 'display' );
+	// Get all my characteristics for this form.
+	$fetch_charstcs = Helpers\get_author_traits_for_form( $product_id );
 
 	// Bail without any to display.
 	if ( empty( $fetch_charstcs ) ) {

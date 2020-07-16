@@ -643,7 +643,7 @@ function get_review_action_link( $product_id = 0, $include_hash = '' ) {
  *
  * @return array
  */
-function get_product_attributes_for_form( $product_id = 0 ) {
+function get_review_attributes_for_form( $product_id = 0 ) {
 
 	// First check for the global setting.
 	$are_global = maybe_attributes_global();
@@ -660,6 +660,35 @@ function get_product_attributes_for_form( $product_id = 0 ) {
 
 	// Attempt to get our attributes based on the global setting.
 	$maybe_has  = Queries\get_attributes_for_product( $product_id, 'display' );
+
+	// Return the applied items, or return false.
+	return ! empty( $maybe_has ) && ! is_wp_error( $maybe_has ) ? $maybe_has : false;
+}
+
+/**
+ * Get the attributes to display on a form.
+ *
+ * @param  integer $product_id  The product ID being viewed.
+ *
+ * @return array
+ */
+function get_author_traits_for_form( $product_id = 0 ) {
+
+	// First check for the global setting.
+	$are_global = maybe_charstcs_global();
+
+	// If we are global, send the whole bunch.
+	if ( false !== $are_global ) {
+		return Queries\get_all_charstcs( 'display' );
+	}
+
+	// Now confirm we have a product ID.
+	if ( empty( $product_id ) ) {
+		return false;
+	}
+
+	// Attempt to get our attributes based on the global setting.
+	$maybe_has  = Queries\get_charstcs_for_product( $product_id, 'display' );
 
 	// Return the applied items, or return false.
 	return ! empty( $maybe_has ) && ! is_wp_error( $maybe_has ) ? $maybe_has : false;
