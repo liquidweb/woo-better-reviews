@@ -259,6 +259,9 @@ function get_review_form_dropdown_field( $field_args = array(), $field_key = '',
 	// Check for the empty to be included in the data array.
 	$set_select_options = ! empty( $field_args['include-empty'] ) ? array( '0' => __( '(Select)', 'woo-better-reviews' ) ) + $field_args['options'] : $field_args['options'];
 
+	// And set a selected.
+	$is_selected_option = ! empty( $field_args['selected'] ) ? $field_args['selected'] : '';
+
 	// Set my empty.
 	$field  = '';
 
@@ -282,7 +285,7 @@ function get_review_form_dropdown_field( $field_args = array(), $field_key = '',
 
 	// Loop the options.
 	foreach ( $set_select_options as $option_value => $option_label ) {
-		$field .= '<option value="' . esc_attr( $option_value ) . '">' . esc_html( $option_label ) . '</option>';
+		$field .= '<option value="' . esc_attr( $option_value ) . '" ' . selected( $is_selected_option, $option_value, false ) . '>' . esc_html( $option_label ) . '</option>';
 	}
 
 	// Close the select tag.
