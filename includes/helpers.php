@@ -608,7 +608,6 @@ function get_product_attributes_for_conversion( $product_id = 0 ) {
 
 	// Return the applied items, or return false.
 	return ! empty( $maybe_has ) && ! is_wp_error( $maybe_has ) ? $maybe_has : false;
-
 }
 
 /**
@@ -639,18 +638,19 @@ function get_review_action_link( $product_id = 0, $include_hash = '' ) {
 /**
  * Get the attributes to display on a form.
  *
- * @param  integer $product_id  The product ID being viewed.
+ * @param  integer $product_id   The product ID being viewed.
+ * @param  string  $return_type  What format we want the data returned in.
  *
  * @return array
  */
-function get_review_attributes_for_form( $product_id = 0 ) {
+function get_review_attributes_for_form( $product_id = 0, $return_type = 'display' ) {
 
 	// First check for the global setting.
 	$are_global = maybe_attributes_global();
 
 	// If we are global, send the whole bunch.
 	if ( false !== $are_global ) {
-		return Queries\get_all_attributes( 'display' );
+		return Queries\get_all_attributes( $return_type );
 	}
 
 	// Now confirm we have a product ID.
@@ -659,7 +659,7 @@ function get_review_attributes_for_form( $product_id = 0 ) {
 	}
 
 	// Attempt to get our attributes based on the global setting.
-	$maybe_has  = Queries\get_attributes_for_product( $product_id, 'display' );
+	$maybe_has  = Queries\get_attributes_for_product( $product_id, $return_type );
 
 	// Return the applied items, or return false.
 	return ! empty( $maybe_has ) && ! is_wp_error( $maybe_has ) ? $maybe_has : false;
@@ -668,18 +668,19 @@ function get_review_attributes_for_form( $product_id = 0 ) {
 /**
  * Get the attributes to display on a form.
  *
- * @param  integer $product_id  The product ID being viewed.
+ * @param  integer $product_id   The product ID being viewed.
+ * @param  string  $return_type  What format we want the data returned in.
  *
  * @return array
  */
-function get_author_traits_for_form( $product_id = 0 ) {
+function get_author_traits_for_form( $product_id = 0, $return_type = 'display' ) {
 
 	// First check for the global setting.
 	$are_global = maybe_charstcs_global();
 
 	// If we are global, send the whole bunch.
 	if ( false !== $are_global ) {
-		return Queries\get_all_charstcs( 'display' );
+		return Queries\get_all_charstcs( $return_type );
 	}
 
 	// Now confirm we have a product ID.
@@ -688,7 +689,7 @@ function get_author_traits_for_form( $product_id = 0 ) {
 	}
 
 	// Attempt to get our attributes based on the global setting.
-	$maybe_has  = Queries\get_charstcs_for_product( $product_id, 'display' );
+	$maybe_has  = Queries\get_charstcs_for_product( $product_id, $return_type );
 
 	// Return the applied items, or return false.
 	return ! empty( $maybe_has ) && ! is_wp_error( $maybe_has ) ? $maybe_has : false;
