@@ -125,7 +125,6 @@ function get_review_author_charstcs_form_fields( $author_id = 0, $product_id = 0
 		// Check if we have the trait or not.
 		$has_trait  = isset( $maybe_has_traits[ $define_id ] ) ? $maybe_has_traits[ $define_id ] : '';
 
-		// preprint( $maybe_get_traits, true );
 		// See if we have a description.
 		$maybe_desc = ! empty( $form_trait['desc'] ) ? $form_trait['desc'] : '';
 
