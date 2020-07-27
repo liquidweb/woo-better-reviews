@@ -108,7 +108,7 @@ function get_review_author_charstcs_form_fields( $author_id = 0, $product_id = 0
 	}
 
 	// Check for any applied traits to the author.
-	$maybe_get_traits   = Queries\get_trait_values_for_author( $author_id );
+	$maybe_get_traits   = ! empty( $author_id ) ? Queries\get_trait_values_for_author( $author_id ) : false;
 	$maybe_has_traits   = ! empty( $maybe_get_traits ) ? $maybe_get_traits : array();
 
 	// Loop and add each one to the array.
