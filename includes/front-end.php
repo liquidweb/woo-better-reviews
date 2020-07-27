@@ -146,6 +146,9 @@ function display_restricted_reviews_text( $display, $product_id ) {
 		return $display;
 	}
 
-	// Now return our new markup.
-	return '<p class="woo-better-reviews-restricted-form">' . esc_html__( 'You must be logged in to leave a review.', 'woo-better-reviews' ) . '</p>';
+	// First check if we wanna bypass the entire thing.
+	$set_restricted_markup  = '<p class="woo-better-reviews-restricted-form">' . esc_html__( 'You must be logged in to leave a review.', 'woo-better-reviews' ) . '</p>';
+
+	// Now return it, filtered.
+	return apply_filters( Core\HOOK_PREFIX . 'restricted_review_form_markup', $set_restricted_markup );
 }

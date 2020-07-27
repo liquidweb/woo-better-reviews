@@ -105,11 +105,18 @@ function backup_existing_review_counts( $replace = false ) {
  */
 function set_initial_options() {
 
+	// Set the array of args for the reminders.
+	$set_remainder_args = array(
+		'number' => 2,
+		'unit'   => 'weeks',
+	);
+
 	// Set our actual option flags.
 	update_option( 'woocommerce_enable_reviews', 'yes' );
 	update_option( Core\OPTION_PREFIX . 'plugin_version', Core\VERS );
 	update_option( Core\OPTION_PREFIX . 'allow_anonymous', 'no' );
 	update_option( Core\OPTION_PREFIX . 'global_attributes', 'yes' );
+	update_option( Core\OPTION_PREFIX . 'global_charstcs', 'yes' );
 	update_option( Core\OPTION_PREFIX . 'send_reminders', 'yes' );
-	update_option( Core\OPTION_PREFIX . 'reminder_wait', array( 'number' => 2, 'unit' => 'weeks' ) );
+	update_option( Core\OPTION_PREFIX . 'reminder_wait', $set_remainder_args );
 }
