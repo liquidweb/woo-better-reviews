@@ -186,6 +186,9 @@ function set_single_review_author_charstcs_view( $review = array() ) {
 		return;
 	}
 
+	// Get the traits we have applied to this product.
+	$applied_traits = Helpers\get_author_traits_for_form( $review['product_id'], 'ids' );
+
 	// First set the empty.
 	$display_view   = '';
 
@@ -200,13 +203,18 @@ function set_single_review_author_charstcs_view( $review = array() ) {
 	}
 
 	// Set the list of characteristics if we have them.
-	if ( ! empty( $review['author_charstcs'] ) ) {
+	if ( ! empty( $applied_traits ) && ! empty( $review['author_charstcs'] ) ) {
 
 		// Set an unordered list.
 		$display_view  .= '<ul class="woo-better-reviews-author-charstcs">';
 
 		// Loop my characteristics.
 		foreach ( $review['author_charstcs'] as $charstc ) {
+
+			// Skip any traits that are not applied to the product.
+			if ( ! in_array( absint( $charstc['id'] ), $applied_traits ) ) {
+				continue;
+			}
 
 			// Set a base class.
 			$charstc_class  = 'woo-better-reviews-author-charstc-item woo-better-reviews-author-charstc';
