@@ -23,6 +23,7 @@ use WP_Error;
 add_action( 'comments_template', __NAMESPACE__ . '\load_review_template', 99 );
 add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\load_review_front_stylesheet' );
 add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\load_review_front_javascript' );
+add_filter( 'wc_better_reviews_display_new_review_form_override', __NAMESPACE__ . '\display_restricted_reviews_text', 10, 2 );
 
 /**
  * Load our own review template from the plugin.
@@ -125,4 +126,26 @@ function load_review_front_javascript() {
 
 	// Include our action let others load things.
 	do_action( Core\HOOK_PREFIX . 'after_front_javascript_load', $handle );
+}
+
+/**
+ * Display a message if they can't leave a review.
+ *
+ * @param  mixed   $display     The current display markup. Should be empty.
+ * @param  integer $product_id  The product ID we're possibly showing.
+ *
+ * @return mixed
+ */
+function display_restricted_reviews_text( $display, $product_id ) {
+
+	// First check if we can even display this.
+	$maybe_display  = Helpers\maybe_review_form_allowed();
+
+	// If we're OK, just return the same null we had.
+	if ( false !== $maybe_display ) {
+		return $display;
+	}
+
+	// Now return our new markup.
+	return '<p class="woo-better-reviews-restricted-form">' . esc_html__( 'You must be logged in to leave a review.', 'woo-better-reviews' ) . '</p>';
 }

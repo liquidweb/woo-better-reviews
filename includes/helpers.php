@@ -179,6 +179,25 @@ function maybe_allowed_status( $order_status ) {
 }
 
 /**
+ * Check if non logged in users are allowed to leave a review.
+ *
+ * @return boolean
+ */
+function maybe_review_form_allowed() {
+
+	// Check the stored setting first.
+	$allow_anon = get_option( Core\OPTION_PREFIX . 'allow_anonymous', 'no' );
+
+	// If we allow anonymous, we can return true.
+	if ( ! empty( $allow_anon ) && 'yes' === sanitize_text_field( $allow_anon ) ) {
+		return true;
+	}
+
+	// Now return also checking the user logged in status.
+	return is_user_logged_in() ? true : false;
+}
+
+/**
  * Check to see if a review is verified.
  *
  * @param  integer $author_id     The ID of the author posting the review.
