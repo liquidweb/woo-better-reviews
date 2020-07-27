@@ -186,6 +186,9 @@ function set_single_review_author_charstcs_view( $review = array() ) {
 		return;
 	}
 
+	// Check if the display wants one.
+	$maybe_checkmrk = get_option( 'woocommerce_review_rating_verification_label', 'no' );
+
 	// Get the traits we have applied to this product.
 	$applied_traits = Helpers\get_author_traits_for_form( $review['product_id'], 'ids' );
 
@@ -196,7 +199,7 @@ function set_single_review_author_charstcs_view( $review = array() ) {
 	if ( ! empty( $review['author_name'] ) ) {
 
 		// Check for the verified part to add our icon.
-		$show_verified  = ! empty( $review['is_verified'] ) ? '<span aria-label="' . esc_attr__( 'This review is verified.', 'woo-better-reviews' ) . '" class="woo-better-reviews-single-verified-check"></span>' : '';
+		$show_verified  = ! empty( $review['is_verified'] ) && ! empty( $maybe_checkmrk ) && 'yes' === $maybe_checkmrk ? '<span aria-label="' . esc_attr__( 'This review is verified.', 'woo-better-reviews' ) . '" class="woo-better-reviews-single-verified-check"></span>' : '';
 
 		// And output.
 		$display_view  .= '<p class="woo-better-reviews-single-author">' . sprintf( __( 'by %s', 'woo-better-reviews' ), '<span class="woo-better-reviews-single-author-val">' . esc_attr( $review['author_name'] ) . '</span>' ) . $show_verified . '</p>';

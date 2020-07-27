@@ -139,7 +139,7 @@ function load_review_front_javascript() {
 function display_restricted_reviews_text( $display, $product_id ) {
 
 	// First check if we can even display this.
-	$maybe_display  = Helpers\maybe_review_form_allowed();
+	$maybe_display  = Helpers\maybe_review_form_allowed( $product_id );
 
 	// If we're OK, just return the same null we had.
 	if ( false !== $maybe_display ) {
@@ -147,7 +147,7 @@ function display_restricted_reviews_text( $display, $product_id ) {
 	}
 
 	// First check if we wanna bypass the entire thing.
-	$set_restricted_markup  = '<p class="woo-better-reviews-restricted-form">' . esc_html__( 'You must be logged in to leave a review.', 'woo-better-reviews' ) . '</p>';
+	$set_restricted_markup  = '<p class="woo-better-reviews-restricted-form">' . esc_html__( 'You must be logged in or have purchased this product to leave a review.', 'woo-better-reviews' ) . '</p>';
 
 	// Now return it, filtered.
 	return apply_filters( Core\HOOK_PREFIX . 'restricted_review_form_markup', $set_restricted_markup );

@@ -20,7 +20,7 @@ use WP_Error;
 /**
  * Get all the reviews.
  *
- * @param  boolean $purge        Optional to purge the cache'd version before looking up.
+ * @param  boolean $purge  Optional to purge the cache'd version before looking up.
  *
  * @return mixed
  */

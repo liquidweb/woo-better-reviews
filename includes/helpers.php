@@ -181,9 +181,11 @@ function maybe_allowed_status( $order_status ) {
 /**
  * Check if non logged in users are allowed to leave a review.
  *
+ * @param  integer $product_id  The product the review is being left on.
+ *
  * @return boolean
  */
-function maybe_review_form_allowed() {
+function maybe_review_form_allowed( $product_id = 0 ) {
 
 	// Check the stored setting first.
 	$allow_anon = get_option( Core\OPTION_PREFIX . 'allow_anonymous', 'no' );
@@ -193,8 +195,29 @@ function maybe_review_form_allowed() {
 		return true;
 	}
 
-	// Now return also checking the user logged in status.
-	return is_user_logged_in() ? true : false;
+	// If the user isn't logged in, we bail at this point.
+	if ( ! is_user_logged_in() ) {
+		return false;
+	}
+
+	// Check to see if we have the customer-only rule.
+	$only_custm = get_option( 'woocommerce_review_rating_verification_required', 'yes' );
+
+	// If we don't force customer purchase, and they are logged in, return true.
+	if ( ! empty( $only_custm ) && 'no' === sanitize_text_field( $only_custm ) ) {
+		return true;
+	}
+
+	// Get my current user ID.
+	$set_user   = wp_get_current_user();
+
+	// Bail without user data to work with.
+	if ( empty( $set_user ) || is_wp_error( $set_user ) ) {
+		return false;
+	}
+
+	// Return based on the purchase status or not.
+	return false !== wc_customer_bought_product( $set_user->user_email, $set_user->ID, $product_id ) ? true : false;
 }
 
 /**
