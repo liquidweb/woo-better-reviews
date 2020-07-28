@@ -63,11 +63,8 @@ function filter_review_stars_html( $html, $rating, $count ) {
 	// Fetch our markup for making stars.
 	$average_stars  = Helpers\get_scoring_stars_display( 0, $rating, false );
 
-	// Create the aria label text.
-	$set_aria_label = sprintf( __( 'Rated %s out of 7 stars', 'woo-better-reviews' ), $rating );
-
-	// And return our new markup.
-	return '<div class="woo-better-reviews-stars-html-wrapper" role="img" aria-label="' . esc_attr( $set_aria_label ) . '">' . $average_stars . '</div>';
+	// Return our stars in a separate div that we can target.
+	return '<div class="woo-better-reviews-stars-html-wrapper">' . $average_stars . '</div>';
 }
 
 /**

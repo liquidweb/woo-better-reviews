@@ -819,7 +819,7 @@ function get_scoring_stars_display( $product_id = 0, $review_score = 0, $include
 	$score_left = $score_show < 7 ? 7 - $score_show : 0;
 
 	// Set the aria label.
-	$aria_label = sprintf( __( 'Overall Score: %s', 'woo-better-reviews' ), absint( $score_show ) );
+	$aria_label = sprintf( __( 'Rated %s out of 7 stars', 'woo-better-reviews' ), absint( $score_show ) );
 
 	// Set the base class for a star.
 	$star_class = 'dashicons dashicons-star-filled woo-better-reviews-single-star';
