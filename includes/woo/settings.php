@@ -115,31 +115,64 @@ function display_settings_tab() {
  */
 function update_review_settings() {
 
+	// We need data.
+	if ( empty( $_POST ) ) {
+		return;
+	}
+
 	// Check out the cron adjustment.
-	maybe_adjust_reminder_cron();
+	maybe_adjust_reminder_cron( $_POST );
 
 	// Now save as normal.
-	woocommerce_update_options( get_settings() );
+	$run_options_update = woocommerce_update_options( get_settings() );
+
+	// If the save failed, we get out and let Woo error.
+	if ( false === $run_options_update ) {
+		return;
+	}
+
+	// Assuming the save went correctly, do the anonymous check.
+	maybe_adjust_for_anonymous( $_POST );
 }
 
 /**
  * Check the POST value and handle the reminder cron.
  *
+ * @param  array $data  The data POSTed.
+ *
  * @return void
  */
-function maybe_adjust_reminder_cron() {
+function maybe_adjust_reminder_cron( $data ) {
 
 	// Set our reminder key.
 	$reminder_key   = Core\OPTION_PREFIX . 'send_reminders';
 
 	// Pull in our scheduled cron and unschedule it if disabled.
-	if ( empty( $_POST[ $reminder_key ] ) ) {
+	if ( empty( $data[ $reminder_key ] ) ) {
 		Utilities\modify_reminder_cron( true, false );
 	}
 
 	// Check for the reminders being turned on or off and handle the cron.
-	if ( ! empty( $_POST[ $reminder_key ] ) && ! wp_next_scheduled( Core\REMINDER_CRON ) ) {
+	if ( ! empty( $data[ $reminder_key ] ) && ! wp_next_scheduled( Core\REMINDER_CRON ) ) {
 		Utilities\modify_reminder_cron( false, 'twicedaily' );
+	}
+}
+
+/**
+ * Check and see if the settings allow anonymous.
+ *
+ * @param  array $data  The data POSTed.
+ *
+ * @return void
+ */
+function maybe_adjust_for_anonymous( $data ) {
+
+	// Set the key.
+	$ky = Core\OPTION_PREFIX . 'allow_anonymous';
+
+	// If this key is in the data, we make sure the "only verified" is turned off.
+	if ( ! empty( $data[ $ky ] ) ) {
+		delete_option( 'woocommerce_review_rating_verification_required' );
 	}
 }
 
