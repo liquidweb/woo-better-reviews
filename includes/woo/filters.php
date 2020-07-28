@@ -20,6 +20,7 @@ use Nexcess\WooBetterReviews\Queries as Queries;
  * Start our engines.
  */
 add_filter( 'woocommerce_product_reviews_tab_title', __NAMESPACE__ . '\modify_review_count_title', 99, 2 );
+add_filter( 'woocommerce_product_get_rating_html', __NAMESPACE__ . '\filter_review_stars_html', 20, 3 );
 add_filter( 'woocommerce_email_classes', __NAMESPACE__ . '\load_review_reminder_email_class', 10 );
 add_filter( 'wc_get_template', __NAMESPACE__ . '\load_review_reminder_email_templates', 99, 5 );
 
@@ -46,6 +47,27 @@ function modify_review_count_title( $title, $key ) {
 
 	// If we have filtered IDs, change my title.
 	return sprintf( __( 'Reviews (%s)', 'woocommerce' ), '<span class="wbr-review-tab-count">' . absint( $review_count ) . '</span>' );
+}
+
+/**
+ * Modify the HTML for the star output to match our 7 point scale.
+ *
+ * @param  HTML    $html    The existing markup, which we're gonna replace.
+ * @param  integer $rating  The rating value we're using.
+ * @param  integer $count   Total number of ratings.
+ *
+ * @return HTML
+ */
+function filter_review_stars_html( $html, $rating, $count ) {
+
+	// Fetch our markup for making stars.
+	$average_stars  = Helpers\get_scoring_stars_display( 0, $rating, false );
+
+	// Create the aria label text.
+	$set_aria_label = sprintf( __( 'Rated %s out of 7 stars', 'woo-better-reviews' ), $rating );
+
+	// And return our new markup.
+	return '<div class="woo-better-reviews-stars-html-wrapper" role="img" aria-label="' . esc_attr( $set_aria_label ) . '">' . $average_stars . '</div>';
 }
 
 /**

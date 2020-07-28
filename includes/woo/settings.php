@@ -145,15 +145,15 @@ function update_review_settings() {
 function maybe_adjust_reminder_cron( $data ) {
 
 	// Set our reminder key.
-	$reminder_key   = Core\OPTION_PREFIX . 'send_reminders';
+	$ky = Core\OPTION_PREFIX . 'send_reminders';
 
 	// Pull in our scheduled cron and unschedule it if disabled.
-	if ( empty( $data[ $reminder_key ] ) ) {
+	if ( empty( $data[ $ky ] ) ) {
 		Utilities\modify_reminder_cron( true, false );
 	}
 
 	// Check for the reminders being turned on or off and handle the cron.
-	if ( ! empty( $data[ $reminder_key ] ) && ! wp_next_scheduled( Core\REMINDER_CRON ) ) {
+	if ( ! empty( $data[ $ky ] ) && ! wp_next_scheduled( Core\REMINDER_CRON ) ) {
 		Utilities\modify_reminder_cron( false, 'twicedaily' );
 	}
 }
@@ -167,7 +167,7 @@ function maybe_adjust_reminder_cron( $data ) {
  */
 function maybe_adjust_for_anonymous( $data ) {
 
-	// Set the key.
+	// Set the option key.
 	$ky = Core\OPTION_PREFIX . 'allow_anonymous';
 
 	// If this key is in the data, we make sure the "only verified" is turned off.
