@@ -595,9 +595,6 @@ class WooBetterReviews_ListReviews extends WP_List_Table {
 			// Add the ID to the update.
 			$tochange[] = $single_review->product_id;
 
-			// Handle the transient purging.
-			Utilities\purge_transients( null, 'reviews' );
-
 			// Nothing left in the loop to do.
 		}
 
@@ -614,6 +611,10 @@ class WooBetterReviews_ListReviews extends WP_List_Table {
 			foreach ( $update_ids as $update_id ) {
 				Utilities\calculate_total_review_scoring( $update_id );
 			}
+
+			// Handle the transient purging.
+			Utilities\purge_transients( null, 'reviews', array( 'ids' => $review_ids ) );
+			Utilities\purge_transients( null, 'products', array( 'ids' => $update_ids ) );
 
 			// Nothing left for the changed items.
 		}
@@ -680,9 +681,6 @@ class WooBetterReviews_ListReviews extends WP_List_Table {
 			// Run my related cleanup.
 			Utilities\delete_related_review_data( $review_id );
 
-			// Handle the transient purging.
-			Utilities\purge_transients( null, 'reviews' );
-
 			// Add the ID to the update.
 			$tochange[] = $single_review->product_id;
 
@@ -702,6 +700,10 @@ class WooBetterReviews_ListReviews extends WP_List_Table {
 			foreach ( $update_ids as $update_id ) {
 				Utilities\calculate_total_review_scoring( $update_id );
 			}
+
+			// Handle the transient purging.
+			Utilities\purge_transients( null, 'reviews', array( 'ids' => $review_ids ) );
+			Utilities\purge_transients( null, 'products', array( 'ids' => $update_ids ) );
 
 			// Nothing left for the changed items.
 		}
@@ -827,7 +829,7 @@ class WooBetterReviews_ListReviews extends WP_List_Table {
 			$tochange[] = $single_review->product_id;
 
 			// Handle the transient purging.
-			Utilities\purge_transients( Core\HOOK_PREFIX . 'single_review_' . $review_id, 'reviews' );
+			// Utilities\purge_transients( Core\HOOK_PREFIX . 'single_review_' . $review_id, 'reviews' );
 
 			// Nothing left in the loop to do.
 		}
@@ -845,6 +847,10 @@ class WooBetterReviews_ListReviews extends WP_List_Table {
 			foreach ( $update_ids as $update_id ) {
 				Utilities\calculate_total_review_scoring( $update_id );
 			}
+
+			// Handle the transient purging.
+			Utilities\purge_transients( null, 'reviews', array( 'ids' => $review_ids ) );
+			Utilities\purge_transients( null, 'products', array( 'ids' => $update_ids ) );
 
 			// Nothing left for the changed items.
 		}
