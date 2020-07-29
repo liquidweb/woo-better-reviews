@@ -46,6 +46,7 @@ function delete_initial_options() {
 	delete_option( Core\OPTION_PREFIX . 'plugin_version' );
 	delete_option( Core\OPTION_PREFIX . 'allow_anonymous' );
 	delete_option( Core\OPTION_PREFIX . 'global_attributes' );
+	delete_option( Core\OPTION_PREFIX . 'global_charstcs' );
 	delete_option( Core\OPTION_PREFIX . 'send_reminders' );
 	delete_option( Core\OPTION_PREFIX . 'reminder_wait' );
 }

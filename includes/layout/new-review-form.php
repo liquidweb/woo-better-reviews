@@ -116,7 +116,7 @@ function set_review_form_rating_attributes_view( $product_id = 0 ) {
 	}
 
 	// Attempt to get our attributes based on the global setting.
-	$attributes = Helpers\get_product_attributes_for_form( $product_id );
+	$attributes = Helpers\get_review_attributes_for_form( $product_id );
 
 	// Bail without the attributes to display.
 	if ( empty( $attributes ) ) {

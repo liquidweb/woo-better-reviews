@@ -869,8 +869,21 @@ function purge_transients( $key = '', $group = '', $custom = array() ) {
 				// Start deleting.
 				delete_transient( Core\HOOK_PREFIX . 'all_reviews' );
 				delete_transient( Core\HOOK_PREFIX . 'admin_reviews' );
+				delete_transient( Core\HOOK_PREFIX . 'pending_reviews' );
 				delete_transient( Core\HOOK_PREFIX . 'verifed_reviews' );
 				delete_transient( Core\HOOK_PREFIX . 'legacy_review_counts' );
+
+				// Loop what we have.
+				if ( ! empty( $custom['ids'] ) ) {
+
+					// Make sure we have good data.
+					$all_id = array_map( 'absint', $custom['ids'] );
+
+					// Loop and delete.
+					foreach ( $all_id as $id ) {
+						delete_transient( Core\HOOK_PREFIX . 'single_review_' . $id );
+					}
+				}
 
 			// Handle attributes and characteristics.
 			case 'taxonomies' :

@@ -78,7 +78,7 @@ function render_attribute_metabox( $post, $callback ) {
 	if ( empty( $callback['args']['items'] ) ) {
 
 		// Do the message.
-		echo '<p class="description">' . __( 'No product attributes have been created yet.', 'woo-better-reviews' ) . '</p>';
+		echo '<p class="description">' . __( 'No review attributes have been created yet.', 'woo-better-reviews' ) . '</p>';
 
 		// And be done.
 		return;
@@ -88,7 +88,7 @@ function render_attribute_metabox( $post, $callback ) {
 	if ( ! empty( $callback['args']['global'] ) ) {
 
 		// Do the message.
-		echo '<p class="description">' . __( 'Product attributes have been enabled globally by the site administrator.', 'woo-better-reviews' ) . '</p>';
+		echo '<p class="description">' . __( 'Review attributes have been enabled globally by the site administrator.', 'woo-better-reviews' ) . '</p>';
 
 		// And be done.
 		return;

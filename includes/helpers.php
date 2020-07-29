@@ -179,6 +179,48 @@ function maybe_allowed_status( $order_status ) {
 }
 
 /**
+ * Check if non logged in users are allowed to leave a review.
+ *
+ * @param  integer $product_id  The product the review is being left on.
+ *
+ * @return boolean
+ */
+function maybe_review_form_allowed( $product_id = 0 ) {
+
+	// Check the stored setting first.
+	$allow_anon = get_option( Core\OPTION_PREFIX . 'allow_anonymous', 'no' );
+
+	// If we allow anonymous, we can return true.
+	if ( ! empty( $allow_anon ) && 'yes' === sanitize_text_field( $allow_anon ) ) {
+		return true;
+	}
+
+	// If the user isn't logged in, we bail at this point.
+	if ( ! is_user_logged_in() ) {
+		return false;
+	}
+
+	// Check to see if we have the customer-only rule.
+	$only_custm = get_option( 'woocommerce_review_rating_verification_required', 'yes' );
+
+	// If we don't force customer purchase, and they are logged in, return true.
+	if ( ! empty( $only_custm ) && 'no' === sanitize_text_field( $only_custm ) ) {
+		return true;
+	}
+
+	// Get my current user ID.
+	$set_user   = wp_get_current_user();
+
+	// Bail without user data to work with.
+	if ( empty( $set_user ) || is_wp_error( $set_user ) ) {
+		return false;
+	}
+
+	// Return based on the purchase status or not.
+	return false !== wc_customer_bought_product( $set_user->user_email, $set_user->ID, $product_id ) ? true : false;
+}
+
+/**
  * Check to see if a review is verified.
  *
  * @param  integer $author_id     The ID of the author posting the review.
@@ -608,7 +650,6 @@ function get_product_attributes_for_conversion( $product_id = 0 ) {
 
 	// Return the applied items, or return false.
 	return ! empty( $maybe_has ) && ! is_wp_error( $maybe_has ) ? $maybe_has : false;
-
 }
 
 /**
@@ -639,18 +680,19 @@ function get_review_action_link( $product_id = 0, $include_hash = '' ) {
 /**
  * Get the attributes to display on a form.
  *
- * @param  integer $product_id  The product ID being viewed.
+ * @param  integer $product_id   The product ID being viewed.
+ * @param  string  $return_type  What format we want the data returned in.
  *
  * @return array
  */
-function get_product_attributes_for_form( $product_id = 0 ) {
+function get_review_attributes_for_form( $product_id = 0, $return_type = 'display' ) {
 
 	// First check for the global setting.
 	$are_global = maybe_attributes_global();
 
 	// If we are global, send the whole bunch.
 	if ( false !== $are_global ) {
-		return Queries\get_all_attributes( 'display' );
+		return Queries\get_all_attributes( $return_type );
 	}
 
 	// Now confirm we have a product ID.
@@ -659,7 +701,37 @@ function get_product_attributes_for_form( $product_id = 0 ) {
 	}
 
 	// Attempt to get our attributes based on the global setting.
-	$maybe_has  = Queries\get_attributes_for_product( $product_id, 'display' );
+	$maybe_has  = Queries\get_attributes_for_product( $product_id, $return_type );
+
+	// Return the applied items, or return false.
+	return ! empty( $maybe_has ) && ! is_wp_error( $maybe_has ) ? $maybe_has : false;
+}
+
+/**
+ * Get the attributes to display on a form.
+ *
+ * @param  integer $product_id   The product ID being viewed.
+ * @param  string  $return_type  What format we want the data returned in.
+ *
+ * @return array
+ */
+function get_author_traits_for_form( $product_id = 0, $return_type = 'display' ) {
+
+	// First check for the global setting.
+	$are_global = maybe_charstcs_global();
+
+	// If we are global, send the whole bunch.
+	if ( false !== $are_global ) {
+		return Queries\get_all_charstcs( $return_type );
+	}
+
+	// Now confirm we have a product ID.
+	if ( empty( $product_id ) ) {
+		return false;
+	}
+
+	// Attempt to get our attributes based on the global setting.
+	$maybe_has  = Queries\get_charstcs_for_product( $product_id, $return_type );
 
 	// Return the applied items, or return false.
 	return ! empty( $maybe_has ) && ! is_wp_error( $maybe_has ) ? $maybe_has : false;
@@ -747,7 +819,7 @@ function get_scoring_stars_display( $product_id = 0, $review_score = 0, $include
 	$score_left = $score_show < 7 ? 7 - $score_show : 0;
 
 	// Set the aria label.
-	$aria_label = sprintf( __( 'Overall Score: %s', 'woo-better-reviews' ), absint( $score_show ) );
+	$aria_label = sprintf( __( 'Rated %s out of 7 stars', 'woo-better-reviews' ), absint( $score_show ) );
 
 	// Set the base class for a star.
 	$star_class = 'dashicons dashicons-star-filled woo-better-reviews-single-star';

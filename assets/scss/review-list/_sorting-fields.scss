@@ -50,6 +50,13 @@
 				line-height: 1;
 				font-weight: 700;
 				text-transform: uppercase;
+				background-color: #efefef;
+				border: 1px solid #ccc;
+
+				&:hover,
+				&:focus {
+					background-color: #ccc;
+				}
 			}
 
 		}

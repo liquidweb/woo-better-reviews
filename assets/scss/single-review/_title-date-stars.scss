@@ -49,6 +49,20 @@
 
 }
 
+.woo-better-reviews-stars-html-wrapper {
+
+	display: inline-block;
+	vertical-align: middle;
+
+	.woo-better-reviews-list-total-score {
+
+		.woo-better-reviews-single-star-full { color: #FFD700; }
+
+		.woo-better-reviews-single-star-empty { color: #999; }
+	}
+
+}
+
 /*
 .woo-better-reviews-single-date-author {
 

@@ -128,11 +128,11 @@ function set_review_list_sorting_view( $product_id = 0 ) {
 		return;
 	}
 
-	// Get all the characteristics we have.
-	$all_charstcs   = Queries\get_all_charstcs( 'display' );
+	// Fetch the applied characteristics / author traits.
+	$applied_traits = Helpers\get_author_traits_for_form( $product_id );
 
 	// Show nothing if we have no characteristics.
-	if ( empty( $all_charstcs ) ) {
+	if ( empty( $applied_traits ) ) {
 		return;
 	}
 
@@ -155,18 +155,18 @@ function set_review_list_sorting_view( $product_id = 0 ) {
 				$display_view  .= '<li class="woo-better-reviews-list-single woo-better-reviews-list-single-intro">' . __( 'Sort By:', 'woo-better-reviews' ) . '</li>';
 
 				// Now loop each characteristic and make a dropdown.
-				foreach ( $all_charstcs as $single_charstc ) {
+				foreach ( $applied_traits as $single_trait ) {
 
 					// Set my field name and slug.
-					$field_name = 'woo-better-reviews-sorting[charstcs][' . absint( $single_charstc['id'] ) . ']';
-					$field_slug = esc_attr( $single_charstc['slug'] );
+					$field_name = 'woo-better-reviews-sorting[charstcs][' . absint( $single_trait['id'] ) . ']';
+					$field_slug = esc_attr( $single_trait['slug'] );
 
 					// Set up my field args.
 					$field_args = array(
-						'id'      => $single_charstc['id'],
+						'id'      => $single_trait['id'],
 						'slug'    => $field_slug,
-						'label'   => $single_charstc['name'],
-						'options' => $single_charstc['values'],
+						'label'   => $single_trait['name'],
+						'options' => $single_trait['values'],
 					);
 
 					// And set the markup.

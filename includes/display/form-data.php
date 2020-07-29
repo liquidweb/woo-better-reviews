@@ -99,38 +99,52 @@ function get_review_author_base_form_fields( $author_id = 0, $only_keys = false 
  */
 function get_review_author_charstcs_form_fields( $author_id = 0, $product_id = 0, $only_keys = false ) {
 
-	// Get all my characteristics.
-	$fetch_charstcs = Queries\get_charstcs_for_product( $product_id, 'display' );
+	// Get all my characteristics for this form.
+	$fetch_form_traits  = Helpers\get_author_traits_for_form( $product_id );
 
 	// Bail without any to display.
-	if ( empty( $fetch_charstcs ) ) {
+	if ( empty( $fetch_form_traits ) ) {
 		return false;
 	}
 
+	// Check for any applied traits to the author.
+	$maybe_get_traits   = ! empty( $author_id ) ? Queries\get_trait_values_for_author( $author_id ) : false;
+	$maybe_has_traits   = ! empty( $maybe_get_traits ) ? $maybe_get_traits : array();
+
 	// Loop and add each one to the array.
-	foreach ( $fetch_charstcs as $charstcs ) {
+	foreach ( $fetch_form_traits as $form_trait ) {
 
 		// Skip if no values exist.
-		if ( empty( $charstcs['values'] ) ) {
+		if ( empty( $form_trait['values'] ) ) {
 			continue;
 		}
 
+		// Set the ID.
+		$define_id  = absint( $form_trait['id'] );
+
+		// Check if we have the trait or not.
+		$has_trait  = isset( $maybe_has_traits[ $define_id ] ) ? $maybe_has_traits[ $define_id ] : '';
+
 		// See if we have a description.
-		$maybe_desc = ! empty( $charstcs['desc'] ) ? $charstcs['desc'] : '';
+		$maybe_desc = ! empty( $form_trait['desc'] ) ? $form_trait['desc'] : '';
 
 		// Set our array key.
-		$array_key  = sanitize_html_class( $charstcs['slug'] );
+		$array_key  = sanitize_html_class( $form_trait['slug'] );
 
 		// And add it.
 		$setup[ $array_key ] = array(
-			'label'         => esc_html( $charstcs['name'] ),
+			'label'         => esc_html( $form_trait['name'] ),
+			'slug'          => $form_trait['slug'],
 			'desc'          => $maybe_desc,
 			'type'          => 'dropdown',
 			'required'      => false,
 			'include-empty' => true,
 			'is-charstcs'   => true,
-			'charstcs-id'   => absint( $charstcs['id'] ),
-			'options'       => $charstcs['values'],
+			'is-trait'      => true,
+			'selected'      => $has_trait,
+			'charstcs-id'   => $define_id,
+			'trait-id'      => $define_id,
+			'options'       => $form_trait['values'],
 		);
 	}
 

@@ -20,7 +20,7 @@ use WP_Error;
 /**
  * Get all the reviews.
  *
- * @param  boolean $purge        Optional to purge the cache'd version before looking up.
+ * @param  boolean $purge  Optional to purge the cache'd version before looking up.
  *
  * @return mixed
  */
@@ -2099,7 +2099,7 @@ function get_charstcs_for_product( $product_id = 0, $return_type = 'objects', $p
 }
 
 /**
- * Get just the charstcs assigned to the author.
+ * Get the terms an author ID has, and return that data.
  *
  * @param  integer $author_id    Which author ID we are looking up.
  * @param  string  $return_type  What type of return we want. Accepts "counts", "objects", "display", or single fields.
@@ -2107,7 +2107,7 @@ function get_charstcs_for_product( $product_id = 0, $return_type = 'objects', $p
  *
  * @return mixed
  */
-function get_charstcs_for_author( $author_id = 0, $return_type = 'objects', $purge = false ) {
+function get_trait_term_data_for_author( $author_id = 0, $return_type = 'objects', $purge = false ) {
 
 	// Bail without a author ID.
 	if ( empty( $author_id ) ) {
@@ -2115,7 +2115,7 @@ function get_charstcs_for_author( $author_id = 0, $return_type = 'objects', $pur
 	}
 
 	// Set the key to use in our transient.
-	$ky = Core\HOOK_PREFIX . 'charstcs_author' . absint( $author_id );
+	$ky = Core\HOOK_PREFIX . 'trait_term_author' . absint( $author_id );
 
 	// If we don't want the cache'd version, delete the transient first.
 	if ( defined( 'WP_DEBUG' ) && WP_DEBUG || ! empty( $purge ) ) {
@@ -2171,7 +2171,7 @@ function get_charstcs_for_author( $author_id = 0, $return_type = 'objects', $pur
 		}
 
 		// Set our transient with our data.
-		set_transient( $ky, absint( $query_list ), HOUR_IN_SECONDS );
+		set_transient( $ky, $query_list, HOUR_IN_SECONDS );
 
 		// And change the variable to do the things.
 		$cached_dataset = $query_list;
@@ -2218,6 +2218,70 @@ function get_charstcs_for_author( $author_id = 0, $return_type = 'objects', $pur
 
 	// No reason we should get down this far but here we go.
 	return false;
+}
+
+/**
+ * Get just the selected trait value for an author ID.
+ *
+ * @param  integer $author_id    Which author ID we are looking up.
+ * @param  boolean $purge        Optional to purge the cache'd version before looking up.
+ *
+ * @return mixed
+ */
+function get_trait_values_for_author( $author_id = 0, $purge = false ) {
+
+	// Bail without a author ID.
+	if ( empty( $author_id ) ) {
+		return new WP_Error( 'missing_author_id', __( 'An author ID is required.', 'woo-better-reviews' ) );
+	}
+
+	// Set the key to use in our transient.
+	$ky = Core\HOOK_PREFIX . 'trait_values_author' . absint( $author_id );
+
+	// If we don't want the cache'd version, delete the transient first.
+	if ( defined( 'WP_DEBUG' ) && WP_DEBUG || ! empty( $purge ) ) {
+		delete_transient( $ky );
+	}
+
+	// Attempt to get the reviews from the cache.
+	$cached_dataset = get_transient( $ky );
+
+	// If we have none, do the things.
+	if ( false === $cached_dataset ) {
+
+		// Call the global database.
+		global $wpdb;
+
+		// Set our table name.
+		$table_name = $wpdb->prefix . Core\TABLE_PREFIX . 'authormeta';
+
+		// Set up our query.
+		$query_args = $wpdb->prepare("
+			SELECT   charstcs_id, charstcs_value
+			FROM     $table_name
+			WHERE    author_id = '%d'
+		", absint( $author_id ) );
+
+		// Process the query.
+		$query_run  = $wpdb->get_results( $query_args );
+
+		// Bail without any data to return.
+		if ( empty( $query_run ) ) {
+			return false;
+		}
+
+		// Set the list we want.
+		$query_list = wp_list_pluck( $query_run, 'charstcs_value', 'charstcs_id' );
+
+		// Set our transient with our data.
+		set_transient( $ky, $query_list, HOUR_IN_SECONDS );
+
+		// And change the variable to do the things.
+		$cached_dataset = $query_list;
+	}
+
+	// We already formatted it, so just return it.
+	return $cached_dataset;
 }
 
 /**
