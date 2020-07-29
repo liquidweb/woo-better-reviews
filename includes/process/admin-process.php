@@ -85,8 +85,11 @@ function update_existing_review() {
 		redirect_admin_action_result( $base_redirect, $error_code );
 	}
 
-	// Purge my related transients.
-	Utilities\purge_transients( Core\HOOK_PREFIX . 'single_review_' . absint( $_POST['item-id'] ), 'reviews' );
+	// Set the array for purging the transients.
+	$set_purge_ids  = (array) $_POST['item-id'];
+
+	// Purge my review related transients.
+	Utilities\purge_transients( null, 'reviews', array( 'ids' => $set_purge_ids ) );
 
 	// Recalculate the values.
 	if ( ! empty( $_POST['product-id'] ) ) {
@@ -99,6 +102,12 @@ function update_existing_review() {
 
 		// Update the overall score.
 		Utilities\calculate_total_review_scoring( $update_id );
+
+		// Set the array for purging the transients.
+		$update_ids = (array) $update_id;
+
+		// And actually purge them.
+		Utilities\purge_transients( null, 'products', array( 'ids' => $update_ids ) );
 	}
 
 	// Redirect a happy one.

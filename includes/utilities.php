@@ -876,8 +876,11 @@ function purge_transients( $key = '', $group = '', $custom = array() ) {
 				// Loop what we have.
 				if ( ! empty( $custom['ids'] ) ) {
 
+					// Make sure it's an array.
+					$arr_id = (array) $custom['ids'];
+
 					// Make sure we have good data.
-					$all_id = array_map( 'absint', $custom['ids'] );
+					$all_id = array_map( 'absint', $arr_id );
 
 					// Loop and delete.
 					foreach ( $all_id as $id ) {
@@ -885,24 +888,17 @@ function purge_transients( $key = '', $group = '', $custom = array() ) {
 					}
 				}
 
-			// Handle attributes and characteristics.
-			case 'taxonomies' :
-
-				// Start deleting.
-				delete_transient( Core\HOOK_PREFIX . 'all_attributes' );
-				delete_transient( Core\HOOK_PREFIX . 'all_charstcs' );
-
-				// And done.
-				break;
-
 			// Handle products.
 			case 'products' :
 
 				// Loop what we have.
 				if ( ! empty( $custom['ids'] ) ) {
 
+					// Make sure it's an array.
+					$arr_id = (array) $custom['ids'];
+
 					// Make sure we have good data.
-					$all_id = array_map( 'absint', $custom['ids'] );
+					$all_id = array_map( 'absint', $arr_id );
 
 					// Loop and delete.
 					foreach ( $all_id as $id ) {
@@ -911,6 +907,7 @@ function purge_transients( $key = '', $group = '', $custom = array() ) {
 						delete_transient( Core\HOOK_PREFIX . 'review_count_product' . $id );
 						delete_transient( Core\HOOK_PREFIX . 'attributes_product' . $id );
 						delete_transient( Core\HOOK_PREFIX . 'author_charstcs_product' . $id );
+						delete_transient( Core\HOOK_PREFIX . 'schema_product' . $id );
 					}
 				}
 
@@ -923,15 +920,30 @@ function purge_transients( $key = '', $group = '', $custom = array() ) {
 				// Loop what we have.
 				if ( ! empty( $custom['ids'] ) ) {
 
+					// Make sure it's an array.
+					$arr_id = (array) $custom['ids'];
+
 					// Make sure we have good data.
-					$all_id = array_map( 'absint', $custom['ids'] );
+					$all_id = array_map( 'absint', $arr_id );
 
 					// Loop and delete.
 					foreach ( $all_id as $id ) {
 						delete_transient( Core\HOOK_PREFIX . 'reviews_for_author_' . $id );
 						delete_transient( Core\HOOK_PREFIX . 'charstcs_author' . $id );
+						delete_transient( Core\HOOK_PREFIX . 'trait_term_author' . $id );
+						delete_transient( Core\HOOK_PREFIX . 'trait_values_author' . $id );
 					}
 				}
+
+				// And done.
+				break;
+
+			// Handle attributes and characteristics.
+			case 'taxonomies' :
+
+				// Start deleting.
+				delete_transient( Core\HOOK_PREFIX . 'all_attributes' );
+				delete_transient( Core\HOOK_PREFIX . 'all_charstcs' );
 
 				// And done.
 				break;
