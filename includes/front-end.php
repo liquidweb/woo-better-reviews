@@ -20,10 +20,35 @@ use WP_Error;
 /**
  * Start our engines.
  */
+add_filter( 'body_class', __NAMESPACE__ . '\filter_front_body_classes' );
 add_action( 'comments_template', __NAMESPACE__ . '\load_review_template', 99 );
 add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\load_review_front_stylesheet' );
 add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\load_review_front_javascript' );
 add_filter( 'wc_better_reviews_display_new_review_form_override', __NAMESPACE__ . '\display_restricted_reviews_text', 10, 2 );
+
+/**
+ * Add additional body classes as needed.
+ *
+ * @param  array $classes  The existing array of body classes.
+ *
+ * @return array           The potentially modifed array.
+ */
+function filter_front_body_classes( $classes ) {
+
+	// Pull our currently active theme.
+	$current_theme  = get_option( 'current_theme' );
+
+	// Add one for Astra.
+	if ( 'Astra' === sanitize_text_field( $current_theme ) ) {
+		$classes[] = 'wbr-astra-active';
+	}
+
+	// And also include one for everything.
+	$classes[] = 'woo-better-review-active';
+
+	// Now return the array.
+	return $classes;
+}
 
 /**
  * Load our own review template from the plugin.
