@@ -978,6 +978,11 @@ class WooBetterReviews_ListReviews extends WP_List_Table {
 	 */
 	protected function column_attribute_ratings( $item ) {
 
+		// Bail without attributes to display.
+		if ( empty( $item['attribute_ratings'] ) ) {
+			return;
+		}
+
 		// Build my markup.
 		$setup  = '';
 
@@ -1170,8 +1175,13 @@ class WooBetterReviews_ListReviews extends WP_List_Table {
 				'review_product'    => get_post_field( 'post_name', $product_id, 'raw' ),
 				'product_data'      => Helpers\get_admin_product_data( $product_id ),
 				'review_score'      => $score_data['total_score'],
-				'attribute_ratings' => $score_data['rating_attributes'],
+				//'attribute_ratings' => $score_data['rating_attributes'],
 			);
+
+			// Add on the attributes if they exist.
+			if ( ! empty( $score_data['rating_attributes'] ) ) {
+				$custom['attribute_ratings'] = $score_data['rating_attributes'];
+			}
 
 			// Set the base array of the data we want.
 			$setup  = wp_parse_args( $custom, (array) $review_object );

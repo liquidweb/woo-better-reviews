@@ -517,7 +517,7 @@ function format_review_content_data( $review ) {
 
 	// Bail without a review.
 	if ( empty( $review ) ) {
-		return;
+		return $review;
 	}
 
 	// Set the empty.
@@ -566,7 +566,7 @@ function format_review_scoring_data( $review, $discard = false ) {
 
 	// Bail without a review.
 	if ( empty( $review ) ) {
-		return;
+		return $review;
 	}
 
 	// Set the empty for scoring.
@@ -583,7 +583,12 @@ function format_review_scoring_data( $review, $discard = false ) {
 	}
 
 	// Check for the attributes kept.
-	if ( isset( $review['rating_attributes'] ) ) {
+	if ( empty( $review['rating_attributes'] ) ) {
+
+		// Just set an empty array.
+		$setup['rating_attributes'] = array();
+
+	} else {
 
 		// Get all my attributes.
 		$all_attributes = Queries\get_all_attributes( 'indexed' );
@@ -606,10 +611,10 @@ function format_review_scoring_data( $review, $discard = false ) {
 
 			// Nothing left with each attribute.
 		}
-
-		// And unset the old.
-		unset( $review['rating_attributes'] );
 	}
+
+	// And unset the old.
+	unset( $review['rating_attributes'] );
 
 	// Return the array.
 	return false !== $discard ? $setup : wp_parse_args( $setup, $review );
@@ -625,36 +630,45 @@ function format_review_scoring_data( $review, $discard = false ) {
 function format_review_author_charstcs( $review ) {
 
 	// Bail without a review.
-	if ( empty( $review ) || empty( $review['author_charstcs'] ) ) {
-		return;
+	if ( empty( $review ) ) {
+		return $review;
 	}
 
 	// Set the empty.
 	$setup  = array();
 
-	// Pull out the charstcs.
-	$charstcs   = maybe_unserialize( $review['author_charstcs'] );
+	// Check to see if we have the traits / characteristics.
+	if ( empty( $review['author_charstcs'] ) ) {
 
-	// Our scoring data has 3 pieces.
-	foreach ( $charstcs as $charstcs_id => $charstcs_slug ) {
+		// Just set an empty array.
+		$setup['author_charstcs'] = array();
 
-		// Skip a missing slug.
-		if ( empty( $charstcs_slug ) ) {
-			continue;
+	} else {
+
+		// Pull out the charstcs.
+		$charstcs   = maybe_unserialize( $review['author_charstcs'] );
+
+		// Our scoring data has 3 pieces.
+		foreach ( $charstcs as $charstcs_id => $charstcs_slug ) {
+
+			// Skip a missing slug.
+			if ( empty( $charstcs_slug ) ) {
+				continue;
+			}
+
+			// Pull my charstcs data.
+			$charstcs_data  = Queries\get_single_charstcs( $charstcs_id );
+			$charstcs_vals  = maybe_unserialize( $charstcs_data['charstcs_values'] );
+
+			// Now set the array accordingly.
+			$setup['author_charstcs'][] = array(
+				'id'    => $charstcs_id,
+				'label' => $charstcs_data['charstcs_name'],
+				'value' => $charstcs_vals[ $charstcs_slug ],
+			);
+
+			// Nothing left with each attribute.
 		}
-
-		// Pull my charstcs data.
-		$charstcs_data  = Queries\get_single_charstcs( $charstcs_id );
-		$charstcs_vals  = maybe_unserialize( $charstcs_data['charstcs_values'] );
-
-		// Now set the array accordingly.
-		$setup['author_charstcs'][] = array(
-			'id'    => $charstcs_id,
-			'label' => $charstcs_data['charstcs_name'],
-			'value' => $charstcs_vals[ $charstcs_slug ],
-		);
-
-		// Nothing left with each attribute.
 	}
 
 	// And unset the old.
