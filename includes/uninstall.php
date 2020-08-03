@@ -21,7 +21,7 @@ use Nexcess\WooBetterReviews\Database as Database;
 function uninstall() {
 
 	// Run the database table deletes.
-	Database\drop_tables();
+	Database\maybe_drop_tables();
 
 	// Delete the options we set.
 	delete_initial_options();
@@ -49,4 +49,5 @@ function delete_initial_options() {
 	delete_option( Core\OPTION_PREFIX . 'global_charstcs' );
 	delete_option( Core\OPTION_PREFIX . 'send_reminders' );
 	delete_option( Core\OPTION_PREFIX . 'reminder_wait' );
+	delete_option( Core\OPTION_PREFIX . 'preserve_on_delete' );
 }

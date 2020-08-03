@@ -495,6 +495,20 @@ function maybe_paginate_reviews( $reviews = array(), $product_id = 0 ) {
 }
 
 /**
+ * Check if we are supposed to drop the tables on delete.
+ *
+ * @return boolean
+ */
+function maybe_preserve_on_delete() {
+
+	// Check the setting first.
+	$maybe_preserve = get_option( Core\OPTION_PREFIX . 'preserve_on_delete', 'yes' );
+
+	// Return a basic boolean.
+	return ! empty( $maybe_preserve ) && 'yes' === sanitize_text_field( $maybe_preserve ) ? true : false;
+}
+
+/**
  * Set and return the array of possible review statuses.
  *
  * @param  boolean $array_keys  Return just the array keys.
