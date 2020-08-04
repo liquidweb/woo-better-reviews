@@ -211,6 +211,7 @@ function get_review_hidden_meta_fields( $product_id = 0, $author_id = 0, $only_k
 
 		// Set up the product ID hidden field.
 		'product-id-hidden' => array(
+			'id'    => 'product-id-hidden',
 			'name'  => 'woo-better-reviews-product-id',
 			'value' => absint( $product_id ),
 			'type'  => 'hidden',
@@ -218,6 +219,7 @@ function get_review_hidden_meta_fields( $product_id = 0, $author_id = 0, $only_k
 
 		// Set up the author ID hidden field.
 		'author-id-hidden' => array(
+			'id'    => 'author-id-hidden',
 			'name'  => 'woo-better-reviews-author-id',
 			'value' => absint( $author_id ),
 			'type'  => 'hidden',
@@ -225,6 +227,7 @@ function get_review_hidden_meta_fields( $product_id = 0, $author_id = 0, $only_k
 
 		// Set the trigger.
 		'add-trigger' => array(
+			'id'    => 'add-trigger',
 			'name'  => 'woo-better-reviews-add-new',
 			'value' => 1,
 			'type'  => 'hidden',
@@ -232,6 +235,7 @@ function get_review_hidden_meta_fields( $product_id = 0, $author_id = 0, $only_k
 
 		// And the nonce.
 		'new-review-nonce' => array(
+			'id'    => 'new-review-nonce',
 			'name'  => 'woo-better-reviews-add-new-nonce',
 			'value' => wp_create_nonce( 'woo-better-reviews-add-new-action' ),
 			'type'  => 'hidden',

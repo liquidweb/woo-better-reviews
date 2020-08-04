@@ -599,14 +599,14 @@ function set_review_form_hidden_meta_fields_view( $author_id = 0, $product_id = 
 	$display_view   = '';
 
 	// Loop the buttons we have.
-	foreach ( $fieldset_data as $field_id => $field_args ) {
+	foreach ( $fieldset_data as $field_key => $field_args ) {
 
 		// Make sure we have a name.
-		$field_name = ! empty( $field_args['name'] ) ? $field_args['name'] : $field_id;
-		$field_val  = ! empty( $field_args['value'] ) ? $field_args['value'] : 0;
+		$field_id   = ! empty( $field_args['id'] ) ? $field_args['id'] : $field_key;
+		$field_name = ! empty( $field_args['name'] ) ? $field_args['name'] : $field_key;
 
 		// And show the field.
-		$display_view  .= '<input type="hidden" id="' . esc_attr( $field_id ) . '" name="' . esc_attr( $field_name ) . '" value="' . esc_attr( $field_val ) . '">';
+		$display_view  .= FormFields\get_review_form_hidden_field( $field_args, $field_key, $field_id, $field_name );
 	}
 
 	// Return it, filtered.
