@@ -534,7 +534,7 @@ function get_review_form_hidden_field( $field_args = array(), $field_key = '' ) 
 	$field .= ' />';
 
 	// Return the field, filtered.
-	return apply_filters( Core\HOOK_PREFIX . 'review_form_hidden_field', $field, $field_args, $field_key, $field_id, $field_name );
+	return apply_filters( Core\HOOK_PREFIX . 'review_form_hidden_field', $field, $field_args, $field_key );
 }
 
 /**
