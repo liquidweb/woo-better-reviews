@@ -489,21 +489,22 @@ function get_review_form_button_field( $field_args = array(), $field_key = '', $
  *
  * @param  array  $field_args  The field args array.
  * @param  string $field_key   The specific key used in the field.
- * @param  string $field_id    Optional field ID, otherwise one is generated from the key.
- * @param  string $field_name  Optional field name, otherwise one is generated from the key.
  *
  * @return HTML
  */
-function get_review_form_hidden_field( $field_args = array(), $field_key = '', $field_id = '', $field_name = '' ) {
+function get_review_form_hidden_field( $field_args = array(), $field_key = '' ) {
 
 	// Bail if we don't have the args or the key.
 	if ( empty( $field_args ) || empty( $field_key ) ) {
 		return;
 	}
 
+	// If for some reason someone mucked with the field type, remove it.
+	unset( $field_args['type'] );
+
 	// Set my field name, and ID.
-	$set_field_id       = ! empty( $field_id ) ? $field_id : 'woo-better-reviews-rating-field-' . sanitize_html_class( $field_key );
-	$set_field_name     = ! empty( $field_name ) ? $field_name : 'woo-better-reviews-rating[' . sanitize_html_class( $field_key ) . ']';
+	$set_field_id       = ! empty( $field_args['id'] ) ? $field_args['id'] : 'woo-better-reviews-rating-field-' . sanitize_html_class( $field_key );
+	$set_field_name     = ! empty( $field_args['name'] ) ? $field_args['name'] : 'woo-better-reviews-rating[' . sanitize_html_class( $field_key ) . ']';
 
 	// Check for a value.
 	$set_field_value    = ! empty( $field_args['value'] ) ? $field_args['value'] : '';
@@ -517,9 +518,6 @@ function get_review_form_hidden_field( $field_args = array(), $field_key = '', $
 
 	// Add items to the array if we have them.
 	$input_args_array   = ! empty( $field_args['custom'] ) ? wp_parse_args( $field_args['custom'], $input_args_array ) : $input_args_array;
-
-	// If for some reason someone mucked with the field type, remove it.
-	unset( $input_args_array['type'] );
 
 	// Set my empty.
 	$field  = '';
