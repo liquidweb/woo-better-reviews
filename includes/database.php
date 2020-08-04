@@ -430,6 +430,25 @@ function install_single_table( $table_name = '' ) {
 }
 
 /**
+ * Check the settings and then drop on delete.
+ *
+ * @return mixed / boolean
+ */
+function maybe_drop_tables() {
+
+	// Check to see if we are supposed to purge.
+	$maybe_preserve = Helpers\maybe_preserve_on_delete();
+
+	// Bail if we didn't return a hard false.
+	if ( false !== $maybe_preserve ) {
+		return;
+	}
+
+	// If we are supposed to purge, DO IT.
+	return drop_all_tables();
+}
+
+/**
  * Delete a single table, as needed.
  *
  * @param  string $table_name  The table name we wanna delete.
@@ -454,11 +473,11 @@ function drop_single_table( $table_name = '' ) {
 }
 
 /**
- * Delete all our tables.
+ * Actually delete all our tables, without the check function.
  *
  * @return boolean
  */
-function drop_tables() {
+function drop_all_tables() {
 
 	// Get my array of table names.
 	$table_names    = Helpers\get_table_args( true );

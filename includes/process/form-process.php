@@ -145,41 +145,47 @@ function process_review_submission() {
 		// Scoring inserts are done.
 	}
 
-	// Set up the author formatting insert.
-	$author_format  = format_submitted_review_author( $form_data, $new_review_id, $product_id, $author_id );
+	// If we have review author traits / characteristics, handle that process.
+	if ( ! empty( $form_data['author-charstcs'] ) ) {
 
-	// Bail without my author formatted.
-	if ( empty( $author_format ) || is_wp_error( $author_format ) ) {
+		// Set up the author formatting insert.
+		$author_format  = format_submitted_review_author( $form_data, $new_review_id, $product_id, $author_id );
 
-		// Determine the error code if we have one.
-		$error_code = ! is_wp_error( $author_format ) ? 'invalid-author-formatting' : $author_format->get_error_code();
-
-		// And run the redirect.
-		redirect_front_submit_result( $base_redirect, $error_code );
-	}
-
-	// Now loop and attempt each insert.
-	foreach ( $author_format as $single_author_array ) {
-
-		// Skip the insert if we have no values.
-		if ( empty( $single_author_array['charstcs_value'] ) ) {
-			continue;
-		}
-
-		// Attempt to insert the review author.
-		$insert_author  = Database\insert( 'authormeta', $single_author_array );
-
-		// Bail on a failed insert.
-		if ( empty( $insert_author ) || is_wp_error( $insert_author ) ) {
+		// Bail without my author formatted.
+		if ( empty( $author_format ) || is_wp_error( $author_format ) ) {
 
 			// Determine the error code if we have one.
-			$error_code = ! is_wp_error( $insert_author ) ? 'author-insert-fail' : $insert_author->get_error_code();
+			$error_code = ! is_wp_error( $author_format ) ? 'invalid-author-formatting' : $author_format->get_error_code();
 
 			// And run the redirect.
 			redirect_front_submit_result( $base_redirect, $error_code );
 		}
 
-		// Author inserts are done.
+		// Now loop and attempt each insert.
+		foreach ( $author_format as $single_author_array ) {
+
+			// Skip the insert if we have no values.
+			if ( empty( $single_author_array['charstcs_value'] ) ) {
+				continue;
+			}
+
+			// Attempt to insert the review author.
+			$insert_author  = Database\insert( 'authormeta', $single_author_array );
+
+			// Bail on a failed insert.
+			if ( empty( $insert_author ) || is_wp_error( $insert_author ) ) {
+
+				// Determine the error code if we have one.
+				$error_code = ! is_wp_error( $insert_author ) ? 'author-insert-fail' : $insert_author->get_error_code();
+
+				// And run the redirect.
+				redirect_front_submit_result( $base_redirect, $error_code );
+			}
+
+			// Author inserts are done.
+		}
+
+		// Nothing left inside the check for author data stuff.
 	}
 
 	// Now we run our scoring merge.
@@ -252,7 +258,7 @@ function format_submitted_review_content( $form_data = array(), $product_id = 0,
 
 	// Bail without the data needed.
 	if ( empty( $form_data ) || empty( $product_id ) || empty( $form_data['review-content'] ) ) {
-		return new WP_Error( 'missing-formatting-data', __( 'The required data to format is missing.', 'woo-better-reviews' ) );
+		return new WP_Error( 'missing-content-formatting-data', __( 'The required data to format the review content is missing.', 'woo-better-reviews' ) );
 	}
 
 	// Set the timestamp and date formatting that we're gonna use.
@@ -364,7 +370,7 @@ function format_submitted_review_author( $form_data = array(), $review_id = 0, $
 
 	// Bail without the data needed.
 	if ( empty( $form_data ) || empty( $product_id ) || empty( $form_data['author-charstcs'] ) ) {
-		return new WP_Error( 'missing-formatting-data', __( 'The required data to format.', 'woo-better-reviews' ) );
+		return new WP_Error( 'missing-author-trait-formatting-data', __( 'The required data to format author trait data is missing.', 'woo-better-reviews' ) );
 	}
 
 	// Set a blank for the insert.
@@ -408,7 +414,7 @@ function merge_review_scoring_data( $review_id = 0, $total_score = 0, $content_a
 	}
 
 	// Bail without the data needed.
-	if ( empty( $content_array ) || empty( $scoring_array ) || empty( $author_array ) ) {
+	if ( empty( $content_array ) || empty( $scoring_array ) ) {
 		return new WP_Error( 'missing-formatting-data', __( 'The required data is missing.', 'woo-better-reviews' ) );
 	}
 
@@ -476,7 +482,7 @@ function parse_attributes_for_scoring( $scoring_array = array() ) {
 	}
 
 	// Return the args, serialized.
-	return maybe_serialize( $setup_args );
+	return ! empty( $setup_args ) ? maybe_serialize( $setup_args ) : array();
 }
 
 /**
@@ -510,5 +516,5 @@ function parse_charstcs_for_scoring( $author_array = array() ) {
 	}
 
 	// Return the args, serialized.
-	return maybe_serialize( $setup_args );
+	return ! empty( $setup_args ) ? maybe_serialize( $setup_args ) : array();
 }

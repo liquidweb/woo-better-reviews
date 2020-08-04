@@ -84,10 +84,19 @@ function filter_woo_review_settings( $settings ) {
  */
 function add_review_settings_tab( $tabs ) {
 
+	// Set the advanced tab so we can add it back to the end.
+	$advanced_tab   = $tabs['advanced'];
+
 	// Confirm we don't already have the tab.
 	if ( ! isset( $tabs[ Core\TAB_BASE ] ) ) {
 		$tabs[ Core\TAB_BASE ] = __( 'Product Reviews', 'woo-better-reviews' );
 	}
+
+	// Now remove the existing.
+	unset( $tabs['advanced'] );
+
+	// Add the advanced tab back to the end.
+	$tabs['advanced'] = $advanced_tab;
 
 	// And return the entire array.
 	return $tabs;
@@ -321,6 +330,26 @@ function get_settings() {
 
 		// Close up the reminders section.
 		'remindsection_end' => array( 'type' => 'sectionend', 'id' => Core\TAB_BASE . '_remind_settings_section_end' ),
+
+		// Now start the admin / other.
+		'adminheader' => array(
+			'title' => __( 'Admin Settings', 'woo-better-reviews' ),
+			'type'  => 'title',
+			'desc'  => '',
+			'id'    => Core\OPTION_PREFIX . 'admin_settings_header',
+		),
+
+		'preserveondelete' => array(
+			'title'   => __( 'Preserve Data', 'woo-better-reviews' ),
+			'desc'    => __( 'If UN-checked, all plugin data, including reviews, will be removed when the plugin is deleted.', 'woo-better-reviews' ),
+			'id'      => Core\OPTION_PREFIX . 'preserve_on_delete',
+			'type'    => 'checkbox',
+			'default' => 'yes',
+			'class'   => 'woo-better-reviews-settings-checkbox',
+		),
+
+		// Close up the admin / other section.
+		'adminsection_end' => array( 'type' => 'sectionend', 'id' => Core\TAB_BASE . '_admin_settings_section_end' ),
 	);
 
 	// Return our set of fields with a filter, resetting the keys again.

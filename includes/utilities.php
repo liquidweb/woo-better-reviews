@@ -517,7 +517,7 @@ function format_review_content_data( $review ) {
 
 	// Bail without a review.
 	if ( empty( $review ) ) {
-		return;
+		return $review;
 	}
 
 	// Set the empty.
@@ -566,7 +566,7 @@ function format_review_scoring_data( $review, $discard = false ) {
 
 	// Bail without a review.
 	if ( empty( $review ) ) {
-		return;
+		return $review;
 	}
 
 	// Set the empty for scoring.
@@ -583,7 +583,12 @@ function format_review_scoring_data( $review, $discard = false ) {
 	}
 
 	// Check for the attributes kept.
-	if ( isset( $review['rating_attributes'] ) ) {
+	if ( empty( $review['rating_attributes'] ) ) {
+
+		// Just set an empty array.
+		$setup['rating_attributes'] = array();
+
+	} else {
 
 		// Get all my attributes.
 		$all_attributes = Queries\get_all_attributes( 'indexed' );
@@ -606,10 +611,10 @@ function format_review_scoring_data( $review, $discard = false ) {
 
 			// Nothing left with each attribute.
 		}
-
-		// And unset the old.
-		unset( $review['rating_attributes'] );
 	}
+
+	// And unset the old.
+	unset( $review['rating_attributes'] );
 
 	// Return the array.
 	return false !== $discard ? $setup : wp_parse_args( $setup, $review );
@@ -625,36 +630,45 @@ function format_review_scoring_data( $review, $discard = false ) {
 function format_review_author_charstcs( $review ) {
 
 	// Bail without a review.
-	if ( empty( $review ) || empty( $review['author_charstcs'] ) ) {
-		return;
+	if ( empty( $review ) ) {
+		return $review;
 	}
 
 	// Set the empty.
 	$setup  = array();
 
-	// Pull out the charstcs.
-	$charstcs   = maybe_unserialize( $review['author_charstcs'] );
+	// Check to see if we have the traits / characteristics.
+	if ( empty( $review['author_charstcs'] ) ) {
 
-	// Our scoring data has 3 pieces.
-	foreach ( $charstcs as $charstcs_id => $charstcs_slug ) {
+		// Just set an empty array.
+		$setup['author_charstcs'] = array();
 
-		// Skip a missing slug.
-		if ( empty( $charstcs_slug ) ) {
-			continue;
+	} else {
+
+		// Pull out the charstcs.
+		$charstcs   = maybe_unserialize( $review['author_charstcs'] );
+
+		// Our scoring data has 3 pieces.
+		foreach ( $charstcs as $charstcs_id => $charstcs_slug ) {
+
+			// Skip a missing slug.
+			if ( empty( $charstcs_slug ) ) {
+				continue;
+			}
+
+			// Pull my charstcs data.
+			$charstcs_data  = Queries\get_single_charstcs( $charstcs_id );
+			$charstcs_vals  = maybe_unserialize( $charstcs_data['charstcs_values'] );
+
+			// Now set the array accordingly.
+			$setup['author_charstcs'][] = array(
+				'id'    => $charstcs_id,
+				'label' => $charstcs_data['charstcs_name'],
+				'value' => $charstcs_vals[ $charstcs_slug ],
+			);
+
+			// Nothing left with each attribute.
 		}
-
-		// Pull my charstcs data.
-		$charstcs_data  = Queries\get_single_charstcs( $charstcs_id );
-		$charstcs_vals  = maybe_unserialize( $charstcs_data['charstcs_values'] );
-
-		// Now set the array accordingly.
-		$setup['author_charstcs'][] = array(
-			'id'    => $charstcs_id,
-			'label' => $charstcs_data['charstcs_name'],
-			'value' => $charstcs_vals[ $charstcs_slug ],
-		);
-
-		// Nothing left with each attribute.
 	}
 
 	// And unset the old.
@@ -876,8 +890,11 @@ function purge_transients( $key = '', $group = '', $custom = array() ) {
 				// Loop what we have.
 				if ( ! empty( $custom['ids'] ) ) {
 
+					// Make sure it's an array.
+					$arr_id = (array) $custom['ids'];
+
 					// Make sure we have good data.
-					$all_id = array_map( 'absint', $custom['ids'] );
+					$all_id = array_map( 'absint', $arr_id );
 
 					// Loop and delete.
 					foreach ( $all_id as $id ) {
@@ -885,24 +902,17 @@ function purge_transients( $key = '', $group = '', $custom = array() ) {
 					}
 				}
 
-			// Handle attributes and characteristics.
-			case 'taxonomies' :
-
-				// Start deleting.
-				delete_transient( Core\HOOK_PREFIX . 'all_attributes' );
-				delete_transient( Core\HOOK_PREFIX . 'all_charstcs' );
-
-				// And done.
-				break;
-
 			// Handle products.
 			case 'products' :
 
 				// Loop what we have.
 				if ( ! empty( $custom['ids'] ) ) {
 
+					// Make sure it's an array.
+					$arr_id = (array) $custom['ids'];
+
 					// Make sure we have good data.
-					$all_id = array_map( 'absint', $custom['ids'] );
+					$all_id = array_map( 'absint', $arr_id );
 
 					// Loop and delete.
 					foreach ( $all_id as $id ) {
@@ -911,6 +921,7 @@ function purge_transients( $key = '', $group = '', $custom = array() ) {
 						delete_transient( Core\HOOK_PREFIX . 'review_count_product' . $id );
 						delete_transient( Core\HOOK_PREFIX . 'attributes_product' . $id );
 						delete_transient( Core\HOOK_PREFIX . 'author_charstcs_product' . $id );
+						delete_transient( Core\HOOK_PREFIX . 'schema_product' . $id );
 					}
 				}
 
@@ -923,15 +934,30 @@ function purge_transients( $key = '', $group = '', $custom = array() ) {
 				// Loop what we have.
 				if ( ! empty( $custom['ids'] ) ) {
 
+					// Make sure it's an array.
+					$arr_id = (array) $custom['ids'];
+
 					// Make sure we have good data.
-					$all_id = array_map( 'absint', $custom['ids'] );
+					$all_id = array_map( 'absint', $arr_id );
 
 					// Loop and delete.
 					foreach ( $all_id as $id ) {
 						delete_transient( Core\HOOK_PREFIX . 'reviews_for_author_' . $id );
 						delete_transient( Core\HOOK_PREFIX . 'charstcs_author' . $id );
+						delete_transient( Core\HOOK_PREFIX . 'trait_term_author' . $id );
+						delete_transient( Core\HOOK_PREFIX . 'trait_values_author' . $id );
 					}
 				}
+
+				// And done.
+				break;
+
+			// Handle attributes and characteristics.
+			case 'taxonomies' :
+
+				// Start deleting.
+				delete_transient( Core\HOOK_PREFIX . 'all_attributes' );
+				delete_transient( Core\HOOK_PREFIX . 'all_charstcs' );
 
 				// And done.
 				break;
