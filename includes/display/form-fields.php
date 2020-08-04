@@ -152,7 +152,7 @@ function get_review_form_scoring_field( $field_args = array(), $field_key = '', 
 	// Now begin the actual field input.
 	$field .= '<input type="radio"';
 
-	// Check for the required and checked flag.
+	// Check for the required and checked flags.
 	$field .= empty( $field_args['required'] ) ? '' : ' required="required"';
 	$field .= empty( $field_args['is-checked'] ) ? '' : ' checked="checked"';
 
@@ -344,10 +344,8 @@ function get_review_form_radio_field( $field_args = array(), $field_key = '', $f
 	// Do the actual radio.
 	$field .= '<input type="radio" id="' . esc_attr( $set_field_id ) . '" class="' . esc_attr( $set_field_class ) . '" name="' . esc_attr( $set_field_name ) . '"';
 
-	// Add the required portion.
+	// Check for the required and checked flags.
 	$field .= empty( $field_args['required'] ) ? '' : ' required="required"';
-
-	// Check for the checked flag.
 	$field .= empty( $field_args['is-checked'] ) ? '' : ' checked="checked"';
 
 	// And close the radio with our value and potential check.

@@ -76,18 +76,17 @@ function set_review_form_rating_stars_view( $product_id = 0 ) {
 				$field_id   = 'woo-better-reviews-rating-content-score-' . absint( $setscore );
 				$field_name = 'woo-better-reviews-rating[score]';
 
+				// Handle our default check on the first star.
+				$field_chkd = 2 >= absint( $setscore ) ? true : false;
+
 				// Set my field args.
 				$field_args = array(
-					'title'    => sprintf( __( 'Select a %d star rating', 'woo-better-reviews' ), absint( $setscore ) ),
-					'class'    => 'woo-better-reviews-single-star',
-					'required' => true,
-					'wrap'     => false,
+					'title'      => sprintf( __( 'Select a %d star rating', 'woo-better-reviews' ), absint( $setscore ) ),
+					'class'      => 'woo-better-reviews-single-star',
+					'required'   => true,
+					'wrap'       => false,
+					'is-checked' => $field_chkd,
 				);
-
-				// Add the checked for our first star.
-				if ( 2 >= absint( $setscore ) ) {
-					$field_args['is-checked'] = true;
-				}
 
 				// And output the field view.
 				$display_view  .= FormFields\get_review_form_scoring_field( $field_args, $setscore, $field_id, $field_name );
