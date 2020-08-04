@@ -84,6 +84,11 @@ function set_review_form_rating_stars_view( $product_id = 0 ) {
 					'wrap'     => false,
 				);
 
+				// Add the checked for our first star.
+				if ( 2 >= absint( $setscore ) ) {
+					$field_args['is-checked'] = true;
+				}
+
 				// And output the field view.
 				$display_view  .= FormFields\get_review_form_scoring_field( $field_args, $setscore, $field_id, $field_name );
 			}
