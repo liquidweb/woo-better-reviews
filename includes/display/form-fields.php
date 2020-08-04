@@ -510,7 +510,6 @@ function get_review_form_hidden_field( $field_args = array(), $field_key = '', $
 
 	// Set the parts of the input field.
 	$input_args_array   = array(
-		'type'  => 'hidden',
 		'name'  => esc_attr( $set_field_name ),
 		'id'    => esc_attr( $set_field_id ),
 		'value' => esc_attr( $set_field_value ),
@@ -518,6 +517,9 @@ function get_review_form_hidden_field( $field_args = array(), $field_key = '', $
 
 	// Add items to the array if we have them.
 	$input_args_array   = ! empty( $field_args['custom'] ) ? wp_parse_args( $field_args['custom'], $input_args_array ) : $input_args_array;
+
+	// If for some reason someone mucked with the field type, remove it.
+	unset( $input_args_array['type'] );
 
 	// Set my empty.
 	$field  = '';
