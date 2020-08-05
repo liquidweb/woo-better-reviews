@@ -372,8 +372,18 @@ function format_string_values_array( $labels, $serialize = true ) {
 		return false;
 	}
 
-	// Make sure it's an array.
-	$label_args = ! is_array( $labels ) ? explode( ',', $labels ) : $labels;
+	// Set the basic label args.
+	$label_args = $labels;
+
+	// If we don't already have an array, do it.
+	if ( ! is_array( $labels ) ) {
+
+		// First swap any pipes to commas.
+		$label_str  = str_replace( array( '|', '/' ), ',', $labels );
+
+		// Now explode it.
+		$label_args = explode( ',', $label_str );
+	}
 
 	// Set an empty.
 	$dataset    = array();

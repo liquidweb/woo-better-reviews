@@ -246,7 +246,7 @@ function get_settings() {
 			'type'     => 'checkbox',
 			'default'  => 'no',
 			'class'    => 'woo-better-reviews-settings-checkbox',
-			'desc_tip' => __( 'User accounts must be enabled for this feature.', 'woo-better-reviews' ),
+			'desc_tip' => __( 'Customer accounts must be enabled to disable anonymous reviews.', 'woo-better-reviews' ),
 		),
 
 		'doverified' => array(
