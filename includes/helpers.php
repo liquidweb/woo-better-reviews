@@ -509,6 +509,20 @@ function maybe_preserve_on_delete() {
 }
 
 /**
+ * Check if the first install was run.
+ *
+ * @return boolean
+ */
+function maybe_first_install() {
+
+	// Check the setting first.
+	$is_run = get_option( Core\OPTION_PREFIX . 'first_install_complete', false );
+
+	// Return a basic boolean.
+	return empty( $is_run ) ? true : false;
+}
+
+/**
  * Check for the default star count value.
  *
  * @param  string  $return_type  The return type we wanna have.
