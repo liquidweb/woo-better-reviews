@@ -232,7 +232,7 @@ function get_settings() {
 		'enable' => array(
 			'title'    => __( 'Enable Reviews', 'woo-better-reviews' ),
 			'desc'     => __( 'Use the Better Product Reviews for WooCommerce plugin', 'woo-better-reviews' ),
-			'id'       => 'woocommerce_enable_reviews', // @@todo figure out if setting key should be different.
+			'id'       => 'woocommerce_enable_reviews',
 			'type'     => 'checkbox',
 			'default'  => 'yes',
 			'class'    => 'woo-better-reviews-settings-checkbox',

@@ -39,14 +39,12 @@ function run_after_purchase_triggers( $order_id ) {
 
 	// First do the trigger with the entire order data.
 	do_action( Core\AFTER_PURCHASE_TRIGGER . 'order_data', $order_id, $order_data );
-	// wc_better_reviews_trigger_after_purchase_
 
 	// If we have no actual line items, do that trigger.
 	if ( empty( $order_data['line_items'] ) ) {
 
 		// Do the trigger with the entire order data.
 		do_action( Core\AFTER_PURCHASE_TRIGGER . 'order_data_no_items', $order_id, $order_data );
-		// wc_better_reviews_trigger_after_purchase_
 
 		// And be done.
 		return;
@@ -62,7 +60,6 @@ function run_after_purchase_triggers( $order_id ) {
 
 	// Do the action that contains the line items.
 	do_action( Core\AFTER_PURCHASE_TRIGGER . 'order_line_items', $order_id, $product_ids, $order_data );
-	// wc_better_reviews_trigger_after_purchase_
 
 	// Now loop through each line item and pass that along.
 	foreach ( $order_data['line_items'] as $item_key => $item_object ) {
@@ -73,10 +70,10 @@ function run_after_purchase_triggers( $order_id ) {
 
 		// Run the trigger that has the single bit of product data.
 		do_action( Core\AFTER_PURCHASE_TRIGGER . 'order_single_line_item', $order_id, $product_data, $order_data );
-		// wc_better_reviews_trigger_after_purchase_
 	}
 
-	// @@todo figure out if we need some sort of final action here.
+	// Now run an action after all are done.
+	do_action( Core\AFTER_PURCHASE_TRIGGER . 'order_data_completed', $order_id, $order_data );
 }
 
 /**
