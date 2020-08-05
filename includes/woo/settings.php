@@ -84,19 +84,23 @@ function filter_woo_review_settings( $settings ) {
  */
 function add_review_settings_tab( $tabs ) {
 
-	// Set the advanced tab so we can add it back to the end.
-	$advanced_tab   = $tabs['advanced'];
-
 	// Confirm we don't already have the tab.
 	if ( ! isset( $tabs[ Core\TAB_BASE ] ) ) {
 		$tabs[ Core\TAB_BASE ] = __( 'Product Reviews', 'woo-better-reviews' );
 	}
 
-	// Now remove the existing.
-	unset( $tabs['advanced'] );
+	// If we have the advanced tab, move it to the end.
+	if ( isset( $tabs['advanced'] ) ) {
 
-	// Add the advanced tab back to the end.
-	$tabs['advanced'] = $advanced_tab;
+		// Set the advanced tab so we can add it back to the end.
+		$advanced_tab   = $tabs['advanced'];
+
+		// Now remove the existing.
+		unset( $tabs['advanced'] );
+
+		// Add the advanced tab back to the end.
+		$tabs['advanced'] = $advanced_tab;
+	}
 
 	// And return the entire array.
 	return $tabs;
@@ -286,6 +290,20 @@ function get_settings() {
 			'default'  => 'yes',
 			'class'    => 'woo-better-reviews-settings-checkbox',
 			'desc_tip' => sprintf( __( '<a href="%s">Click here</a> to view and edit your review author traits.', 'woo-better-reviews' ), Helpers\get_admin_menu_link( Core\CHARSTCS_ANCHOR ) ),
+		),
+
+		'defaultstars' => array(
+			'title'             => __( 'Default Star Rating', 'woo-better-reviews' ),
+			'desc'              => '',
+			'id'                => Core\OPTION_PREFIX . 'default_stars',
+			'type'              => 'number',
+			'default'           => '7',
+			'class'             => 'woo-better-reviews-settings-small-number',
+			'custom_attributes' => array(
+				'min'  => 1,
+				'max'  => 7,
+				'step' => 1,
+			),
 		),
 
 		// Include my section end.

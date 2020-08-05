@@ -117,6 +117,7 @@ function set_initial_options() {
 	update_option( Core\OPTION_PREFIX . 'allow_anonymous', 'no' );
 	update_option( Core\OPTION_PREFIX . 'global_attributes', 'yes' );
 	update_option( Core\OPTION_PREFIX . 'global_charstcs', 'yes' );
+	update_option( Core\OPTION_PREFIX . 'default_stars', '7' );
 	update_option( Core\OPTION_PREFIX . 'send_reminders', 'yes' );
 	update_option( Core\OPTION_PREFIX . 'reminder_wait', $set_remainder_args );
 	update_option( Core\OPTION_PREFIX . 'preserve_on_delete', 'yes' );

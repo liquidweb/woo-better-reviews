@@ -335,14 +335,14 @@ function maybe_attributes_global() {
 /**
  * Check to see if there is a search term and return it.
  *
- * @param  string $return  The return type we wanna have. Boolean or string.
+ * @param  string $return_type  The return type we wanna have. Boolean or string.
  *
  * @return mixed.
  */
-function maybe_search_term( $return = 'string' ) {
+function maybe_search_term( $return_type = 'string' ) {
 
 	// Determine which thing we're returning.
-	switch ( esc_attr( $return ) ) {
+	switch ( esc_attr( $return_type ) ) {
 
 		case 'string' :
 
@@ -506,6 +506,38 @@ function maybe_preserve_on_delete() {
 
 	// Return a basic boolean.
 	return ! empty( $maybe_preserve ) && 'yes' === sanitize_text_field( $maybe_preserve ) ? true : false;
+}
+
+/**
+ * Check for the default star count value.
+ *
+ * @param  string  $return_type  The return type we wanna have.
+ * @param  integer $compare      If doing a comparison, what to compare against.
+ *
+ * @return mixed.
+ */
+function get_default_stars( $return_type = 'integer', $compare = 0 ) {
+
+	// Check the setting first.
+	$default_stars  = get_option( Core\OPTION_PREFIX . 'default_stars', '7' );
+
+	// Determine which thing we're returning.
+	switch ( esc_attr( $return_type ) ) {
+
+		case 'integer' :
+
+			return absint( $default_stars );
+			break;
+
+		case 'bool' :
+		case 'boolean' :
+		case 'compare' :
+
+			return absint( $default_stars ) === absint( $compare ) ? true : false;
+			break;
+
+		// End all case breaks.
+	}
 }
 
 /**
