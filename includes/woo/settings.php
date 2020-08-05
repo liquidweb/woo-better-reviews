@@ -294,7 +294,7 @@ function get_settings() {
 
 		'defaultstars' => array(
 			'title'             => __( 'Default Star Rating', 'woo-better-reviews' ),
-			'desc'              => '',
+			'desc'              => __( 'Select the default rating that will load on the new review form.', 'woo-better-reviews' ),
 			'id'                => Core\OPTION_PREFIX . 'default_stars',
 			'type'              => 'number',
 			'default'           => '7',
