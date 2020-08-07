@@ -26,8 +26,6 @@ add_action( 'woocommerce_order_status_changed', __NAMESPACE__ . '\run_after_stat
  */
 function run_after_purchase_triggers( $order_id ) {
 
-	// @@todo include some sort of check for the setting i haven't added yet.
-
 	// Bail without an order ID.
 	if ( ! $order_id ) {
 		return;

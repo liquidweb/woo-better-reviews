@@ -70,7 +70,6 @@ function process_review_submission() {
 	}
 
 	// Set my author ID as a variable.
-	// @@todo figure out how to handle author IDs when it's not present.
 	$author_id  = ! empty( $_POST['woo-better-reviews-author-id'] ) ? absint( $_POST['woo-better-reviews-author-id'] ) : 0;
 
 	// Set our submitted data as it's own variable.
