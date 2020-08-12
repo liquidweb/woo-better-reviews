@@ -180,13 +180,13 @@ function maybe_adjust_reminder_cron( $data ) {
  */
 function maybe_adjust_for_anonymous( $data ) {
 
-	// Set the option key.
-	$ky = Core\OPTION_PREFIX . 'allow_anonymous';
-
-	// If this key is in the data, we make sure the "only verified" is turned off.
-	if ( ! empty( $data[ $ky ] ) ) {
-		delete_option( 'woocommerce_review_rating_verification_required' );
+	// If the key isn't present in the data, do not do anything.
+	if ( empty( $data['woocommerce_review_rating_verification_required'] ) ) {
+		return;
 	}
+
+	// If this key is in the data, we make sure the "allow anonymous" is turned off.
+	delete_option( Core\OPTION_PREFIX . 'allow_anonymous' );
 }
 
 /**
@@ -207,21 +207,6 @@ function get_settings() {
 	// Set up our array, including default Woo items.
 	$setup_args = array(
 
-		/*
-		'option_name' => array(
-			'title' => 'Title for your option shown on the settings page',
-			'description' => 'Description for your option shown on the settings page',
-			'type' => 'text|password|textarea|checkbox|select|multiselect',
-			'default' => 'Default value for the option',
-			'class' => 'Class for the input',
-			'css' => 'CSS rules added line to the input',
-			'label' => 'Label', // checkbox only
-			'options' => array(
-				'key' => 'value'
-			) // array of options for select/multiselects only
-		)
-		*/
-
 		'mainheader' => array(
 			'title' => __( 'Product Review Settings', 'woo-better-reviews' ),
 			'type'  => 'title',
@@ -236,17 +221,16 @@ function get_settings() {
 			'type'     => 'checkbox',
 			'default'  => 'yes',
 			'class'    => 'woo-better-reviews-settings-checkbox',
-			'desc_tip' => __( 'Unchecking this box will disable reviews completely.', 'woo-better-reviews' ),
+			'desc_tip' =>  '<span class="woo-better-reviews-checkbox-notice">' . __( 'Unchecking this box will disable reviews completely.', 'woo-better-reviews' ) . '</span>',
 		),
 
 		'anonymous' => array(
-			'title'    => __( 'Anonymous Reviews', 'woo-better-reviews' ),
-			'desc'     => __( 'Allow non-logged in users to leave product reviews', 'woo-better-reviews' ),
-			'id'       => Core\OPTION_PREFIX . 'allow_anonymous',
-			'type'     => 'checkbox',
-			'default'  => 'no',
-			'class'    => 'woo-better-reviews-settings-checkbox',
-			'desc_tip' => __( 'Customer accounts must be enabled to disable anonymous reviews.', 'woo-better-reviews' ),
+			'title'   => __( 'Anonymous Reviews', 'woo-better-reviews' ),
+			'desc'    => __( 'Allow non-logged in users to leave product reviews', 'woo-better-reviews' ),
+			'id'      => Core\OPTION_PREFIX . 'allow_anonymous',
+			'type'    => 'checkbox',
+			'default' => 'no',
+			'class'   => 'woo-better-reviews-settings-checkbox',
 		),
 
 		'doverified' => array(
@@ -270,6 +254,7 @@ function get_settings() {
 			'show_if_checked' => 'yes',
 			'class'           => 'woo-better-reviews-settings-checkbox',
 			'autoload'        => false,
+			'desc_tip'        => '<span class="woo-better-reviews-checkbox-notice">' . __( 'Enabling this feature will disable anonymous reviews.', 'woo-better-reviews' ) . '</span>',
 		),
 
 		'gloablattributes' => array(
@@ -279,7 +264,7 @@ function get_settings() {
 			'type'     => 'checkbox',
 			'default'  => 'yes',
 			'class'    => 'woo-better-reviews-settings-checkbox',
-			'desc_tip' => sprintf( __( '<a href="%s">Click here</a> to view and edit your product review attributes.', 'woo-better-reviews' ), Helpers\get_admin_menu_link( Core\ATTRIBUTES_ANCHOR ) ),
+			'desc_tip' => '<span class="woo-better-reviews-checkbox-notice">' . sprintf( __( '<a href="%s">Click here</a> to view and edit your product review attributes.', 'woo-better-reviews' ), Helpers\get_admin_menu_link( Core\ATTRIBUTES_ANCHOR ) ) . '</span>',
 		),
 
 		'gloablcharstcs' => array(
@@ -289,7 +274,7 @@ function get_settings() {
 			'type'     => 'checkbox',
 			'default'  => 'yes',
 			'class'    => 'woo-better-reviews-settings-checkbox',
-			'desc_tip' => sprintf( __( '<a href="%s">Click here</a> to view and edit your review author traits.', 'woo-better-reviews' ), Helpers\get_admin_menu_link( Core\CHARSTCS_ANCHOR ) ),
+			'desc_tip' =>  '<span class="woo-better-reviews-checkbox-notice">' . sprintf( __( '<a href="%s">Click here</a> to view and edit your review author traits.', 'woo-better-reviews' ), Helpers\get_admin_menu_link( Core\CHARSTCS_ANCHOR ) ) . '</span>',
 		),
 
 		'defaultstars' => array(
