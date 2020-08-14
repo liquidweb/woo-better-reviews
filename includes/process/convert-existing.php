@@ -284,14 +284,6 @@ function format_converted_scoring_data( $review_id = 0, $rebased_score = 0, $pro
 		return false;
 	}
 
-	// Get all my attribute arguments.
-	$attribute_data = Helpers\get_product_attributes_for_conversion( $product_id );
-
-	// Bail without the data.
-	if ( empty( $attribute_data ) ) {
-		return;
-	}
-
 	// Set up the first insert data array for the
 	// total, which has an attribute ID of zero.
 	$scores_setup[] = array(
@@ -302,19 +294,26 @@ function format_converted_scoring_data( $review_id = 0, $rebased_score = 0, $pro
 		'rating_score' => $rebased_score,
 	);
 
-	// Now loop through the attributes.
-	foreach ( $attribute_data as $attribute_id ) {
+	// Get all my attribute arguments.
+	$attribute_data = Helpers\get_product_attributes_for_conversion( $product_id );
 
-		// Add to the array using this attribute.
-		$scores_setup[] = array(
-			'review_id'    => $review_id,
-			'author_id'    => $author_id,
-			'product_id'   => $product_id,
-			'attribute_id' => $attribute_id,
-			'rating_score' => apply_filters( Core\HOOK_PREFIX . 'converted_review_default_attribute_score', 4 ),
-		);
+	// If we have some (which we should not) use it.
+	if ( ! empty( $attribute_data ) ) {
 
-		// Nothing remains for this.
+		// Now loop through the attributes.
+		foreach ( $attribute_data as $attribute_id ) {
+
+			// Add to the array using this attribute.
+			$scores_setup[] = array(
+				'review_id'    => $review_id,
+				'author_id'    => $author_id,
+				'product_id'   => $product_id,
+				'attribute_id' => $attribute_id,
+				'rating_score' => apply_filters( Core\HOOK_PREFIX . 'converted_review_default_attribute_score', 4 ),
+			);
+
+			// Nothing remains for this.
+		}
 	}
 
 	// Return the entire scoring array, filtered.
