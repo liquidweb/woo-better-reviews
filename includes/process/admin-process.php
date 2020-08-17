@@ -94,20 +94,20 @@ function update_existing_review() {
 	// Recalculate the values.
 	if ( ! empty( $_POST['product-id'] ) ) {
 
-		// Set my ID.
+		// Set my single ID.
 		$update_id  = absint( $_POST['product-id'] );
-
-		// Update the product review count.
-		Utilities\update_product_review_count( $update_id );
-
-		// Update the overall score.
-		Utilities\calculate_total_review_scoring( $update_id );
 
 		// Set the array for purging the transients.
 		$update_ids = (array) $update_id;
 
 		// And actually purge them.
 		Utilities\purge_transients( null, 'products', array( 'ids' => $update_ids ) );
+
+		// Update the product review count.
+		Utilities\update_product_review_count( $update_id );
+
+		// Update the overall score.
+		Utilities\calculate_total_review_scoring( $update_id );
 	}
 
 	// Redirect a happy one.

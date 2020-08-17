@@ -598,11 +598,17 @@ class WooBetterReviews_ListReviews extends WP_List_Table {
 			// Nothing left in the loop to do.
 		}
 
+		// Handle the transient purging for reviews.
+		Utilities\purge_transients( null, 'reviews', array( 'ids' => $review_ids ) );
+
 		// Run the change loop if we have items.
 		if ( ! empty( $tochange ) ) {
 
 			// Get just the individual unique IDs.
 			$update_ids = array_unique( $tochange );
+
+			// Handle the transient purging for products.
+			Utilities\purge_transients( null, 'products', array( 'ids' => $update_ids ) );
 
 			// Update all my counts.
 			Utilities\update_product_review_count( $update_ids );
@@ -611,10 +617,6 @@ class WooBetterReviews_ListReviews extends WP_List_Table {
 			foreach ( $update_ids as $update_id ) {
 				Utilities\calculate_total_review_scoring( $update_id );
 			}
-
-			// Handle the transient purging.
-			Utilities\purge_transients( null, 'reviews', array( 'ids' => $review_ids ) );
-			Utilities\purge_transients( null, 'products', array( 'ids' => $update_ids ) );
 
 			// Nothing left for the changed items.
 		}
@@ -687,11 +689,17 @@ class WooBetterReviews_ListReviews extends WP_List_Table {
 			// Nothing left in the loop to do.
 		}
 
+		// Handle the transient purging for reviews.
+		Utilities\purge_transients( null, 'reviews', array( 'ids' => $review_ids ) );
+
 		// Run the change loop if we have items.
 		if ( ! empty( $tochange ) ) {
 
 			// Get just the individual unique IDs.
 			$update_ids = array_unique( $tochange );
+
+			// Handle the transient purging for products.
+			Utilities\purge_transients( null, 'products', array( 'ids' => $update_ids ) );
 
 			// Update all my counts.
 			Utilities\update_product_review_count( $update_ids );
@@ -700,10 +708,6 @@ class WooBetterReviews_ListReviews extends WP_List_Table {
 			foreach ( $update_ids as $update_id ) {
 				Utilities\calculate_total_review_scoring( $update_id );
 			}
-
-			// Handle the transient purging.
-			Utilities\purge_transients( null, 'reviews', array( 'ids' => $review_ids ) );
-			Utilities\purge_transients( null, 'products', array( 'ids' => $update_ids ) );
 
 			// Nothing left for the changed items.
 		}
@@ -834,11 +838,17 @@ class WooBetterReviews_ListReviews extends WP_List_Table {
 			// Nothing left in the loop to do.
 		}
 
+		// Handle the transient purging for reviews.
+		Utilities\purge_transients( null, 'reviews', array( 'ids' => $review_ids ) );
+
 		// Run the change loop if we have items.
 		if ( ! empty( $tochange ) ) {
 
 			// Get just the individual unique IDs.
 			$update_ids = array_unique( $tochange );
+
+			// Handle the transient purging for products.
+			Utilities\purge_transients( null, 'products', array( 'ids' => $update_ids ) );
 
 			// Update all my counts.
 			Utilities\update_product_review_count( $update_ids );
@@ -847,10 +857,6 @@ class WooBetterReviews_ListReviews extends WP_List_Table {
 			foreach ( $update_ids as $update_id ) {
 				Utilities\calculate_total_review_scoring( $update_id );
 			}
-
-			// Handle the transient purging.
-			Utilities\purge_transients( null, 'reviews', array( 'ids' => $review_ids ) );
-			Utilities\purge_transients( null, 'products', array( 'ids' => $update_ids ) );
 
 			// Nothing left for the changed items.
 		}
@@ -1461,8 +1467,6 @@ class WooBetterReviews_ListReviews extends WP_List_Table {
 			$success_cd = 'review-deleted';
 		}
 
-		// @@todo more single actions?
-
 		// If we don't have a success key code, return unknown failure.
 		if ( empty( $success_cd ) ) {
 
@@ -1479,17 +1483,17 @@ class WooBetterReviews_ListReviews extends WP_List_Table {
 
 		// It worked! Let's handle additional cleanup and recalculations, then redirect.
 
-		// Update the product review count.
-		Utilities\update_product_review_count( $product_id );
-
-		// Update the overall score.
-		Utilities\calculate_total_review_scoring( $product_id );
-
 		// Set the array for purging the transients.
 		$update_ids = (array) $product_id;
 
 		// And actually purge them.
 		Utilities\purge_transients( null, 'products', array( 'ids' => $update_ids ) );
+
+		// Update the product review count.
+		Utilities\update_product_review_count( $product_id );
+
+		// Update the overall score.
+		Utilities\calculate_total_review_scoring( $product_id );
 
 		// Set my success args.
 		$redirect_args  = array(

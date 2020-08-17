@@ -416,6 +416,10 @@ function update_products_post_conversion( $product_ids = array(), $convert_type 
 		return false;
 	}
 
+	// Handle purging product and author related transients.
+	Utilities\purge_transients( null, 'products', array( 'ids' => (array) $product_ids ) );
+	Utilities\purge_transients( null, 'authors', array( 'ids' => (array) $product_ids ) );
+
 	// Update all my counts.
 	Utilities\update_product_review_count( $product_ids );
 
@@ -439,10 +443,6 @@ function update_products_post_conversion( $product_ids = array(), $convert_type 
 
 		// Recalculate the total score on each.
 		Utilities\calculate_total_review_scoring( $product_id );
-
-		// Handle purging product and author related transients.
-		Utilities\purge_transients( null, 'products', array( 'ids' => (array) $product_id ) );
-		Utilities\purge_transients( null, 'authors', array( 'ids' => (array) $product_id ) );
 	}
 
 	// Include an action for all the product IDs.

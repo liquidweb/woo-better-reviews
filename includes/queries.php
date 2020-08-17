@@ -584,7 +584,7 @@ function get_approved_reviews_for_product( $product_id = 0, $return_type = 'obje
 			SELECT   *
 			FROM     $table_name
 			WHERE    product_id = '%d'
-			AND      review_status LIKE '%s'
+			AND      review_status = '%s'
 			ORDER BY review_date DESC
 		", absint( $product_id ), esc_attr( 'approved' ) );
 
