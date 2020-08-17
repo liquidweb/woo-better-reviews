@@ -152,5 +152,3 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 	// And add our command.
 	WP_CLI::add_command( 'woo-better-reviews', WBR_Commands::class );
 }
-
-

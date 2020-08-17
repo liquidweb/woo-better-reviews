@@ -89,9 +89,14 @@ function calculate_total_review_scoring( $product_id = 0 ) {
 	// Get all the totals from approved reviews.
 	$approved_totals    = Queries\get_approved_reviews_for_product( $product_id, 'total' );
 
-	// Bail without having any reviews to calculate.
-	// @@todo zero out any scoring?
+	// If we have no more approved reviews, we need to reset to zero.
 	if ( empty( $approved_totals ) ) {
+
+		// Set both postmeta keys to zero.
+		update_post_meta( $product_id, '_wc_average_rating', 0 );
+		update_post_meta( $product_id, Core\META_PREFIX . 'average_rating', 0 );
+
+		// And be done.
 		return;
 	}
 
@@ -367,8 +372,18 @@ function format_string_values_array( $labels, $serialize = true ) {
 		return false;
 	}
 
-	// Make sure it's an array.
-	$label_args = ! is_array( $labels ) ? explode( ',', $labels ) : $labels;
+	// Set the basic label args.
+	$label_args = $labels;
+
+	// If we don't already have an array, do it.
+	if ( ! is_array( $labels ) ) {
+
+		// First swap any pipes to commas.
+		$label_str  = str_replace( array( '|', '/' ), ',', $labels );
+
+		// Now explode it.
+		$label_args = explode( ',', $label_str );
+	}
 
 	// Set an empty.
 	$dataset    = array();

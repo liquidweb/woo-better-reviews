@@ -84,19 +84,23 @@ function filter_woo_review_settings( $settings ) {
  */
 function add_review_settings_tab( $tabs ) {
 
-	// Set the advanced tab so we can add it back to the end.
-	$advanced_tab   = $tabs['advanced'];
-
 	// Confirm we don't already have the tab.
 	if ( ! isset( $tabs[ Core\TAB_BASE ] ) ) {
 		$tabs[ Core\TAB_BASE ] = __( 'Product Reviews', 'woo-better-reviews' );
 	}
 
-	// Now remove the existing.
-	unset( $tabs['advanced'] );
+	// If we have the advanced tab, move it to the end.
+	if ( isset( $tabs['advanced'] ) ) {
 
-	// Add the advanced tab back to the end.
-	$tabs['advanced'] = $advanced_tab;
+		// Set the advanced tab so we can add it back to the end.
+		$advanced_tab   = $tabs['advanced'];
+
+		// Now remove the existing.
+		unset( $tabs['advanced'] );
+
+		// Add the advanced tab back to the end.
+		$tabs['advanced'] = $advanced_tab;
+	}
 
 	// And return the entire array.
 	return $tabs;
@@ -176,13 +180,13 @@ function maybe_adjust_reminder_cron( $data ) {
  */
 function maybe_adjust_for_anonymous( $data ) {
 
-	// Set the option key.
-	$ky = Core\OPTION_PREFIX . 'allow_anonymous';
-
-	// If this key is in the data, we make sure the "only verified" is turned off.
-	if ( ! empty( $data[ $ky ] ) ) {
-		delete_option( 'woocommerce_review_rating_verification_required' );
+	// If the key isn't present in the data, do not do anything.
+	if ( empty( $data['woocommerce_review_rating_verification_required'] ) ) {
+		return;
 	}
+
+	// If this key is in the data, we make sure the "allow anonymous" is turned off.
+	delete_option( Core\OPTION_PREFIX . 'allow_anonymous' );
 }
 
 /**
@@ -203,21 +207,6 @@ function get_settings() {
 	// Set up our array, including default Woo items.
 	$setup_args = array(
 
-		/*
-		'option_name' => array(
-			'title' => 'Title for your option shown on the settings page',
-			'description' => 'Description for your option shown on the settings page',
-			'type' => 'text|password|textarea|checkbox|select|multiselect',
-			'default' => 'Default value for the option',
-			'class' => 'Class for the input',
-			'css' => 'CSS rules added line to the input',
-			'label' => 'Label', // checkbox only
-			'options' => array(
-				'key' => 'value'
-			) // array of options for select/multiselects only
-		)
-		*/
-
 		'mainheader' => array(
 			'title' => __( 'Product Review Settings', 'woo-better-reviews' ),
 			'type'  => 'title',
@@ -228,21 +217,20 @@ function get_settings() {
 		'enable' => array(
 			'title'    => __( 'Enable Reviews', 'woo-better-reviews' ),
 			'desc'     => __( 'Use the Better Product Reviews for WooCommerce plugin', 'woo-better-reviews' ),
-			'id'       => 'woocommerce_enable_reviews', // @@todo figure out if setting key should be different.
+			'id'       => 'woocommerce_enable_reviews',
 			'type'     => 'checkbox',
 			'default'  => 'yes',
 			'class'    => 'woo-better-reviews-settings-checkbox',
-			'desc_tip' => __( 'Unchecking this box will disable reviews completely.', 'woo-better-reviews' ),
+			'desc_tip' =>  '<span class="woo-better-reviews-checkbox-notice">' . __( 'Unchecking this box will disable reviews completely.', 'woo-better-reviews' ) . '</span>',
 		),
 
 		'anonymous' => array(
-			'title'    => __( 'Anonymous Reviews', 'woo-better-reviews' ),
-			'desc'     => __( 'Allow non-logged in users to leave product reviews', 'woo-better-reviews' ),
-			'id'       => Core\OPTION_PREFIX . 'allow_anonymous',
-			'type'     => 'checkbox',
-			'default'  => 'no',
-			'class'    => 'woo-better-reviews-settings-checkbox',
-			'desc_tip' => __( 'User accounts must be enabled for this feature.', 'woo-better-reviews' ),
+			'title'   => __( 'Anonymous Reviews', 'woo-better-reviews' ),
+			'desc'    => __( 'Allow non-logged in users to leave product reviews', 'woo-better-reviews' ),
+			'id'      => Core\OPTION_PREFIX . 'allow_anonymous',
+			'type'    => 'checkbox',
+			'default' => 'no',
+			'class'   => 'woo-better-reviews-settings-checkbox',
 		),
 
 		'doverified' => array(
@@ -266,6 +254,7 @@ function get_settings() {
 			'show_if_checked' => 'yes',
 			'class'           => 'woo-better-reviews-settings-checkbox',
 			'autoload'        => false,
+			'desc_tip'        => '<span class="woo-better-reviews-checkbox-notice">' . __( 'Enabling this feature will disable anonymous reviews.', 'woo-better-reviews' ) . '</span>',
 		),
 
 		'gloablattributes' => array(
@@ -275,7 +264,7 @@ function get_settings() {
 			'type'     => 'checkbox',
 			'default'  => 'yes',
 			'class'    => 'woo-better-reviews-settings-checkbox',
-			'desc_tip' => sprintf( __( '<a href="%s">Click here</a> to view and edit your product review attributes.', 'woo-better-reviews' ), Helpers\get_admin_menu_link( Core\ATTRIBUTES_ANCHOR ) ),
+			'desc_tip' => '<span class="woo-better-reviews-checkbox-notice">' . sprintf( __( '<a href="%s">Click here</a> to view and edit your product review attributes.', 'woo-better-reviews' ), Helpers\get_admin_menu_link( Core\ATTRIBUTES_ANCHOR ) ) . '</span>',
 		),
 
 		'gloablcharstcs' => array(
@@ -285,7 +274,21 @@ function get_settings() {
 			'type'     => 'checkbox',
 			'default'  => 'yes',
 			'class'    => 'woo-better-reviews-settings-checkbox',
-			'desc_tip' => sprintf( __( '<a href="%s">Click here</a> to view and edit your review author traits.', 'woo-better-reviews' ), Helpers\get_admin_menu_link( Core\CHARSTCS_ANCHOR ) ),
+			'desc_tip' =>  '<span class="woo-better-reviews-checkbox-notice">' . sprintf( __( '<a href="%s">Click here</a> to view and edit your review author traits.', 'woo-better-reviews' ), Helpers\get_admin_menu_link( Core\CHARSTCS_ANCHOR ) ) . '</span>',
+		),
+
+		'defaultstars' => array(
+			'title'             => __( 'Default Star Rating', 'woo-better-reviews' ),
+			'desc'              => __( 'Select the default rating that will load on the new review form.', 'woo-better-reviews' ),
+			'id'                => Core\OPTION_PREFIX . 'default_stars',
+			'type'              => 'number',
+			'default'           => '7',
+			'class'             => 'woo-better-reviews-settings-small-number',
+			'custom_attributes' => array(
+				'min'  => 1,
+				'max'  => 7,
+				'step' => 1,
+			),
 		),
 
 		// Include my section end.

@@ -61,11 +61,16 @@ function modify_review_count_title( $title, $key ) {
  */
 function filter_review_stars_html( $html, $rating, $count ) {
 
+	// If we don't have a count, return whatever we had.
+	if ( empty( $count ) ) {
+		return $html;
+	}
+
 	// Fetch our markup for making stars.
 	$average_stars  = Helpers\get_scoring_stars_display( 0, $rating, false );
 
-	// Return our stars in a separate div that we can target.
-	return '<div class="woo-better-reviews-stars-html-wrapper">' . $average_stars . '</div>';
+	// Return our stars in a separate div that we can target, or the original HTML if we don't have ours.
+	return ! empty( $average_stars ) ? '<div class="woo-better-reviews-stars-html-wrapper">' . $average_stars . '</div>' : $html;
 }
 
 /**

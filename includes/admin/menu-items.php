@@ -75,6 +75,10 @@ function load_admin_menus() {
 	// Set the user cap.
 	$user_menu_cap  = apply_filters( Core\HOOK_PREFIX . 'user_menu_cap', 'manage_options' );
 
+	// Create the link for the settings jump.
+	$setslink_args  = array( 'page' => 'wc-settings', 'tab' => trim( Core\TAB_BASE ) );
+	$setslink_strng = add_query_arg( $setslink_args, 'admin.php' );
+
 	// Load my top-level admin menu.
 	add_menu_page(
 		__( 'Product Reviews', 'woo-better-reviews' ),
@@ -115,6 +119,18 @@ function load_admin_menus() {
 		Core\CHARSTCS_ANCHOR,
 		__NAMESPACE__ . '\load_author_traits_page'
 	);
+
+	// And include the settings link over to Woo.
+	add_submenu_page(
+		Core\REVIEWS_ANCHOR,
+		__( 'Plugin Settings', 'woo-better-reviews' ),
+		__( 'Plugin Settings', 'woo-better-reviews' ),
+		$user_menu_cap,
+		$setslink_strng,
+		null
+	);
+
+	// No more menu items to include.
 }
 
 /**

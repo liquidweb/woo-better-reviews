@@ -10,6 +10,34 @@ body.woo-better-reviews-admin-woo-tab-class {
 			height: 32px;
 		}
 
+		td.forminp {
+
+			&.forminp-number {
+
+				input.woo-better-reviews-settings-small-number {
+					width: 50px;
+					display: inline-block;
+					vertical-align: middle;
+				}
+
+				p.description {
+					display: inline-block;
+					vertical-align: middle;
+					width: auto;
+					margin: 0 0 0 5px;
+				}
+			}
+		}
+
+		p.description {
+
+			span.woo-better-reviews-checkbox-notice {
+				font-style: italic;
+				margin-left: 25px;
+			}
+
+		}
+
 		.woo-better-reviews-settings-block-desc {
 			display: block;
 			width: 100%;

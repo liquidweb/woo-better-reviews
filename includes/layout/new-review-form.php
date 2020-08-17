@@ -77,7 +77,7 @@ function set_review_form_rating_stars_view( $product_id = 0 ) {
 				$field_name = 'woo-better-reviews-rating[score]';
 
 				// Handle our default check on the first star.
-				$field_chkd = 2 >= absint( $setscore ) ? true : false;
+				$field_chkd = Helpers\get_default_stars( 'compare', $setscore ); // 2 >= absint( $setscore ) ? true : false;
 
 				// Set my field args.
 				$field_args = array(

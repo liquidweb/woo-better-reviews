@@ -382,7 +382,7 @@ function maybe_update_tables() {
 	}
 
 	// Run the install setups.
-	// @@todo figure out what upgrading looks like.
+	// We don't actually have one right now.
 }
 
 /**
