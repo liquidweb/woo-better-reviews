@@ -58,6 +58,7 @@
 		& > label {
 			color: #ddd;
 			float: right;
+			margin-left: 0;
 		}
 
 		& > input:checked ~ label, // show gold star when clicked

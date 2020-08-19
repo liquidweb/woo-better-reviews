@@ -252,7 +252,7 @@ function load_edit_single_review_form( $action ) {
  *
  * @return void
  */
-function display_product_attributes_page() {
+function display_review_attributes_page() {
 
 	// Fetch the action link.
 	$action = Helpers\get_admin_menu_link( Core\ATTRIBUTES_ANCHOR );
@@ -285,14 +285,13 @@ function display_product_attributes_page() {
 }
 
 /**
- * Load the form to something authors.
- *
- * @param  string $action  The URL to include in the form action.
+ * Display the main admin page for author traits.
  *
  * @return HTML
  */
-function display_author_characteristics_page() {
+function display_author_traits_page() {
 
+	// Pull in the action link.
 	$action = Helpers\get_admin_menu_link( Core\CHARSTCS_ANCHOR );
 
 	// Check to see if we are editing an attribute or not.
@@ -316,7 +315,7 @@ function display_author_characteristics_page() {
 		echo '<hr class="wp-header-end">';
 
 		// Load the proper page.
-		echo ! $isedit ? load_primary_charstcs_display( $action ) : load_edit_single_charstcs_form( $action );
+		echo ! $isedit ? load_primary_traits_display( $action ) : load_edit_single_traits_form( $action );
 
 	// Close the wrapper.
 	echo '</div>';
@@ -448,7 +447,7 @@ function load_add_new_attribute_form( $action = '' ) {
 
 			// Output the submit button.
 			$build .= '<p class="submit woo-better-reviews-add-new-submit-wrap">';
-				$build .= get_submit_button( __( 'Add New Attribute', 'woo-better-reviews' ), 'primary', 'add-new-attribute', false );
+				$build .= get_submit_button( __( 'Add New Review Attribute', 'woo-better-reviews' ), 'primary', 'add-new-attribute', false );
 			$build .= '</p>';
 
 		// Close up the form markup.
@@ -631,7 +630,7 @@ function load_edit_single_attribute_form( $action ) {
  *
  * @return void
  */
-function load_primary_charstcs_display( $action = '' ) {
+function load_primary_traits_display( $action = '' ) {
 
 	// Bail if we shouldn't be here.
 	if ( ! current_user_can( 'manage_options' ) ) {
@@ -646,7 +645,7 @@ function load_primary_charstcs_display( $action = '' ) {
 			echo '<div class="col-wrap">';
 
 			// Load the add new item form section.
-			echo load_add_new_charstcs_form( $action ); // WPCS: XSS ok.
+			echo load_add_new_trait_form( $action ); // WPCS: XSS ok.
 
 			echo '</div>';
 		echo '</div>';
@@ -656,7 +655,7 @@ function load_primary_charstcs_display( $action = '' ) {
 			echo '<div class="col-wrap">';
 
 			// Load the table form with the existing.
-			load_charstcs_list_table_form(); // WPCS: XSS ok.
+			load_trait_list_table_form(); // WPCS: XSS ok.
 
 			echo '</div>';
 		echo '</div>';
@@ -672,7 +671,7 @@ function load_primary_charstcs_display( $action = '' ) {
  *
  * @return HTML
  */
-function load_add_new_charstcs_form( $action = '' ) {
+function load_add_new_trait_form( $action = '' ) {
 
 	// Bail if we shouldn't be here.
 	if ( ! current_user_can( 'manage_options' ) ) {
@@ -689,7 +688,7 @@ function load_add_new_charstcs_form( $action = '' ) {
 	$build .= '<div class="form-wrap woo-better-reviews-form-wrap">';
 
 		// Title it.
-		$build .= '<h2>' . esc_html__( 'Add New Characteristic', 'woo-better-reviews' ) . '</h2>';
+		$build .= '<h2>' . esc_html__( 'Add New Review Author Trait', 'woo-better-reviews' ) . '</h2>';
 
 		// Now set the actual form itself.
 		$build .= '<form id="woo-better-reviews-add-characteristic" class="woo-better-reviews-admin-form" method="post" action="' . esc_url( $action ) . '">';
@@ -768,7 +767,7 @@ function load_add_new_charstcs_form( $action = '' ) {
 
 			// Output the submit button.
 			$build .= '<p class="submit woo-better-reviews-add-new-submit-wrap">';
-				$build .= get_submit_button( __( 'Add New Characteristic', 'woo-better-reviews' ), 'primary', 'add-new-charstc', false );
+				$build .= get_submit_button( __( 'Add New Review Author Trait', 'woo-better-reviews' ), 'primary', 'add-new-charstc', false );
 			$build .= '</p>';
 
 		// Close up the form markup.
@@ -786,7 +785,7 @@ function load_add_new_charstcs_form( $action = '' ) {
  *
  * @return HTML
  */
-function load_charstcs_list_table_form() {
+function load_trait_list_table_form() {
 
 	// Bail if we shouldn't be here.
 	if ( ! current_user_can( 'manage_options' ) ) {
@@ -810,7 +809,7 @@ function load_charstcs_list_table_form() {
  *
  * @return HTML
  */
-function load_edit_single_charstcs_form( $action ) {
+function load_edit_single_traits_form( $action ) {
 
 	// Bail if we shouldn't be here.
 	if ( ! current_user_can( 'manage_options' ) ) {
@@ -952,7 +951,7 @@ function load_edit_single_charstcs_form( $action ) {
 			$build .= '<p class="submit">';
 
 				// The actual submit button.
-				$build .= get_submit_button( __( 'Update Characteristic', 'woo-better-reviews' ), 'primary', 'edit-existing-charstcs', false );
+				$build .= get_submit_button( __( 'Update Review Author Trait', 'woo-better-reviews' ), 'primary', 'edit-existing-charstcs', false );
 
 				// Our cancel link.
 				$build .= '<span class="cancel-edit-link-wrap">';

@@ -1,24 +1,31 @@
 // All the front-end parts will be pulled in.
 
+// The parts we use for all the things.
+@import 'mixins-vars/variables';
+@import 'mixins-vars/bits';
+
 // The pieces tied to the general list setup.
-@import "review-list/message-display";
-@import "review-list/visual-aggregate";
-@import "review-list/title-wrapper";
-@import "review-list/sorting-fields";
-@import "review-list/pagination";
+@import 'review-list/message-display';
+@import 'review-list/visual-aggregate';
+@import 'review-list/title-wrapper';
+@import 'review-list/sorting-fields';
+@import 'review-list/pagination';
 
 // Our single review parts.
-@import "single-review/display-wrap";
-@import "single-review/title-date-stars";
-@import "single-review/attribute-scoring";
-@import "single-review/review-body";
-@import "single-review/author-charstcs";
+@import 'single-review/display-wrap';
+@import 'single-review/title-date-stars';
+@import 'single-review/attribute-scoring';
+@import 'single-review/review-body';
+@import 'single-review/author-charstcs';
 
 
 // The new review form.
-@import "new-review/display-wrap";
-@import "new-review/stars";
-@import "new-review/attributes";
-@import "new-review/content";
-@import "new-review/author";
-@import "new-review/submit-meta";
+@import 'new-review/display-wrap';
+@import 'new-review/stars';
+@import 'new-review/attributes';
+@import 'new-review/content';
+@import 'new-review/author';
+@import 'new-review/submit-meta';
+
+// And now the theme tweaks.
+@import 'mixins-vars/theme-tweaks';

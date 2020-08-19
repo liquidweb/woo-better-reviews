@@ -34,8 +34,8 @@ class WooBetterReviews_ListAttributes extends WP_List_Table {
 
 		// Set parent defaults.
 		parent::__construct( array(
-			'singular' => __( 'Product Attribute', 'woo-better-reviews' ),
-			'plural'   => __( 'Product Attributes', 'woo-better-reviews' ),
+			'singular' => __( 'Review Attribute', 'woo-better-reviews' ),
+			'plural'   => __( 'Review Attributes', 'woo-better-reviews' ),
 			'ajax'     => false,
 		) );
 	}

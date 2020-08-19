@@ -1,12 +1,15 @@
+// The parts we use for all the things.
+@import 'mixins-vars/variables';
+@import 'mixins-vars/bits';
 
 // Load screen parts.
-@import "admin/list-primary-display";
-@import "admin/edit-single-item";
-@import "admin/post-columns";
-@import "admin/star-output";
-@import "admin/settings-tab";
-@import "admin/product-meta";
+@import 'admin/list-primary-display';
+@import 'admin/edit-single-item';
+@import 'admin/post-columns';
+@import 'admin/star-output';
+@import 'admin/settings-tab';
+@import 'admin/product-meta';
 
 // Load review parts.
-@import "admin/list-reviews";
+@import 'admin/list-reviews';
 

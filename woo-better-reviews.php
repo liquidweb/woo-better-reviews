@@ -1,8 +1,8 @@
 <?php
 /**
- * Plugin Name: Better Reviews For WooCommerce
+ * Plugin Name: Better Product Reviews For WooCommerce
  * Plugin URI:  https://www.nexcess.net
- * Description: Like reviews, only way better.
+ * Description: Like regular product reviews, only way better.
  * Version:     0.4.0-dev
  * Author:      Nexcess
  * Author URI:  https://www.nexcess.net
@@ -69,6 +69,10 @@ define( __NAMESPACE__ . '\SCHEMA_KEY', HOOK_PREFIX . 'db_version' );
 // Set our cron function name constants.
 define( __NAMESPACE__ . '\REMINDER_CRON', 'wbr_process_reminders' );
 
+// Define a few constants to use for the trigger logic.
+define( __NAMESPACE__ . '\AFTER_PURCHASE_TRIGGER', 'wc_better_reviews_trigger_after_purchase_' );
+define( __NAMESPACE__ . '\STATUS_CHANGE_TRIGGER', 'wc_better_reviews_trigger_status_change_' );
+
 // Load the multi-use files first.
 require_once __DIR__ . '/includes/helpers.php';
 require_once __DIR__ . '/includes/utilities.php';
@@ -128,7 +132,7 @@ require_once __DIR__ . '/includes/updates.php';
 require_once __DIR__ . '/includes/deactivate.php';
 require_once __DIR__ . '/includes/uninstall.php';
 
-// Check that we have the constant available.
+// Check that we have the constant available for loading CLI.
 if ( defined( 'WP_CLI' ) && WP_CLI ) {
 
 	// Load our commands file.
@@ -137,7 +141,3 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 	// And add our command.
 	WP_CLI::add_command( 'woo-better-reviews', WBR_Commands::class );
 }
-
-// Define a few constants to use for the trigger logic.
-define( __NAMESPACE__ . '\AFTER_PURCHASE_TRIGGER', 'wc_better_reviews_trigger_after_purchase_' );
-define( __NAMESPACE__ . '\STATUS_CHANGE_TRIGGER', 'wc_better_reviews_trigger_status_change_' );

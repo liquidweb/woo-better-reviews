@@ -49,12 +49,15 @@ function get_review_form_input_field( $field_args = array(), $field_key = '', $f
 	$set_field_id       = ! empty( $field_id ) ? $field_id : 'woo-better-reviews-rating-field-' . sanitize_html_class( $field_key );
 	$set_field_name     = ! empty( $field_name ) ? $field_name : 'woo-better-reviews-rating[' . sanitize_html_class( $field_key ) . ']';
 
+	// Make sure we have a correct field type.
+	$set_field_type     = ! empty( $field_args['type'] ) && in_array( $field_args['type'], array( 'text', 'tel', 'url', 'email', 'number' ) ) ? $field_args['type'] : 'text';
+
 	// Check for a value.
 	$set_field_value    = ! empty( $field_args['value'] ) ? $field_args['value'] : '';
 
 	// Set the parts of the input field.
 	$input_args_array   = array(
-		'type'  => esc_attr( $field_args['type'] ),
+		'type'  => esc_attr( $set_field_type ),
 		'name'  => esc_attr( $set_field_name ),
 		'id'    => esc_attr( $set_field_id ),
 		'class' => esc_attr( $set_field_class ),
@@ -96,7 +99,7 @@ function get_review_form_input_field( $field_args = array(), $field_key = '', $f
 	}
 
 	// And close the field.
-	$field .= '/>';
+	$field .= ' />';
 
 	// Check for the description before we finish.
 	if ( ! empty( $field_args['description'] ) ) {
@@ -152,10 +155,9 @@ function get_review_form_scoring_field( $field_args = array(), $field_key = '', 
 	// Now begin the actual field input.
 	$field .= '<input type="radio"';
 
-	// Include the required portion.
-	if ( ! empty( $field_args['required'] ) ) {
-		$field .= ' required="required"';
-	}
+	// Check for the required and checked flags.
+	$field .= empty( $field_args['required'] ) ? '' : ' required="required"';
+	$field .= empty( $field_args['is-checked'] ) ? '' : ' checked="checked"';
 
 	// Loop the field parts.
 	foreach ( $input_args_array as $input_key => $input_val ) {
@@ -259,6 +261,9 @@ function get_review_form_dropdown_field( $field_args = array(), $field_key = '',
 	// Check for the empty to be included in the data array.
 	$set_select_options = ! empty( $field_args['include-empty'] ) ? array( '0' => __( '(Select)', 'woo-better-reviews' ) ) + $field_args['options'] : $field_args['options'];
 
+	// And set a selected.
+	$is_selected_option = ! empty( $field_args['selected'] ) ? $field_args['selected'] : '';
+
 	// Set my empty.
 	$field  = '';
 
@@ -282,7 +287,7 @@ function get_review_form_dropdown_field( $field_args = array(), $field_key = '',
 
 	// Loop the options.
 	foreach ( $set_select_options as $option_value => $option_label ) {
-		$field .= '<option value="' . esc_attr( $option_value ) . '">' . esc_html( $option_label ) . '</option>';
+		$field .= '<option value="' . esc_attr( $option_value ) . '" ' . selected( $is_selected_option, $option_value, false ) . '>' . esc_html( $option_label ) . '</option>';
 	}
 
 	// Close the select tag.
@@ -342,10 +347,8 @@ function get_review_form_radio_field( $field_args = array(), $field_key = '', $f
 	// Do the actual radio.
 	$field .= '<input type="radio" id="' . esc_attr( $set_field_id ) . '" class="' . esc_attr( $set_field_class ) . '" name="' . esc_attr( $set_field_name ) . '"';
 
-	// Add the required portion.
+	// Check for the required and checked flags.
 	$field .= empty( $field_args['required'] ) ? '' : ' required="required"';
-
-	// Check for the checked flag.
 	$field .= empty( $field_args['is-checked'] ) ? '' : ' checked="checked"';
 
 	// And close the radio with our value and potential check.
@@ -479,6 +482,59 @@ function get_review_form_button_field( $field_args = array(), $field_key = '', $
 
 	// Return the field, filtered.
 	return apply_filters( Core\HOOK_PREFIX . 'review_form_button_field', $setup, $field_args, $field_key, $field_id, $field_name );
+}
+
+/**
+ * Build and return a text field.
+ *
+ * @param  array  $field_args  The field args array.
+ * @param  string $field_key   The specific key used in the field.
+ *
+ * @return HTML
+ */
+function get_review_form_hidden_field( $field_args = array(), $field_key = '' ) {
+
+	// Bail if we don't have the args or the key.
+	if ( empty( $field_args ) || empty( $field_key ) ) {
+		return;
+	}
+
+	// If for some reason someone mucked with the field type, remove it.
+	unset( $field_args['type'] );
+
+	// Set my field name, and ID.
+	$set_field_id       = ! empty( $field_args['id'] ) ? $field_args['id'] : 'woo-better-reviews-rating-field-' . sanitize_html_class( $field_key );
+	$set_field_name     = ! empty( $field_args['name'] ) ? $field_args['name'] : 'woo-better-reviews-rating[' . sanitize_html_class( $field_key ) . ']';
+
+	// Check for a value.
+	$set_field_value    = ! empty( $field_args['value'] ) ? $field_args['value'] : '';
+
+	// Set the parts of the input field.
+	$input_args_array   = array(
+		'name'  => esc_attr( $set_field_name ),
+		'id'    => esc_attr( $set_field_id ),
+		'value' => esc_attr( $set_field_value ),
+	);
+
+	// Add items to the array if we have them.
+	$input_args_array   = ! empty( $field_args['custom'] ) ? wp_parse_args( $field_args['custom'], $input_args_array ) : $input_args_array;
+
+	// Set my empty.
+	$field  = '';
+
+	// Now begin the actual field input.
+	$field .= '<input type="hidden"';
+
+	// Loop the field parts.
+	foreach ( $input_args_array as $input_key => $input_val ) {
+		$field .= ' ' . esc_attr( $input_key ) . '="' . esc_attr( $input_val ) . '"';
+	}
+
+	// And close the field.
+	$field .= ' />';
+
+	// Return the field, filtered.
+	return apply_filters( Core\HOOK_PREFIX . 'review_form_hidden_field', $field, $field_args, $field_key );
 }
 
 /**

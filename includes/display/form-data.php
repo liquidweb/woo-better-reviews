@@ -17,11 +17,11 @@ use Nexcess\WooBetterReviews\Queries as Queries;
 /**
  * Set and return the array of content fields.
  *
- * @param  boolean $keys  Whether to return just the keys.
+ * @param  boolean $only_keys  Whether to return just the keys.
  *
  * @return array
  */
-function get_review_content_form_fields( $keys = false ) {
+function get_review_content_form_fields( $only_keys = false ) {
 
 	// Set up our array.
 	$setup  = array(
@@ -46,18 +46,18 @@ function get_review_content_form_fields( $keys = false ) {
 	$fields = apply_filters( Core\HOOK_PREFIX . 'review_form_content_fields', $setup );
 
 	// Either return the full array, or just the keys if requested.
-	return ! $keys ? $fields : array_keys( $fields );
+	return false !== $only_keys ? array_keys( $fields ) : $fields;
 }
 
 /**
  * Set and return the array of author entry fields.
  *
  * @param  integer $author_id  The potential author ID tied to the review.
- * @param  boolean $keys       Whether to return just the keys.
+ * @param  boolean $only_keys  Whether to return just the keys.
  *
  * @return array
  */
-function get_review_author_form_fields( $author_id = 0, $keys = false ) {
+function get_review_author_base_form_fields( $author_id = 0, $only_keys = false ) {
 
 	// Get some values if we have them.
 	$author_display = ! empty( $author_id ) ? get_the_author_meta( 'display_name', $author_id ) : '';
@@ -82,53 +82,87 @@ function get_review_author_form_fields( $author_id = 0, $keys = false ) {
 
 	);
 
-	// Get all my characteristics.
-	$fetch_charstcs = Queries\get_all_charstcs( 'display' );
+	// Set the fields filtered.
+	$fields = apply_filters( Core\HOOK_PREFIX . 'review_author_base_form_fields', $setup );
 
-	// If we have the characteristics, add them.
-	if ( ! empty( $fetch_charstcs ) ) {
+	// Either return the full array, or just the keys if requested.
+	return false !== $only_keys ? array_keys( $fields ) : $fields;
+}
 
-		// Loop and add each one to the array.
-		foreach ( $fetch_charstcs as $charstcs ) {
+/**
+ * Set and return the array of author entry fields.
+ *
+ * @param  integer $author_id  The potential author ID tied to the review.
+ * @param  boolean $only_keys  Whether to return just the keys.
+ *
+ * @return array
+ */
+function get_review_author_charstcs_form_fields( $author_id = 0, $product_id = 0, $only_keys = false ) {
 
-			// Skip if no values exist.
-			if ( empty( $charstcs['values'] ) ) {
-				continue;
-			}
+	// Get all my characteristics for this form.
+	$fetch_form_traits  = Helpers\get_author_traits_for_form( $product_id );
 
-			// Set our array key.
-			$array_key  = sanitize_html_class( $charstcs['slug'] );
+	// Bail without any to display.
+	if ( empty( $fetch_form_traits ) ) {
+		return false;
+	}
 
-			// And add it.
-			$setup[ $array_key ] = array(
-				'label'         => esc_html( $charstcs['name'] ),
-				'type'          => 'dropdown',
-				'required'      => false,
-				'include-empty' => true,
-				'is-charstcs'   => true,
-				'charstcs-id'   => absint( $charstcs['id'] ),
-				'options'       => $charstcs['values'],
-			);
+	// Check for any applied traits to the author.
+	$maybe_get_traits   = ! empty( $author_id ) ? Queries\get_trait_values_for_author( $author_id ) : false;
+	$maybe_has_traits   = ! empty( $maybe_get_traits ) ? $maybe_get_traits : array();
+
+	// Loop and add each one to the array.
+	foreach ( $fetch_form_traits as $form_trait ) {
+
+		// Skip if no values exist.
+		if ( empty( $form_trait['values'] ) ) {
+			continue;
 		}
 
-		// Nothing left for characteristics.
+		// Set the ID.
+		$define_id  = absint( $form_trait['id'] );
+
+		// Check if we have the trait or not.
+		$has_trait  = isset( $maybe_has_traits[ $define_id ] ) ? $maybe_has_traits[ $define_id ] : '';
+
+		// See if we have a description.
+		$maybe_desc = ! empty( $form_trait['desc'] ) ? $form_trait['desc'] : '';
+
+		// Set our array key.
+		$array_key  = sanitize_html_class( $form_trait['slug'] );
+
+		// And add it.
+		$setup[ $array_key ] = array(
+			'label'         => esc_html( $form_trait['name'] ),
+			'slug'          => $form_trait['slug'],
+			'desc'          => $maybe_desc,
+			'type'          => 'dropdown',
+			'required'      => false,
+			'include-empty' => true,
+			'is-charstcs'   => true,
+			'is-trait'      => true,
+			'selected'      => $has_trait,
+			'charstcs-id'   => $define_id,
+			'trait-id'      => $define_id,
+			'options'       => $form_trait['values'],
+		);
 	}
 
 	// Set the fields filtered.
-	$fields = apply_filters( Core\HOOK_PREFIX . 'review_author_form_fields', $setup );
+	$fields = apply_filters( Core\HOOK_PREFIX . 'review_author_charstcs_form_fields', $setup );
 
 	// Either return the full array, or just the keys if requested.
-	return ! $keys ? $fields : array_keys( $fields );
+	return false !== $only_keys ? array_keys( $fields ) : $fields;
 }
 
 /**
  * Set and return the array of action buttons.
  *
- * @param  boolean $keys  Whether to return just the keys.
+ * @param  boolean $only_keys  Whether to return just the keys.
  *
  * @return array
  */
-function get_review_action_buttons_fields( $keys = false ) {
+function get_review_action_buttons_fields( $only_keys = false ) {
 
 	// Set my button array.
 	$setup  = array(
@@ -153,7 +187,7 @@ function get_review_action_buttons_fields( $keys = false ) {
 	$fields = apply_filters( Core\HOOK_PREFIX . 'review_form_action_buttons_fields', $setup );
 
 	// Either return the full array, or just the keys if requested.
-	return ! $keys ? $fields : array_keys( $fields );
+	return false !== $only_keys ? array_keys( $fields ) : $fields;
 }
 
 /**
@@ -161,11 +195,11 @@ function get_review_action_buttons_fields( $keys = false ) {
  *
  * @param  integer $product_id  The product ID tied to the reviews.
  * @param  integer $author_id   The author ID tied to the reviews.
- * @param  boolean $keys        Whether to return just the keys.
+ * @param  boolean $only_keys   Whether to return just the keys.
  *
  * @return array
  */
-function get_review_hidden_meta_fields( $product_id = 0, $author_id = 0, $keys = false ) {
+function get_review_hidden_meta_fields( $product_id = 0, $author_id = 0, $only_keys = false ) {
 
 	// Bail without the product ID.
 	if ( empty( $product_id ) ) {
@@ -177,6 +211,7 @@ function get_review_hidden_meta_fields( $product_id = 0, $author_id = 0, $keys =
 
 		// Set up the product ID hidden field.
 		'product-id-hidden' => array(
+			'id'    => 'product-id-hidden',
 			'name'  => 'woo-better-reviews-product-id',
 			'value' => absint( $product_id ),
 			'type'  => 'hidden',
@@ -184,6 +219,7 @@ function get_review_hidden_meta_fields( $product_id = 0, $author_id = 0, $keys =
 
 		// Set up the author ID hidden field.
 		'author-id-hidden' => array(
+			'id'    => 'author-id-hidden',
 			'name'  => 'woo-better-reviews-author-id',
 			'value' => absint( $author_id ),
 			'type'  => 'hidden',
@@ -191,6 +227,7 @@ function get_review_hidden_meta_fields( $product_id = 0, $author_id = 0, $keys =
 
 		// Set the trigger.
 		'add-trigger' => array(
+			'id'    => 'add-trigger',
 			'name'  => 'woo-better-reviews-add-new',
 			'value' => 1,
 			'type'  => 'hidden',
@@ -198,6 +235,7 @@ function get_review_hidden_meta_fields( $product_id = 0, $author_id = 0, $keys =
 
 		// And the nonce.
 		'new-review-nonce' => array(
+			'id'    => 'new-review-nonce',
 			'name'  => 'woo-better-reviews-add-new-nonce',
 			'value' => wp_create_nonce( 'woo-better-reviews-add-new-action' ),
 			'type'  => 'hidden',
@@ -208,5 +246,5 @@ function get_review_hidden_meta_fields( $product_id = 0, $author_id = 0, $keys =
 	$fields = apply_filters( Core\HOOK_PREFIX . 'review_form_hidden_meta_fields', $setup );
 
 	// Either return the full array, or just the keys if requested.
-	return ! $keys ? $fields : array_keys( $fields );
+	return false !== $only_keys ? array_keys( $fields ) : $fields;
 }

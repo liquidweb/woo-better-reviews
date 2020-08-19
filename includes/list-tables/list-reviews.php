@@ -595,17 +595,20 @@ class WooBetterReviews_ListReviews extends WP_List_Table {
 			// Add the ID to the update.
 			$tochange[] = $single_review->product_id;
 
-			// Handle the transient purging.
-			Utilities\purge_transients( null, 'reviews' );
-
 			// Nothing left in the loop to do.
 		}
+
+		// Handle the transient purging for reviews.
+		Utilities\purge_transients( null, 'reviews', array( 'ids' => $review_ids ) );
 
 		// Run the change loop if we have items.
 		if ( ! empty( $tochange ) ) {
 
 			// Get just the individual unique IDs.
 			$update_ids = array_unique( $tochange );
+
+			// Handle the transient purging for products.
+			Utilities\purge_transients( null, 'products', array( 'ids' => $update_ids ) );
 
 			// Update all my counts.
 			Utilities\update_product_review_count( $update_ids );
@@ -680,20 +683,23 @@ class WooBetterReviews_ListReviews extends WP_List_Table {
 			// Run my related cleanup.
 			Utilities\delete_related_review_data( $review_id );
 
-			// Handle the transient purging.
-			Utilities\purge_transients( null, 'reviews' );
-
 			// Add the ID to the update.
 			$tochange[] = $single_review->product_id;
 
 			// Nothing left in the loop to do.
 		}
 
+		// Handle the transient purging for reviews.
+		Utilities\purge_transients( null, 'reviews', array( 'ids' => $review_ids ) );
+
 		// Run the change loop if we have items.
 		if ( ! empty( $tochange ) ) {
 
 			// Get just the individual unique IDs.
 			$update_ids = array_unique( $tochange );
+
+			// Handle the transient purging for products.
+			Utilities\purge_transients( null, 'products', array( 'ids' => $update_ids ) );
 
 			// Update all my counts.
 			Utilities\update_product_review_count( $update_ids );
@@ -827,16 +833,22 @@ class WooBetterReviews_ListReviews extends WP_List_Table {
 			$tochange[] = $single_review->product_id;
 
 			// Handle the transient purging.
-			Utilities\purge_transients( Core\HOOK_PREFIX . 'single_review_' . $review_id, 'reviews' );
+			// Utilities\purge_transients( Core\HOOK_PREFIX . 'single_review_' . $review_id, 'reviews' );
 
 			// Nothing left in the loop to do.
 		}
+
+		// Handle the transient purging for reviews.
+		Utilities\purge_transients( null, 'reviews', array( 'ids' => $review_ids ) );
 
 		// Run the change loop if we have items.
 		if ( ! empty( $tochange ) ) {
 
 			// Get just the individual unique IDs.
 			$update_ids = array_unique( $tochange );
+
+			// Handle the transient purging for products.
+			Utilities\purge_transients( null, 'products', array( 'ids' => $update_ids ) );
 
 			// Update all my counts.
 			Utilities\update_product_review_count( $update_ids );
@@ -971,6 +983,11 @@ class WooBetterReviews_ListReviews extends WP_List_Table {
 	 * @return string
 	 */
 	protected function column_attribute_ratings( $item ) {
+
+		// Bail without attributes to display.
+		if ( empty( $item['attribute_ratings'] ) ) {
+			return;
+		}
 
 		// Build my markup.
 		$setup  = '';
@@ -1164,8 +1181,13 @@ class WooBetterReviews_ListReviews extends WP_List_Table {
 				'review_product'    => get_post_field( 'post_name', $product_id, 'raw' ),
 				'product_data'      => Helpers\get_admin_product_data( $product_id ),
 				'review_score'      => $score_data['total_score'],
-				'attribute_ratings' => $score_data['rating_attributes'],
+				//'attribute_ratings' => $score_data['rating_attributes'],
 			);
+
+			// Add on the attributes if they exist.
+			if ( ! empty( $score_data['rating_attributes'] ) ) {
+				$custom['attribute_ratings'] = $score_data['rating_attributes'];
+			}
 
 			// Set the base array of the data we want.
 			$setup  = wp_parse_args( $custom, (array) $review_object );
@@ -1363,6 +1385,12 @@ class WooBetterReviews_ListReviews extends WP_List_Table {
 		// Get my product ID before going forward.
 		$product_id = ! empty( $_GET['wbr-product-id'] ) ? absint( $_GET['wbr-product-id'] ) : Queries\get_single_review( $review_id, 'product' );
 
+		// Set the array for purging the transients.
+		$set_purge_ids  = (array) $review_id;
+
+		// Purge my review related transients before we update stuff.
+		Utilities\purge_transients( null, 'reviews', array( 'ids' => $set_purge_ids ) );
+
 		// Set a blank success return code.
 		$success_cd = '';
 
@@ -1393,6 +1421,9 @@ class WooBetterReviews_ListReviews extends WP_List_Table {
 				// And redirect.
 				Helpers\admin_page_redirect( $redirect_args, Core\REVIEWS_ANCHOR );
 			}
+
+			// Purge the transient that has the approved counts.
+			Utilities\purge_transients( Core\HOOK_PREFIX . 'approved_reviews_for_product_' . absint( $product_id ) );
 
 			// Set my success code.
 			$success_cd = 'review-approved-single';
@@ -1436,8 +1467,6 @@ class WooBetterReviews_ListReviews extends WP_List_Table {
 			$success_cd = 'review-deleted';
 		}
 
-		// @@todo more single actions?
-
 		// If we don't have a success key code, return unknown failure.
 		if ( empty( $success_cd ) ) {
 
@@ -1454,8 +1483,11 @@ class WooBetterReviews_ListReviews extends WP_List_Table {
 
 		// It worked! Let's handle additional cleanup and recalculations, then redirect.
 
-		// Handle the transients tied to the single review and groups.
-		Utilities\purge_transients( Core\HOOK_PREFIX . 'single_review_' . $review_id, 'reviews' );
+		// Set the array for purging the transients.
+		$update_ids = (array) $product_id;
+
+		// And actually purge them.
+		Utilities\purge_transients( null, 'products', array( 'ids' => $update_ids ) );
 
 		// Update the product review count.
 		Utilities\update_product_review_count( $product_id );

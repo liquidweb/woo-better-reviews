@@ -76,12 +76,16 @@ function set_review_form_rating_stars_view( $product_id = 0 ) {
 				$field_id   = 'woo-better-reviews-rating-content-score-' . absint( $setscore );
 				$field_name = 'woo-better-reviews-rating[score]';
 
+				// Handle our default check on the first star.
+				$field_chkd = Helpers\get_default_stars( 'compare', $setscore ); // 2 >= absint( $setscore ) ? true : false;
+
 				// Set my field args.
 				$field_args = array(
-					'title'    => sprintf( __( 'Select a %d star rating', 'woo-better-reviews' ), absint( $setscore ) ),
-					'class'    => 'woo-better-reviews-single-star',
-					'required' => true,
-					'wrap'     => false,
+					'title'      => sprintf( __( 'Select a %d star rating', 'woo-better-reviews' ), absint( $setscore ) ),
+					'class'      => 'woo-better-reviews-single-star',
+					'required'   => true,
+					'wrap'       => false,
+					'is-checked' => $field_chkd,
 				);
 
 				// And output the field view.
@@ -116,7 +120,7 @@ function set_review_form_rating_attributes_view( $product_id = 0 ) {
 	}
 
 	// Attempt to get our attributes based on the global setting.
-	$attributes = Helpers\get_product_attributes_for_form( $product_id );
+	$attributes = Helpers\get_review_attributes_for_form( $product_id );
 
 	// Bail without the attributes to display.
 	if ( empty( $attributes ) ) {
@@ -310,114 +314,214 @@ function set_review_form_content_fields_view( $product_id = 0 ) {
 }
 
 /**
- * Set up the portion displaying the author input entry fields.
+ * Set up the portion displaying the introduction to author input entry fields.
  *
- * @param  integer $author_id  The author ID we are displaying this for.
+ * @param  integer $author_id   The author ID we are displaying this for.
+ * @param  integer $product_id  The product ID we are displaying this on.
  *
  * @return HTML
  */
-function set_review_form_author_fields_view( $author_id = 0 ) {
+function set_review_form_author_title_view( $author_id = 0, $product_id = 0 ) {
+
+	// Set my author field title.
+	$author_view_h3 = apply_filters( Core\HOOK_PREFIX . 'review_form_author_title', __( 'Tell us about yourself', 'woo-better-reviews' ), $author_id, $product_id );
+
+	// Set an actual title.
+	$display_view   = '<h3 class="woo-better-reviews-rating-author-fields-title">' . esc_html( $author_view_h3 ) . '</h3>';
+
+	// Return it, filtered.
+	return apply_filters( Core\HOOK_PREFIX . 'review_form_author_title_view', $display_view, array(), $author_id, $product_id );
+}
+
+/**
+ * Set up the portion displaying the basic author input entry fields.
+ *
+ * @param  integer $author_id   The author ID we are displaying this for.
+ * @param  integer $product_id  The product ID we are displaying this on.
+ *
+ * @return HTML
+ */
+function set_review_form_author_base_fields_view( $author_id = 0, $product_id = 0 ) {
 
 	// Get my form fields.
-	$fieldset_data  = FormData\get_review_author_form_fields( $author_id );
+	$fieldset_data  = FormData\get_review_author_base_form_fields( $author_id );
 
 	// Bail without the fields to display.
 	if ( empty( $fieldset_data ) ) {
-		return apply_filters( Core\HOOK_PREFIX . 'review_form_author_fields_view', '', null, $author_id );
+		return apply_filters( Core\HOOK_PREFIX . 'review_form_author_base_fields_view', '', null, $author_id, $product_id );
 	}
-
-	// Set my author field title.
-	$author_view_h3 = apply_filters( Core\HOOK_PREFIX . 'review_form_author_fields_title', __( 'Tell us about yourself', 'woo-better-reviews' ), $author_id );
 
 	// First set the empty.
 	$display_view   = '';
 
-	// Wrap the fields inside a div.
-	$display_view  .= '<div class="woo-better-reviews-rating-new-review-fields woo-better-reviews-rating-author-fields">';
+	// Loop my form fields and output each one.
+	foreach ( $fieldset_data as $field_key => $field_args ) {
 
-		// Set an actual title.
-		$display_view  .= '<h3 class="woo-better-reviews-rating-author-fields-title">' . esc_html( $author_view_h3 ) . '</h3>';
-
-		// Loop my form fields and output each one.
-		foreach ( $fieldset_data as $field_key => $field_args ) {
-
-			// Skip if no type is declared.
-			if ( empty( $field_args['type'] ) ) {
-				continue;
-			}
-
-			// Set my field wrapper class.
-			$wrapper_class  = 'woo-better-reviews-rating-content-field-wrap woo-better-reviews-rating-' . sanitize_html_class( $field_args['type'] ) . '-field-wrap';
-			$wrapper_class .= ! empty( $field_args['is-charstcs'] ) ? ' woo-better-reviews-rating-charstcs-field-wrap' : '';
-
-			// Wrap the field in a second div tag.
-			$display_view  .= '<div id="woo-better-reviews-rating-' . sanitize_html_class( $field_key ) . '" class="' . esc_attr( $wrapper_class ) . '">';
-
-			// Output the field.
-			switch ( esc_attr( $field_args['type'] ) ) {
-
-				// Handle text and text-like.
-				case 'input' :
-				case 'text' :
-				case 'tel' :
-				case 'url' :
-				case 'email' :
-				case 'number' :
-
-					// Handle the standard input field.
-					$display_view  .= FormFields\get_review_form_input_field( $field_args, $field_key );
-					break;
-
-				// Do the textarea.
-				case 'textarea' :
-
-					// Render the field.
-					$display_view  .= FormFields\get_review_form_textarea_field( $field_args, $field_key );
-					break;
-
-				// Do the dropdown.
-				case 'select' :
-				case 'dropdown' :
-
-					// Set the field ID and name.
-					$field_id   = ! empty( $field_args['is-charstcs'] ) ? 'woo-better-reviews-rating-content-charstcs-' . esc_attr( $field_key ) : '';
-					$field_name = ! empty( $field_args['charstcs-id'] ) ? 'woo-better-reviews-rating[author-charstcs][' . absint( $field_args['charstcs-id'] ) . ']' : '';
-
-					// Render the field.
-					$display_view  .= FormFields\get_review_form_dropdown_field( $field_args, $field_key, $field_id, $field_name );
-					break;
-
-				// Render the minimal editor.
-				case 'editor-minimal' :
-
-					// Render the field.
-					$display_view  .= FormFields\get_review_form_editor_minimal_field( $field_args, $field_key );
-					break;
-
-				//
-
-				// End all case breaks.
-			}
-
-			// Close up the paragraph tag.
-			$display_view  .= '</div>';
+		// Skip if no type is declared.
+		if ( empty( $field_args['type'] ) ) {
+			continue;
 		}
 
-	// Close the list.
-	$display_view  .= '</div>';
+		// Set my field wrapper class.
+		$wrapper_class  = 'woo-better-reviews-rating-content-field-wrap woo-better-reviews-rating-' . sanitize_html_class( $field_args['type'] ) . '-field-wrap';
+		$wrapper_class .= ! empty( $field_args['is-charstcs'] ) ? ' woo-better-reviews-rating-charstcs-field-wrap' : '';
+
+		// Wrap the field in a second div tag.
+		$display_view  .= '<div id="woo-better-reviews-rating-' . sanitize_html_class( $field_key ) . '" class="' . esc_attr( $wrapper_class ) . '">';
+
+		// Output the field.
+		switch ( esc_attr( $field_args['type'] ) ) {
+
+			// Handle text and text-like.
+			case 'input' :
+			case 'text' :
+			case 'tel' :
+			case 'url' :
+			case 'email' :
+			case 'number' :
+
+				// Handle the standard input field.
+				$display_view  .= FormFields\get_review_form_input_field( $field_args, $field_key );
+				break;
+
+			// Do the textarea.
+			case 'textarea' :
+
+				// Render the field.
+				$display_view  .= FormFields\get_review_form_textarea_field( $field_args, $field_key );
+				break;
+
+			// Do the dropdown.
+			case 'select' :
+			case 'dropdown' :
+
+				// Set the field ID and name.
+				$field_id   = ! empty( $field_args['is-charstcs'] ) ? 'woo-better-reviews-rating-content-charstcs-' . esc_attr( $field_key ) : '';
+				$field_name = ! empty( $field_args['charstcs-id'] ) ? 'woo-better-reviews-rating[author-charstcs][' . absint( $field_args['charstcs-id'] ) . ']' : '';
+
+				// Render the field.
+				$display_view  .= FormFields\get_review_form_dropdown_field( $field_args, $field_key, $field_id, $field_name );
+				break;
+
+			// Render the minimal editor.
+			case 'editor-minimal' :
+
+				// Render the field.
+				$display_view  .= FormFields\get_review_form_editor_minimal_field( $field_args, $field_key );
+				break;
+
+			//
+
+			// End all case breaks.
+		}
+
+		// Close up the paragraph tag.
+		$display_view  .= '</div>';
+	}
 
 	// Return it, filtered.
-	return apply_filters( Core\HOOK_PREFIX . 'review_form_author_fields_view', $display_view, $fieldset_data, $author_id );
+	return apply_filters( Core\HOOK_PREFIX . 'review_form_author_base_fields_view', $display_view, $fieldset_data, $author_id, $product_id );
+}
+
+/**
+ * Set up the portion displaying the author charstcs input entry fields.
+ *
+ * @param  integer $author_id   The author ID we are displaying this for.
+ * @param  integer $product_id  The product ID we are displaying this on.
+ *
+ * @return HTML
+ */
+function set_review_form_author_charstcs_fields_view( $author_id = 0, $product_id = 0 ) {
+
+	// Get my form fields.
+	$fieldset_data  = FormData\get_review_author_charstcs_form_fields( $author_id, $product_id );
+
+	// Bail without the fields to display.
+	if ( empty( $fieldset_data ) ) {
+		return apply_filters( Core\HOOK_PREFIX . 'review_form_author_charstcs_fields_view', '', null, $author_id, $product_id );
+	}
+
+	// First set the empty.
+	$display_view   = '';
+
+	// Loop my form fields and output each one.
+	foreach ( $fieldset_data as $field_key => $field_args ) {
+
+		// Skip if no type is declared.
+		if ( empty( $field_args['type'] ) ) {
+			continue;
+		}
+
+		// Set my field wrapper class.
+		$wrapper_class  = 'woo-better-reviews-rating-content-field-wrap woo-better-reviews-rating-' . sanitize_html_class( $field_args['type'] ) . '-field-wrap';
+		$wrapper_class .= ! empty( $field_args['is-charstcs'] ) ? ' woo-better-reviews-rating-charstcs-field-wrap' : '';
+
+		// Wrap the field in a second div tag.
+		$display_view  .= '<div id="woo-better-reviews-rating-' . sanitize_html_class( $field_key ) . '" class="' . esc_attr( $wrapper_class ) . '">';
+
+		// Output the field.
+		switch ( esc_attr( $field_args['type'] ) ) {
+
+			// Handle text and text-like.
+			case 'input' :
+			case 'text' :
+			case 'tel' :
+			case 'url' :
+			case 'email' :
+			case 'number' :
+
+				// Handle the standard input field.
+				$display_view  .= FormFields\get_review_form_input_field( $field_args, $field_key );
+				break;
+
+			// Do the textarea.
+			case 'textarea' :
+
+				// Render the field.
+				$display_view  .= FormFields\get_review_form_textarea_field( $field_args, $field_key );
+				break;
+
+			// Do the dropdown.
+			case 'select' :
+			case 'dropdown' :
+
+				// Set the field ID and name.
+				$field_id   = ! empty( $field_args['is-charstcs'] ) ? 'woo-better-reviews-rating-content-charstcs-' . esc_attr( $field_key ) : '';
+				$field_name = ! empty( $field_args['charstcs-id'] ) ? 'woo-better-reviews-rating[author-charstcs][' . absint( $field_args['charstcs-id'] ) . ']' : '';
+
+				// Render the field.
+				$display_view  .= FormFields\get_review_form_dropdown_field( $field_args, $field_key, $field_id, $field_name );
+				break;
+
+			// Render the minimal editor.
+			case 'editor-minimal' :
+
+				// Render the field.
+				$display_view  .= FormFields\get_review_form_editor_minimal_field( $field_args, $field_key );
+				break;
+
+			//
+
+			// End all case breaks.
+		}
+
+		// Close up the paragraph tag.
+		$display_view  .= '</div>';
+	}
+
+	// Return it, filtered.
+	return apply_filters( Core\HOOK_PREFIX . 'review_form_author_charstcs_fields_view', $display_view, $fieldset_data, $author_id, $product_id );
 }
 
 /**
  * Set up the portion displaying the content entry fields.
  *
- * @param  integer $product_id  The product ID we are displaying for.
+ * @param  integer $author_id   The author ID we are displaying this for.
+ * @param  integer $product_id  The product ID we are displaying this on.
  *
  * @return HTML
  */
-function set_review_form_submit_action_fields_view( $product_id = 0 ) {
+function set_review_form_submit_action_fields_view( $author_id = 0, $product_id = 0 ) {
 
 	// Bail without the parts we want.
 	if ( empty( $product_id ) ) {
@@ -429,7 +533,7 @@ function set_review_form_submit_action_fields_view( $product_id = 0 ) {
 
 	// Bail without buttons.
 	if ( empty( $fieldset_data ) ) {
-		return apply_filters( Core\HOOK_PREFIX . 'review_form_submit_actions_fields_view', '', null, $product_id );
+		return apply_filters( Core\HOOK_PREFIX . 'review_form_submit_actions_fields_view', '', null, $author_id, $product_id );
 	}
 
 	// First set the empty.
@@ -465,18 +569,18 @@ function set_review_form_submit_action_fields_view( $product_id = 0 ) {
 	$display_view  .= '</div>';
 
 	// Return it, filtered.
-	return apply_filters( Core\HOOK_PREFIX . 'review_form_submit_actions_fields_view', $display_view, $fieldset_data, $product_id );
+	return apply_filters( Core\HOOK_PREFIX . 'review_form_submit_actions_fields_view', $display_view, $fieldset_data, $author_id, $product_id );
 }
 
 /**
  * Set up the portion displaying the hidden meta entry fields.
  *
- * @param  integer $product_id  The product ID we are displaying for.
- * @param  integer $author_id   The possible author ID we are displaying for.
+ * @param  integer $author_id   The author ID we are displaying this for.
+ * @param  integer $product_id  The product ID we are displaying this on.
  *
  * @return HTML
  */
-function set_review_form_hidden_meta_fields_view( $product_id = 0, $author_id = 0 ) {
+function set_review_form_hidden_meta_fields_view( $author_id = 0, $product_id = 0 ) {
 
 	// Bail without the parts we want.
 	if ( empty( $product_id ) ) {
@@ -488,23 +592,17 @@ function set_review_form_hidden_meta_fields_view( $product_id = 0, $author_id = 
 
 	// Bail without buttons.
 	if ( empty( $fieldset_data ) ) {
-		return apply_filters( Core\HOOK_PREFIX . 'review_form_hidden_meta_fields_view', '', null, $product_id, $author_id );
+		return apply_filters( Core\HOOK_PREFIX . 'review_form_hidden_meta_fields_view', '', null, $author_id, $product_id );
 	}
 
 	// First set the empty.
 	$display_view   = '';
 
-	// Loop the buttons we have.
-	foreach ( $fieldset_data as $field_id => $field_args ) {
-
-		// Make sure we have a name.
-		$field_name = ! empty( $field_args['name'] ) ? $field_args['name'] : $field_id;
-		$field_val  = ! empty( $field_args['value'] ) ? $field_args['value'] : 0;
-
-		// And show the field.
-		$display_view  .= '<input type="hidden" id="' . esc_attr( $field_id ) . '" name="' . esc_attr( $field_name ) . '" value="' . esc_attr( $field_val ) . '">';
+	// Loop the fields and render them.
+	foreach ( $fieldset_data as $field_key => $field_args ) {
+		$display_view  .= FormFields\get_review_form_hidden_field( $field_args, $field_key );
 	}
 
 	// Return it, filtered.
-	return apply_filters( Core\HOOK_PREFIX . 'review_form_hidden_meta_fields_view', $display_view, $fieldset_data, $product_id, $author_id );
+	return apply_filters( Core\HOOK_PREFIX . 'review_form_hidden_meta_fields_view', $display_view, $fieldset_data, $author_id, $product_id );
 }

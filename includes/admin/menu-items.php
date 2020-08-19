@@ -75,36 +75,62 @@ function load_admin_menus() {
 	// Set the user cap.
 	$user_menu_cap  = apply_filters( Core\HOOK_PREFIX . 'user_menu_cap', 'manage_options' );
 
+	// Create the link for the settings jump.
+	$setslink_args  = array( 'page' => 'wc-settings', 'tab' => trim( Core\TAB_BASE ) );
+	$setslink_strng = add_query_arg( $setslink_args, 'admin.php' );
+
 	// Load my top-level admin menu.
 	add_menu_page(
-		get_menu_page_title( 'reviews' ),
-		__( 'Reviews', 'woo-better-reviews' ),
+		__( 'Product Reviews', 'woo-better-reviews' ),
+		__( 'Product Reviews', 'woo-better-reviews' ),
 		$user_menu_cap,
 		Core\REVIEWS_ANCHOR,
-		__NAMESPACE__ . '\load_reviews_list_page',
+		null,
         'dashicons-feedback',
         '58.8'
     );
+
+	// Add a secondary page so we have a better label.
+	add_submenu_page(
+		Core\REVIEWS_ANCHOR,
+		get_menu_page_title( 'reviews' ),
+		__( 'All Reviews', 'woo-better-reviews' ),
+		$user_menu_cap,
+		Core\REVIEWS_ANCHOR,
+		__NAMESPACE__ . '\load_reviews_list_page'
+	);
 
 	// Add the attributes page.
 	add_submenu_page(
 		Core\REVIEWS_ANCHOR,
 		get_menu_page_title( 'attributes' ),
-		__( 'Attributes','woo-better-reviews' ),
+		__( 'Review Attributes','woo-better-reviews' ),
 		$user_menu_cap,
 		Core\ATTRIBUTES_ANCHOR,
-		__NAMESPACE__ . '\load_product_attributes_page'
+		__NAMESPACE__ . '\load_review_attributes_page'
 	);
 
-	// Add the characteristics page.
+	// Add the traits page.
 	add_submenu_page(
 		Core\REVIEWS_ANCHOR,
-		get_menu_page_title( 'characteristics' ),
-		__( 'Characteristics', 'woo-better-reviews' ),
+		get_menu_page_title( 'traits' ),
+		__( 'Author Traits', 'woo-better-reviews' ),
 		$user_menu_cap,
 		Core\CHARSTCS_ANCHOR,
-		__NAMESPACE__ . '\load_author_characteristics_page'
+		__NAMESPACE__ . '\load_author_traits_page'
 	);
+
+	// And include the settings link over to Woo.
+	add_submenu_page(
+		Core\REVIEWS_ANCHOR,
+		__( 'Plugin Settings', 'woo-better-reviews' ),
+		__( 'Plugin Settings', 'woo-better-reviews' ),
+		$user_menu_cap,
+		$setslink_strng,
+		null
+	);
+
+	// No more menu items to include.
 }
 
 /**
@@ -121,8 +147,8 @@ function load_reviews_list_page() {
  *
  * @return void
  */
-function load_product_attributes_page() {
-	AdminPages\display_product_attributes_page();
+function load_review_attributes_page() {
+	AdminPages\display_review_attributes_page();
 }
 
 /**
@@ -130,8 +156,8 @@ function load_product_attributes_page() {
  *
  * @return void
  */
-function load_author_characteristics_page() {
-	AdminPages\display_author_characteristics_page();
+function load_author_traits_page() {
+	AdminPages\display_author_traits_page();
 }
 
 /**
@@ -152,19 +178,20 @@ function get_menu_page_title( $menu = '' ) {
 		case 'reviews' :
 
 			// Make and return my label.
-			return ! $isedit ? __( 'Reviews', 'woo-better-reviews' ) : __( 'Edit Review', 'woo-better-reviews' );
+			return ! $isedit ? __( 'Product Reviews', 'woo-better-reviews' ) : __( 'Edit Product Review', 'woo-better-reviews' );
 			break;
 
 		case 'attributes' :
 
 			// Make and return my label.
-			return ! $isedit ? __( 'Product Attributes', 'woo-better-reviews' ) : __( 'Edit Attribute', 'woo-better-reviews' );
+			return ! $isedit ? __( 'Review Attributes', 'woo-better-reviews' ) : __( 'Edit Review Attribute', 'woo-better-reviews' );
 			break;
 
+		case 'traits' :
 		case 'characteristics' :
 
 			// Make and return my label.
-			return ! $isedit ? __( 'Review Author Characteristics', 'woo-better-reviews' ) : __( 'Edit Characteristic', 'woo-better-reviews' );
+			return ! $isedit ? __( 'Review Author Traits', 'woo-better-reviews' ) : __( 'Edit Review Author Trait', 'woo-better-reviews' );
 			break;
 
 		// No more case breaks, no more menues.

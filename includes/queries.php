@@ -20,7 +20,7 @@ use WP_Error;
 /**
  * Get all the reviews.
  *
- * @param  boolean $purge        Optional to purge the cache'd version before looking up.
+ * @param  boolean $purge  Optional to purge the cache'd version before looking up.
  *
  * @return mixed
  */
@@ -584,7 +584,7 @@ function get_approved_reviews_for_product( $product_id = 0, $return_type = 'obje
 			SELECT   *
 			FROM     $table_name
 			WHERE    product_id = '%d'
-			AND      review_status LIKE '%s'
+			AND      review_status = '%s'
 			ORDER BY review_date DESC
 		", absint( $product_id ), esc_attr( 'approved' ) );
 
@@ -1725,6 +1725,7 @@ function get_attributes_for_product( $product_id = 0, $return_type = 'objects', 
 			return wp_list_pluck( $cached_dataset, 'attribute_id', null );
 			break;
 
+		case 'titles' :
 		case 'names' :
 
 			// Return my list, plucked.
@@ -1825,6 +1826,7 @@ function get_single_attribute( $attribute_id = 0, $return_type = 'dataset', $pur
 			return $cached_dataset;
 			break;
 
+		case 'title' :
 		case 'name' :
 
 			// Return the single bit.
@@ -1927,6 +1929,15 @@ function get_all_charstcs( $return_type = 'objects', $purge = false ) {
 			return Utilities\format_charstcs_display_data( $cached_dataset );
 			break;
 
+		case 'indexed' :
+
+			// First get the IDs.
+			$id_index   = wp_list_pluck( $cached_dataset, 'charstcs_id', null );
+
+			// Return it with our IDs as the index.
+			return array_combine( $id_index, $cached_dataset );
+			break;
+
 		case 'ids' :
 
 			// Set and return my query list.
@@ -1940,6 +1951,7 @@ function get_all_charstcs( $return_type = 'objects', $purge = false ) {
 			break;
 
 		case 'titles' :
+		case 'names' :
 
 			// Set and return my query list.
 			return wp_list_pluck( $cached_dataset, 'charstcs_name', 'charstcs_id' );
@@ -1968,7 +1980,126 @@ function get_all_charstcs( $return_type = 'objects', $purge = false ) {
 }
 
 /**
- * Get just the charstcs assigned to the author.
+ * Get just the charstcs assigned to the product.
+ *
+ * @param  integer $product_id   Which product ID we are looking up.
+ * @param  string  $return_type  What type of return we want. Accepts "counts", "objects", "display", or single fields.
+ * @param  boolean $purge        Optional to purge the cache'd version before looking up.
+ *
+ * @return mixed
+ */
+function get_charstcs_for_product( $product_id = 0, $return_type = 'objects', $purge = false ) {
+
+	// Bail without a product ID.
+	if ( empty( $product_id ) ) {
+		return new WP_Error( 'missing_product_id', __( 'A product ID is required.', 'woo-better-reviews' ) );
+	}
+
+	// Set the key to use in our transient.
+	$ky = Core\HOOK_PREFIX . 'author_charstcs_product' . absint( $product_id );
+
+	// If we don't want the cache'd version, delete the transient first.
+	if ( defined( 'WP_DEBUG' ) && WP_DEBUG || ! empty( $purge ) ) {
+		delete_transient( $ky );
+	}
+
+	// Attempt to get the reviews from the cache.
+	$cached_dataset = get_transient( $ky );
+
+	// If we have none, do the things.
+	if ( false === $cached_dataset ) {
+
+		// Check for the stored product meta.
+		$maybe_has_items    = Helpers\get_selected_product_charstcs( $product_id );
+
+		// Bail without any selected attributes.
+		if ( empty( $maybe_has_items ) ) {
+			return false;
+		}
+
+		// Get all my items.
+		$all_items  = get_all_charstcs( 'indexed' );
+
+		// Set my empty.
+		$query_list = array();
+
+		// Loop the attribute IDs.
+		foreach ( $maybe_has_items as $item_id ) {
+
+			// Skip the empty data.
+			if ( empty( $all_items[ $item_id ] ) ) {
+				continue;
+			}
+
+			// Add the data to the list.
+			$query_list[] = $all_items[ $item_id ];
+		}
+
+		// Set our transient with our data.
+		set_transient( $ky, $query_list, HOUR_IN_SECONDS );
+
+		// And change the variable to do the things.
+		$cached_dataset = $query_list;
+	}
+
+	// Now switch between my return types.
+	switch ( sanitize_text_field( $return_type ) ) {
+
+		case 'counts' :
+			return count( $cached_dataset );
+			break;
+
+		case 'objects' :
+			return $cached_dataset;
+			break;
+
+		case 'display' :
+			return Utilities\format_charstcs_display_data( $cached_dataset );
+			break;
+
+		case 'ids' :
+
+			// Return my list, plucked.
+			return wp_list_pluck( $cached_dataset, 'charstcs_id', null );
+			break;
+
+		case 'titles' :
+		case 'names' :
+
+			// Return my list, plucked.
+			return wp_list_pluck( $cached_dataset, 'charstcs_name', 'charstcs_id' );
+			break;
+
+		case 'slugs' :
+
+			// Return my list, plucked.
+			return wp_list_pluck( $cached_dataset, 'charstcs_slug', 'charstcs_id' );
+			break;
+
+		case 'descriptions' :
+
+			// Return my list, plucked.
+			return wp_list_pluck( $cached_dataset, 'charstcs_desc', 'charstcs_id' );
+			break;
+
+		case 'values' :
+
+			// Parse out the values.
+			$plucked_values = wp_list_pluck( $cached_dataset, 'charstcs_values', 'charstcs_id' );
+
+			// Set and return my query list.
+			return array_map( 'maybe_unserialize', $plucked_values );
+			break;
+
+		// No more case breaks, no more return types.
+	}
+
+	// No reason we should get down this far but here we go.
+	return false;
+}
+
+/**
+ * Get the terms an author ID has, and return that data.
  *
  * @param  integer $author_id    Which author ID we are looking up.
  * @param  string  $return_type  What type of return we want. Accepts "counts", "objects", "display", or single fields.
@@ -1976,7 +2107,7 @@ function get_all_charstcs( $return_type = 'objects', $purge = false ) {
  *
  * @return mixed
  */
-function get_charstcs_for_author( $author_id = 0, $return_type = 'objects', $purge = false ) {
+function get_trait_term_data_for_author( $author_id = 0, $return_type = 'objects', $purge = false ) {
 
 	// Bail without a author ID.
 	if ( empty( $author_id ) ) {
@@ -1984,7 +2115,7 @@ function get_charstcs_for_author( $author_id = 0, $return_type = 'objects', $pur
 	}
 
 	// Set the key to use in our transient.
-	$ky = Core\HOOK_PREFIX . 'charstcs_author' . absint( $author_id );
+	$ky = Core\HOOK_PREFIX . 'trait_term_author' . absint( $author_id );
 
 	// If we don't want the cache'd version, delete the transient first.
 	if ( defined( 'WP_DEBUG' ) && WP_DEBUG || ! empty( $purge ) ) {
@@ -2040,7 +2171,7 @@ function get_charstcs_for_author( $author_id = 0, $return_type = 'objects', $pur
 		}
 
 		// Set our transient with our data.
-		set_transient( $ky, absint( $query_list ), HOUR_IN_SECONDS );
+		set_transient( $ky, $query_list, HOUR_IN_SECONDS );
 
 		// And change the variable to do the things.
 		$cached_dataset = $query_list;
@@ -2063,6 +2194,19 @@ function get_charstcs_for_author( $author_id = 0, $return_type = 'objects', $pur
 			return wp_list_pluck( $cached_dataset, 'charstcs_id', null );
 			break;
 
+		case 'slugs' :
+
+			// Return my list, plucked.
+			return wp_list_pluck( $cached_dataset, 'charstcs_slug', 'charstcs_id' );
+			break;
+
+		case 'titles' :
+		case 'names' :
+
+			// Return my list, plucked.
+			return wp_list_pluck( $cached_dataset, 'charstcs_name', 'charstcs_id' );
+			break;
+
 		case 'values' :
 
 			// Return my list, plucked.
@@ -2074,6 +2218,70 @@ function get_charstcs_for_author( $author_id = 0, $return_type = 'objects', $pur
 
 	// No reason we should get down this far but here we go.
 	return false;
+}
+
+/**
+ * Get just the selected trait value for an author ID.
+ *
+ * @param  integer $author_id    Which author ID we are looking up.
+ * @param  boolean $purge        Optional to purge the cache'd version before looking up.
+ *
+ * @return mixed
+ */
+function get_trait_values_for_author( $author_id = 0, $purge = false ) {
+
+	// Bail without a author ID.
+	if ( empty( $author_id ) ) {
+		return new WP_Error( 'missing_author_id', __( 'An author ID is required.', 'woo-better-reviews' ) );
+	}
+
+	// Set the key to use in our transient.
+	$ky = Core\HOOK_PREFIX . 'trait_values_author' . absint( $author_id );
+
+	// If we don't want the cache'd version, delete the transient first.
+	if ( defined( 'WP_DEBUG' ) && WP_DEBUG || ! empty( $purge ) ) {
+		delete_transient( $ky );
+	}
+
+	// Attempt to get the reviews from the cache.
+	$cached_dataset = get_transient( $ky );
+
+	// If we have none, do the things.
+	if ( false === $cached_dataset ) {
+
+		// Call the global database.
+		global $wpdb;
+
+		// Set our table name.
+		$table_name = $wpdb->prefix . Core\TABLE_PREFIX . 'authormeta';
+
+		// Set up our query.
+		$query_args = $wpdb->prepare("
+			SELECT   charstcs_id, charstcs_value
+			FROM     $table_name
+			WHERE    author_id = '%d'
+		", absint( $author_id ) );
+
+		// Process the query.
+		$query_run  = $wpdb->get_results( $query_args );
+
+		// Bail without any data to return.
+		if ( empty( $query_run ) ) {
+			return false;
+		}
+
+		// Set the list we want.
+		$query_list = wp_list_pluck( $query_run, 'charstcs_value', 'charstcs_id' );
+
+		// Set our transient with our data.
+		set_transient( $ky, $query_list, HOUR_IN_SECONDS );
+
+		// And change the variable to do the things.
+		$cached_dataset = $query_list;
+	}
+
+	// We already formatted it, so just return it.
+	return $cached_dataset;
 }
 
 /**

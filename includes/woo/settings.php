@@ -89,6 +89,19 @@ function add_review_settings_tab( $tabs ) {
 		$tabs[ Core\TAB_BASE ] = __( 'Product Reviews', 'woo-better-reviews' );
 	}
 
+	// If we have the advanced tab, move it to the end.
+	if ( isset( $tabs['advanced'] ) ) {
+
+		// Set the advanced tab so we can add it back to the end.
+		$advanced_tab   = $tabs['advanced'];
+
+		// Now remove the existing.
+		unset( $tabs['advanced'] );
+
+		// Add the advanced tab back to the end.
+		$tabs['advanced'] = $advanced_tab;
+	}
+
 	// And return the entire array.
 	return $tabs;
 }
@@ -115,32 +128,65 @@ function display_settings_tab() {
  */
 function update_review_settings() {
 
+	// We need data.
+	if ( empty( $_POST ) ) {
+		return;
+	}
+
 	// Check out the cron adjustment.
-	maybe_adjust_reminder_cron();
+	maybe_adjust_reminder_cron( $_POST );
 
 	// Now save as normal.
-	woocommerce_update_options( get_settings() );
+	$run_options_update = woocommerce_update_options( get_settings() );
+
+	// If the save failed, we get out and let Woo error.
+	if ( false === $run_options_update ) {
+		return;
+	}
+
+	// Assuming the save went correctly, do the anonymous check.
+	maybe_adjust_for_anonymous( $_POST );
 }
 
 /**
  * Check the POST value and handle the reminder cron.
  *
+ * @param  array $data  The data POSTed.
+ *
  * @return void
  */
-function maybe_adjust_reminder_cron() {
+function maybe_adjust_reminder_cron( $data ) {
 
 	// Set our reminder key.
-	$reminder_key   = Core\OPTION_PREFIX . 'send_reminders';
+	$ky = Core\OPTION_PREFIX . 'send_reminders';
 
 	// Pull in our scheduled cron and unschedule it if disabled.
-	if ( empty( $_POST[ $reminder_key ] ) ) {
+	if ( empty( $data[ $ky ] ) ) {
 		Utilities\modify_reminder_cron( true, false );
 	}
 
 	// Check for the reminders being turned on or off and handle the cron.
-	if ( ! empty( $_POST[ $reminder_key ] ) && ! wp_next_scheduled( Core\REMINDER_CRON ) ) {
+	if ( ! empty( $data[ $ky ] ) && ! wp_next_scheduled( Core\REMINDER_CRON ) ) {
 		Utilities\modify_reminder_cron( false, 'twicedaily' );
 	}
+}
+
+/**
+ * Check and see if the settings allow anonymous.
+ *
+ * @param  array $data  The data POSTed.
+ *
+ * @return void
+ */
+function maybe_adjust_for_anonymous( $data ) {
+
+	// If the key isn't present in the data, do not do anything.
+	if ( empty( $data['woocommerce_review_rating_verification_required'] ) ) {
+		return;
+	}
+
+	// If this key is in the data, we make sure the "allow anonymous" is turned off.
+	delete_option( Core\OPTION_PREFIX . 'allow_anonymous' );
 }
 
 /**
@@ -150,23 +196,16 @@ function maybe_adjust_reminder_cron() {
  */
 function get_settings() {
 
+	// Set the text for the global product attributes, since it has some markup.
+	$setup_global_attributes_label  = __( 'Make reviewable attributes global.', 'woo-better-reviews' );
+	$setup_global_attributes_label .= ' <span class="woo-better-reviews-inline-label-text">' . __( '(Apply each created review attribute to every product)', 'woo-better-reviews' ) . '</span>';
+
+	// Set the text for the global review author characteristics / traits, since it has some markup.
+	$setup_global_charstcs_label    = __( 'Make review author traits global.', 'woo-better-reviews' );
+	$setup_global_charstcs_label   .= ' <span class="woo-better-reviews-inline-label-text">' . __( '(Apply each created trait to every review author)', 'woo-better-reviews' ) . '</span>';
+
 	// Set up our array, including default Woo items.
 	$setup_args = array(
-
-		/*
-		'option_name' => array(
-			'title' => 'Title for your option shown on the settings page',
-			'description' => 'Description for your option shown on the settings page',
-			'type' => 'text|password|textarea|checkbox|select|multiselect',
-			'default' => 'Default value for the option',
-			'class' => 'Class for the input',
-			'css' => 'CSS rules added line to the input',
-			'label' => 'Label', // checkbox only
-			'options' => array(
-				'key' => 'value'
-			) // array of options for select/multiselects only
-		)
-		*/
 
 		'mainheader' => array(
 			'title' => __( 'Product Review Settings', 'woo-better-reviews' ),
@@ -177,22 +216,21 @@ function get_settings() {
 
 		'enable' => array(
 			'title'    => __( 'Enable Reviews', 'woo-better-reviews' ),
-			'desc'     => __( 'Use the Better Reviews for WooCommerce plugin', 'woo-better-reviews' ),
-			'id'       => 'woocommerce_enable_reviews', // @@todo figure out if setting key should be different.
+			'desc'     => __( 'Use the Better Product Reviews for WooCommerce plugin', 'woo-better-reviews' ),
+			'id'       => 'woocommerce_enable_reviews',
 			'type'     => 'checkbox',
 			'default'  => 'yes',
 			'class'    => 'woo-better-reviews-settings-checkbox',
-			'desc_tip' => __( 'Unchecking this box will disable reviews completely.', 'woo-better-reviews' ),
+			'desc_tip' =>  '<span class="woo-better-reviews-checkbox-notice">' . __( 'Unchecking this box will disable reviews completely.', 'woo-better-reviews' ) . '</span>',
 		),
 
 		'anonymous' => array(
-			'title'    => __( 'Anonymous Reviews', 'woo-better-reviews' ),
-			'desc'     => __( 'Allow non-logged in users to leave product reviews', 'woo-better-reviews' ),
-			'id'       => Core\OPTION_PREFIX . 'allow_anonymous',
-			'type'     => 'checkbox',
-			'default'  => 'no',
-			'class'    => 'woo-better-reviews-settings-checkbox',
-			'desc_tip' => __( 'User accounts must be enabled for this feature.', 'woo-better-reviews' ),
+			'title'   => __( 'Anonymous Reviews', 'woo-better-reviews' ),
+			'desc'    => __( 'Allow non-logged in users to leave product reviews', 'woo-better-reviews' ),
+			'id'      => Core\OPTION_PREFIX . 'allow_anonymous',
+			'type'    => 'checkbox',
+			'default' => 'no',
+			'class'   => 'woo-better-reviews-settings-checkbox',
 		),
 
 		'doverified' => array(
@@ -216,16 +254,41 @@ function get_settings() {
 			'show_if_checked' => 'yes',
 			'class'           => 'woo-better-reviews-settings-checkbox',
 			'autoload'        => false,
+			'desc_tip'        => '<span class="woo-better-reviews-checkbox-notice">' . __( 'Enabling this feature will disable anonymous reviews.', 'woo-better-reviews' ) . '</span>',
 		),
 
 		'gloablattributes' => array(
-			'title'    => __( 'Product Attributes', 'woo-better-reviews' ),
-			'desc'     => __( 'Apply each created attribute to every product', 'woo-better-reviews' ),
+			'title'    => __( 'Product Review Attributes', 'woo-better-reviews' ),
+			'desc'     => $setup_global_attributes_label,
 			'id'       => Core\OPTION_PREFIX . 'global_attributes',
 			'type'     => 'checkbox',
 			'default'  => 'yes',
 			'class'    => 'woo-better-reviews-settings-checkbox',
-			'desc_tip' => sprintf( __( '<a href="%s">Click here</a> to view and edit your product review attributes.', 'woo-better-reviews' ), Helpers\get_admin_menu_link( Core\ATTRIBUTES_ANCHOR ) ),
+			'desc_tip' => '<span class="woo-better-reviews-checkbox-notice">' . sprintf( __( '<a href="%s">Click here</a> to view and edit your product review attributes.', 'woo-better-reviews' ), Helpers\get_admin_menu_link( Core\ATTRIBUTES_ANCHOR ) ) . '</span>',
+		),
+
+		'gloablcharstcs' => array(
+			'title'    => __( 'Review Author Traits', 'woo-better-reviews' ),
+			'desc'     => $setup_global_charstcs_label,
+			'id'       => Core\OPTION_PREFIX . 'global_charstcs',
+			'type'     => 'checkbox',
+			'default'  => 'yes',
+			'class'    => 'woo-better-reviews-settings-checkbox',
+			'desc_tip' =>  '<span class="woo-better-reviews-checkbox-notice">' . sprintf( __( '<a href="%s">Click here</a> to view and edit your review author traits.', 'woo-better-reviews' ), Helpers\get_admin_menu_link( Core\CHARSTCS_ANCHOR ) ) . '</span>',
+		),
+
+		'defaultstars' => array(
+			'title'             => __( 'Default Star Rating', 'woo-better-reviews' ),
+			'desc'              => __( 'Select the default rating that will load on the new review form.', 'woo-better-reviews' ),
+			'id'                => Core\OPTION_PREFIX . 'default_stars',
+			'type'              => 'number',
+			'default'           => '7',
+			'class'             => 'woo-better-reviews-settings-small-number',
+			'custom_attributes' => array(
+				'min'  => 1,
+				'max'  => 7,
+				'step' => 1,
+			),
 		),
 
 		// Include my section end.
@@ -270,6 +333,26 @@ function get_settings() {
 
 		// Close up the reminders section.
 		'remindsection_end' => array( 'type' => 'sectionend', 'id' => Core\TAB_BASE . '_remind_settings_section_end' ),
+
+		// Now start the admin / other.
+		'adminheader' => array(
+			'title' => __( 'Admin Settings', 'woo-better-reviews' ),
+			'type'  => 'title',
+			'desc'  => '',
+			'id'    => Core\OPTION_PREFIX . 'admin_settings_header',
+		),
+
+		'preserveondelete' => array(
+			'title'   => __( 'Preserve Data', 'woo-better-reviews' ),
+			'desc'    => __( 'If UN-checked, all plugin data, including reviews, will be removed when the plugin is deleted.', 'woo-better-reviews' ),
+			'id'      => Core\OPTION_PREFIX . 'preserve_on_delete',
+			'type'    => 'checkbox',
+			'default' => 'yes',
+			'class'   => 'woo-better-reviews-settings-checkbox',
+		),
+
+		// Close up the admin / other section.
+		'adminsection_end' => array( 'type' => 'sectionend', 'id' => Core\TAB_BASE . '_admin_settings_section_end' ),
 	);
 
 	// Return our set of fields with a filter, resetting the keys again.

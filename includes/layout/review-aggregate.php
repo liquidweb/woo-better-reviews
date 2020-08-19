@@ -57,8 +57,8 @@ function set_review_aggregate_average_rating_view( $product_id = 0, $review_coun
 			// Output the text version.
 			$display_view  .= '<p class="woo-better-reviews-list-aggregate-group-content-item woo-better-reviews-list-aggregate-group-content-average-text">' . sprintf( __( 'Average Rating: %s stars', 'woo-better-reviews' ), $score_wrapper ) . '</p>';
 
-			// Output the total version.
-			$display_view  .= '<p class="woo-better-reviews-list-aggregate-group-content-item woo-better-reviews-list-aggregate-group-content-count-total">' . sprintf( __( '%s reviews total', 'woo-better-reviews' ), $count_wrapper ) . '</p>';
+			// Output the total review count.
+			$display_view  .= '<p class="woo-better-reviews-list-aggregate-group-content-item woo-better-reviews-list-aggregate-group-content-count-total">' . sprintf( esc_html( _n( '%1$s review total', '%1$s reviews total', $review_count, 'woo-better-reviews' ) ), $count_wrapper ) . '</p>';
 
 		// Close the group content div.
 		$display_view  .= '</div>';
