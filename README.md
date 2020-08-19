@@ -1,10 +1,10 @@
 # Better Product Reviews For WooCommerce #
 **Contributors:** [nexcess](https://profiles.wordpress.org/nexcess), [norcross](https://profiles.wordpress.org/norcross)  
-**Tags:** woocommerce, reviews  
-**Requires at least:** 5.0  
-**Tested up to:** 5.2.0  
+**Tags:** woocommerce, reviews, product reviews  
+**Requires at least:** 5.2  
+**Tested up to:** 5.5.0  
 **Requires PHP:** 5.6.0  
-**Stable tag:** 0.4.0-dev  
+**Stable tag:** 0.4.0
 **License:** MIT  
 **License URI:** https://opensource.org/licenses/MIT  
 
@@ -71,6 +71,11 @@ Yes.
 1. **WooCommerce Settings** - Set the options for reviews
 
 ## Changelog ##
+
+### 0.4.0 ###
+* bug squashing roundup
+* changes default star behavior
+* adding settings for data control on uninstall
 
 ### 0.3.0 ###
 * added email reminders for product reviews

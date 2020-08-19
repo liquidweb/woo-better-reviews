@@ -3,13 +3,13 @@
  * Plugin Name: Better Product Reviews For WooCommerce
  * Plugin URI:  https://www.nexcess.net
  * Description: Like regular product reviews, only way better.
- * Version:     0.4.0-dev
+ * Version:     0.4.0
  * Author:      Nexcess
  * Author URI:  https://www.nexcess.net
  * Text Domain: woo-better-reviews
  * Domain Path: /languages
- * WC requires at least: 3.5.0
- * WC tested up to: 3.6.0
+ * WC requires at least: 4.2.0
+ * WC tested up to: 4.4.1
  * License:     MIT
  * License URI: https://opensource.org/licenses/MIT
  *
@@ -26,7 +26,7 @@ use WP_CLI;
 if ( ! defined( 'ABSPATH' ) ) exit;
 
 // Define our plugin version.
-define( __NAMESPACE__ . '\VERS', '0.4.0-dev' );
+define( __NAMESPACE__ . '\VERS', '0.4.0' );
 
 // Plugin root file.
 define( __NAMESPACE__ . '\FILE', __FILE__ );
@@ -72,6 +72,10 @@ define( __NAMESPACE__ . '\REMINDER_CRON', 'wbr_process_reminders' );
 // Define a few constants to use for the trigger logic.
 define( __NAMESPACE__ . '\AFTER_PURCHASE_TRIGGER', 'wc_better_reviews_trigger_after_purchase_' );
 define( __NAMESPACE__ . '\STATUS_CHANGE_TRIGGER', 'wc_better_reviews_trigger_status_change_' );
+
+/**
+ * Now we handle all the various file loading.
+ */
 
 // Load the multi-use files first.
 require_once __DIR__ . '/includes/helpers.php';
