@@ -73,72 +73,64 @@ define( __NAMESPACE__ . '\REMINDER_CRON', 'wbr_process_reminders' );
 define( __NAMESPACE__ . '\AFTER_PURCHASE_TRIGGER', 'wc_better_reviews_trigger_after_purchase_' );
 define( __NAMESPACE__ . '\STATUS_CHANGE_TRIGGER', 'wc_better_reviews_trigger_status_change_' );
 
-// Call the function to load.
-add_action( 'plugins_loaded', __NAMESPACE__ . '\woo_better_reviews_init', 10 );
-/**
- * Now we actually load up our plugin, making sure Woo has already done so.
- */
-function woo_better_reviews_init() {
+// Load the multi-use files first.
+require_once __DIR__ . '/includes/helpers.php';
+require_once __DIR__ . '/includes/utilities.php';
 
-	// Load the multi-use files first.
-	require_once __DIR__ . '/includes/helpers.php';
-	require_once __DIR__ . '/includes/utilities.php';
+// Load the database and custom table items.
+require_once __DIR__ . '/includes/database.php';
+require_once __DIR__ . '/includes/db-tables/data-content.php';
+require_once __DIR__ . '/includes/db-tables/data-ratings.php';
+require_once __DIR__ . '/includes/db-tables/data-authormeta.php';
+require_once __DIR__ . '/includes/db-tables/tax-attributes.php';
+require_once __DIR__ . '/includes/db-tables/tax-characteristics.php';
 
-	// Load the database and custom table items.
-	require_once __DIR__ . '/includes/database.php';
-	require_once __DIR__ . '/includes/db-tables/data-content.php';
-	require_once __DIR__ . '/includes/db-tables/data-ratings.php';
-	require_once __DIR__ . '/includes/db-tables/data-authormeta.php';
-	require_once __DIR__ . '/includes/db-tables/tax-attributes.php';
-	require_once __DIR__ . '/includes/db-tables/tax-characteristics.php';
+// Load my query logic plugin-wide.
+require_once __DIR__ . '/includes/queries.php';
 
-	// Load my query logic plugin-wide.
-	require_once __DIR__ . '/includes/queries.php';
+// Load all the Woo files.
+require_once __DIR__ . '/includes/woo/actions.php';
+require_once __DIR__ . '/includes/woo/filters.php';
+require_once __DIR__ . '/includes/woo/settings.php';
 
-	// Load all the Woo files.
-	require_once __DIR__ . '/includes/woo/actions.php';
-	require_once __DIR__ . '/includes/woo/filters.php';
-	require_once __DIR__ . '/includes/woo/settings.php';
-
-	// Load the admin specific files.
-	if ( is_admin() ) {
-		require_once __DIR__ . '/includes/admin/menu-items.php';
-		require_once __DIR__ . '/includes/admin/post-columns.php';
-		require_once __DIR__ . '/includes/admin/admin-assets.php';
-		require_once __DIR__ . '/includes/admin/admin-notices.php';
-		require_once __DIR__ . '/includes/admin/admin-pages.php';
-		require_once __DIR__ . '/includes/admin/product-meta.php';
-		require_once __DIR__ . '/includes/list-tables/list-reviews.php';
-		require_once __DIR__ . '/includes/list-tables/list-attributes.php';
-		require_once __DIR__ . '/includes/list-tables/list-charstcs.php';
-		require_once __DIR__ . '/includes/process/admin-process.php';
-	}
-
-	// Load the front-end specific files.
-	if ( ! is_admin() ) {
-		require_once __DIR__ . '/includes/front-end.php';
-		require_once __DIR__ . '/includes/display/form-data.php';
-		require_once __DIR__ . '/includes/display/form-fields.php';
-		require_once __DIR__ . '/includes/display/view-output.php';
-		require_once __DIR__ . '/includes/display/schema-markup.php';
-		require_once __DIR__ . '/includes/layout/review-list.php';
-		require_once __DIR__ . '/includes/layout/review-aggregate.php';
-		require_once __DIR__ . '/includes/layout/single-review.php';
-		require_once __DIR__ . '/includes/layout/new-review-form.php';
-		require_once __DIR__ . '/includes/process/form-process.php';
-	}
-
-	// Load our triggers setup, along with the converting and potentially export logic.
-	require_once __DIR__ . '/includes/process/reminders.php';
-	require_once __DIR__ . '/includes/process/cron-tasks.php';
-	require_once __DIR__ . '/includes/process/convert-existing.php';
-
-	// Load the triggered file loads.
-	require_once __DIR__ . '/includes/activate.php';
-	require_once __DIR__ . '/includes/updates.php';
-	require_once __DIR__ . '/includes/deactivate.php';
-	require_once __DIR__ . '/includes/uninstall.php';
+// Load the admin specific files.
+if ( is_admin() ) {
+	require_once __DIR__ . '/includes/admin/menu-items.php';
+	require_once __DIR__ . '/includes/admin/post-columns.php';
+	require_once __DIR__ . '/includes/admin/admin-assets.php';
+	require_once __DIR__ . '/includes/admin/admin-notices.php';
+	require_once __DIR__ . '/includes/admin/admin-pages.php';
+	require_once __DIR__ . '/includes/admin/product-meta.php';
+	require_once __DIR__ . '/includes/list-tables/list-reviews.php';
+	require_once __DIR__ . '/includes/list-tables/list-attributes.php';
+	require_once __DIR__ . '/includes/list-tables/list-charstcs.php';
+	require_once __DIR__ . '/includes/process/admin-process.php';
 }
+
+// Load the front-end specific files.
+if ( ! is_admin() ) {
+	require_once __DIR__ . '/includes/front-end.php';
+	require_once __DIR__ . '/includes/display/form-data.php';
+	require_once __DIR__ . '/includes/display/form-fields.php';
+	require_once __DIR__ . '/includes/display/view-output.php';
+	require_once __DIR__ . '/includes/display/schema-markup.php';
+	require_once __DIR__ . '/includes/layout/review-list.php';
+	require_once __DIR__ . '/includes/layout/review-aggregate.php';
+	require_once __DIR__ . '/includes/layout/single-review.php';
+	require_once __DIR__ . '/includes/layout/new-review-form.php';
+	require_once __DIR__ . '/includes/process/form-process.php';
+}
+
+// Load our triggers setup, along with the converting and potentially export logic.
+require_once __DIR__ . '/includes/process/reminders.php';
+require_once __DIR__ . '/includes/process/cron-tasks.php';
+require_once __DIR__ . '/includes/process/convert-existing.php';
+
+// Load the triggered file loads.
+require_once __DIR__ . '/includes/activate.php';
+require_once __DIR__ . '/includes/updates.php';
+require_once __DIR__ . '/includes/deactivate.php';
+require_once __DIR__ . '/includes/uninstall.php';
 
 // Check that we have the constant available for loading CLI.
 if ( defined( 'WP_CLI' ) && WP_CLI ) {

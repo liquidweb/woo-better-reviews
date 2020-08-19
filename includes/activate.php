@@ -35,8 +35,18 @@ function activate() {
 		wp_die( sprintf( __( 'Using the Better Reviews for WooCommerce plugin required that you have WooCommerce installed and activated. <a href="%s">Click here</a> to return to the plugins page.', 'woo-better-reviews' ), admin_url( '/plugins.php' ) ) );
 	}
 
-	// Run the check on the DB table.
-	Database\maybe_install_tables();
+	// Attempt to install the tables.
+	$add_tables = Database\maybe_install_tables();
+
+	// Bail if the tables couldn't be made.
+	if ( ! $add_tables ) {
+
+		// Deactivate the plugin.
+		deactivate_plugins( Core\BASE );
+
+		// And display the notice.
+		wp_die( __( 'The Better Reviews for WooCommerce plugin uses custom tables that could not be created. Please contact your hosting support.', 'woo-better-reviews' ) );
+	}
 
 	// Check if this is the very first install.
 	$maybe_done = Helpers\maybe_first_install();

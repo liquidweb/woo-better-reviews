@@ -347,7 +347,7 @@ function maybe_install_tables() {
 
 	// Bail without tables.
 	if ( empty( $tables ) ) {
-		return false; // @@todo figure out if better error is needed.
+		return false;
 	}
 
 	// Now loop my tables and check.
@@ -367,6 +367,9 @@ function maybe_install_tables() {
 
 	// Run the update schema keys.
 	update_option( Core\SCHEMA_KEY, Core\DB_VERS );
+
+	// And return true.
+	return true;
 }
 
 /**
