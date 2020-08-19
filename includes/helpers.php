@@ -32,7 +32,7 @@ function get_table_args( $keys = false ) {
 	);
 
 	// Either return the full array, or just the keys if requested.
-	return ! $keys ? $tables : array_keys( $tables );
+	return false !== $keys ? array_keys( $tables ) : $tables;
 }
 
 /**
