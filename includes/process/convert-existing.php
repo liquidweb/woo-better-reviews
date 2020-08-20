@@ -19,14 +19,14 @@ use Nexcess\WooBetterReviews\Database as Database;
 use WP_Error;
 
 /**
- * Convert the existing comment-based reviews to our new ones.
+ * Convert the existing WooCommerce comment-based reviews to our new ones.
  *
  * @param  boolean $convert_type    Whether to convert the type the existing.
  * @param  boolean $purge_existing  Whether to actually purge the existing.
  *
  * @return mixed
  */
-function attempt_existing_review_conversion( $convert_type = true, $purge_existing = false ) {
+function attempt_existing_woo_review_conversion( $convert_type = true, $purge_existing = false ) {
 
 	// If both the convert AND purge flags are set to "false", error out.
 	if ( false === $convert_type && false === $purge_existing ) {

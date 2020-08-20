@@ -263,13 +263,13 @@ class WBR_Commands extends WP_CLI_Command {
 	 *
 	 * ## EXAMPLES
 	 *
-	 *     wp woo-better-reviews convert
-	 *     wp woo-better-reviews convert --cleanup=convert
-	 *     wp woo-better-reviews convert --cleanup=purge
+	 *     wp woo-better-reviews convert_woo
+	 *     wp woo-better-reviews convert_woo --cleanup=convert
+	 *     wp woo-better-reviews convert_woo --cleanup=purge
 	 *
 	 * @when after_wp_load
 	 */
-	function convert( $args = array(), $assoc_args = array() ) {
+	function convert_woo( $args = array(), $assoc_args = array() ) {
 
 		// Parse out the associatives.
 		$parse_cli_args = wp_parse_args( $assoc_args, array(
@@ -297,7 +297,7 @@ class WBR_Commands extends WP_CLI_Command {
 
 		// The function itself is a single function, since
 		// this is just a wrapper for the conversion function.
-		$maybe_convert  = ConvertExisting\attempt_existing_review_conversion( $maybe_do_type, $maybe_do_purge );
+		$maybe_convert  = ConvertExisting\attempt_existing_woo_review_conversion( $maybe_do_type, $maybe_do_purge );
 
 		// First look for the 'no-reviews' string. If is
 		// exists, display the 'none' message and halt.
