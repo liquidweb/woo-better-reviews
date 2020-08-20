@@ -4,7 +4,7 @@ Tags: woocommerce, reviews, product reviews,
 Requires at least: 5.2
 Tested up to: 5.5.0
 Requires PHP: 5.6.0
-Stable tag: 0.4.0
+Stable tag: 0.5.0-dev
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -71,6 +71,9 @@ Yes.
 1. **WooCommerce Settings** - Set the options for reviews
 
 == Changelog ==
+
+= 0.5.0 =
+* TBD
 
 = 0.4.0 =
 * bug squashing roundup

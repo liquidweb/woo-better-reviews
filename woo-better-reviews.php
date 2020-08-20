@@ -3,7 +3,7 @@
  * Plugin Name: Better Product Reviews For WooCommerce
  * Plugin URI:  https://www.nexcess.net
  * Description: Like regular product reviews, only way better.
- * Version:     0.4.0
+ * Version:     0.5.0-dev
  * Author:      Nexcess
  * Author URI:  https://www.nexcess.net
  * Text Domain: woo-better-reviews
@@ -26,7 +26,7 @@ use WP_CLI;
 if ( ! defined( 'ABSPATH' ) ) exit;
 
 // Define our plugin version.
-define( __NAMESPACE__ . '\VERS', '0.4.0' );
+define( __NAMESPACE__ . '\VERS', '0.5.0-dev' );
 
 // Plugin root file.
 define( __NAMESPACE__ . '\FILE', __FILE__ );

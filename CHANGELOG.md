@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file, according t
 
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+##[0.5.0]
+
+* TBD
+
 ##[0.4.0]
 
 * bug squashing roundup
