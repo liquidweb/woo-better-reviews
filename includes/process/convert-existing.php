@@ -21,8 +21,8 @@ use WP_Error;
 /**
  * Convert the existing WooCommerce comment-based reviews to our new ones.
  *
- * @param  boolean $convert_type    Whether to convert the type the existing.
- * @param  boolean $purge_existing  Whether to actually purge the existing.
+ * @param  boolean $convert_type    Whether to convert the comment type of the existing reviews.
+ * @param  boolean $purge_existing  Whether to actually purge the existing reviews once they have been converted.
  *
  * @return mixed
  */
