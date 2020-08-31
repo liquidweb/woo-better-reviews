@@ -189,7 +189,7 @@ function rebase_existing_review_score( $original_id = 0, $review_object ) {
 	$custom_score   = apply_filters( Core\HOOK_PREFIX . 'custom_rebase_existing_review_score', null, $original_id, $review_object );
 
 	// If we have a custom score, return that.
-	if ( isset( $custom_score ) ) {
+	if ( ! empty( $custom_score ) ) {
 		return $custom_score;
 	}
 
@@ -256,7 +256,7 @@ function format_existing_review_data( $review_object, $rebased_score = 0, $produ
 		'review_status'      => 'approved',
 		'is_verified'        => $maybe_verified,
 		'rating_total_score' => $rebased_score,
-		'rating_attributes'  => '', // This will get inserted later.
+		'rating_attributes'  => '', // This has to be empty, since we never collected it.
 		'author_charstcs'    => '', // This has to be empty, since we never collected it.
 	);
 

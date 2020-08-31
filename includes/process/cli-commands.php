@@ -295,13 +295,16 @@ class WBR_Commands extends WP_CLI_Command {
 			WP_CLI::confirm( __( 'Are you sure you want to purge the existing reviews? THIS CANNOT BE UNDONE.', 'woo-better-reviews' ), $assoc_args );
 		}
 
+		// Add an intro sentence.
+		WP_CLI::line( __( 'Beginning the conversion...', 'woo-better-reviews' ) );
+
 		// The function itself is a single function, since
 		// this is just a wrapper for the conversion function.
 		$maybe_convert  = ConvertExisting\attempt_existing_woo_review_conversion( $maybe_do_type, $maybe_do_purge );
 
 		// First look for the 'no-reviews' string. If is
 		// exists, display the 'none' message and halt.
-		if ( 'no-reviews' === esc_attr( $maybe_convert ) ) {
+		if ( is_string( $maybe_convert ) && 'no-reviews' === esc_attr( $maybe_convert ) ) {
 			WP_CLI::line( __( 'No existing reviews exist to convert.', 'woo-better-reviews' ) );
 			WP_CLI::halt( 0 );
 		}
@@ -320,7 +323,7 @@ class WBR_Commands extends WP_CLI_Command {
 			$wp_error_text  = $maybe_convert->get_error_message();
 
 			// Build my return message.
-			$return_message = sprintf( __( '%1$s | ERR_CODE %2$s', 'woo-better-reviews' ), esc_attr( $error_text ), esc_attr( $error_code ) );
+			$return_message = sprintf( __( '%1$s | ERR_CODE %2$s', 'woo-better-reviews' ), esc_attr( $wp_error_text ), esc_attr( $wp_error_code ) );
 
 			// Display the formatted error message.
 			WP_CLI::error( esc_attr( $return_message ) );
