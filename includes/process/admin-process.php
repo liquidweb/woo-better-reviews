@@ -14,6 +14,7 @@ use Nexcess\WooBetterReviews\Helpers as Helpers;
 use Nexcess\WooBetterReviews\Utilities as Utilities;
 use Nexcess\WooBetterReviews\Queries as Queries;
 use Nexcess\WooBetterReviews\Database as Database;
+use Nexcess\WooBetterReviews\ConvertExisting as ConvertExisting;
 
 // And pull in any other namespaces.
 use WP_Error;
@@ -28,6 +29,7 @@ add_action( 'admin_init', __NAMESPACE__ . '\delete_existing_attribute' );
 add_action( 'admin_init', __NAMESPACE__ . '\add_new_charstcs' );
 add_action( 'admin_init', __NAMESPACE__ . '\update_existing_charstcs' );
 add_action( 'admin_init', __NAMESPACE__ . '\delete_existing_charstcs' );
+add_action( 'admin_init', __NAMESPACE__ . '\run_existing_review_import' );
 
 /**
  * Check for the editing function of an attribute.
@@ -450,6 +452,31 @@ function delete_existing_charstcs() {
 
 	// Redirect a happy one.
 	redirect_admin_action_result( $base_redirect, false, 'charstcs-deleted', true );
+}
+
+/**
+ * Check for our importer run.
+ *
+ * @return void
+ */
+function run_existing_review_import() {
+
+	// First check for our flag being present at all.
+	if ( ! isset( $_POST['import-existing-reviews'] ) ) {
+		return;
+	}
+
+	// Handle the nonce check.
+	if ( empty( $_POST['wbr_run_import_nonce'] ) || ! wp_verify_nonce( $_POST['wbr_run_import_nonce'], 'wbr_run_import_action' ) ) {
+		wp_die( __( 'Your security nonce failed.', 'woo-better-reviews' ) );
+	}
+
+	// Check the purge flag.
+	$maybe_do_purge = ! empty( $_POST['wbr-purge-on-import'] ) && 'yes' === sanitize_text_field( $_POST['wbr-purge-on-import'] ) ? true : false;
+
+	// ConvertExisting\asda
+
+	preprint( $_POST, true );
 }
 
 /**

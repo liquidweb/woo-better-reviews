@@ -13,6 +13,7 @@ use Nexcess\WooBetterReviews as Core;
 use Nexcess\WooBetterReviews\Helpers as Helpers;
 use Nexcess\WooBetterReviews\Utilities as Utilities;
 use Nexcess\WooBetterReviews\Queries as Queries;
+use Nexcess\WooBetterReviews\Admin\AdminSetup as AdminSetup;
 
 // And pull in any other namespaces.
 use WP_Error;
@@ -153,7 +154,7 @@ function load_edit_single_review_form( $action ) {
 
 					// Output the actual field.
 					$build .= '<td>';
-						$build .= set_admin_data_dropdown( Helpers\get_review_statuses(), 'review-args[status]', 'review-status', $review_data->review_status );
+						$build .= AdminSetup\set_admin_data_dropdown( Helpers\get_review_statuses(), 'review-args[status]', 'review-status', $review_data->review_status );
 					$build .= '</td>';
 
 				// Close the review status field.
@@ -181,7 +182,7 @@ function load_edit_single_review_form( $action ) {
 
 								// Do the value.
 								$build .= '<span class="woo-better-reviews-form-inside-list-value">';
-									$build .= set_admin_star_display( $review_scoring['total_score'] );
+									$build .= AdminSetup\set_admin_star_display( $review_scoring['total_score'] );
 								$build .= '</span>';
 
 							// Close the list item for total score.
@@ -318,6 +319,48 @@ function display_author_traits_page() {
 		echo ! $isedit ? load_primary_traits_display( $action ) : load_edit_single_traits_form( $action );
 
 	// Close the wrapper.
+	echo '</div>';
+}
+
+/**
+ * Load the form to edit an existing characteristic.
+ *
+ * @param  string $action  The URL to include in the form action.
+ *
+ * @return HTML
+ */
+function display_review_import_page() {
+
+	// Bail if we shouldn't be here.
+	if ( ! current_user_can( 'manage_options' ) ) {
+		wp_die( __( 'You are not permitted to view this page.', 'woo-better-reviews' ) );
+	}
+
+	// Pull in the action link.
+	$action = add_query_arg( 'import', 'wbr-review-conversion', admin_url( 'admin.php' ) );
+
+	// Attempt to first get the reviews.
+	$data   = Queries\get_existing_woo_reviews();
+
+	// Wrap the entire thing.
+	echo '<div class="wrap woo-better-reviews-admin-wrap woo-better-reviews-admin-converter-wrap">';
+
+		// Handle the title.
+		echo '<h1 class="wp-heading-inline woo-better-reviews-admin-title">' . esc_html__( 'WooCommerce Product Review Importer', 'woo-better-reviews' ) . '</h1>';
+
+		// Cut off the header.
+		echo '<hr class="wp-header-end">';
+
+		// Set the same div on either.
+		echo '<div class="woo-better-reviews-converter-wrap">';
+
+			// Load the proper page.
+			echo ! empty( $data ) ? load_primary_converter_display( $data, $action ) : load_empty_converter_display();
+
+		// Close the dynamic wrapper.
+		echo '</div>';
+
+	// Close the entire thing.
 	echo '</div>';
 }
 
@@ -489,7 +532,7 @@ function load_attributes_list_table_form() {
  *
  * @return HTML
  */
-function load_edit_single_attribute_form( $action ) {
+function load_edit_single_attribute_form( $action = '' ) {
 
 	// Bail if we shouldn't be here.
 	if ( ! current_user_can( 'manage_options' ) ) {
@@ -809,7 +852,7 @@ function load_trait_list_table_form() {
  *
  * @return HTML
  */
-function load_edit_single_traits_form( $action ) {
+function load_edit_single_traits_form( $action = '' ) {
 
 	// Bail if we shouldn't be here.
 	if ( ! current_user_can( 'manage_options' ) ) {
@@ -972,71 +1015,84 @@ function load_edit_single_traits_form( $action ) {
 }
 
 /**
- * Set up the dropdown some data.
+ * Load the form to edit an existing characteristic.
+ *
+ * @param  array  $review_data  All the actual reviews to display.
+ * @param  string $action       The URL to include in the form action.
  *
  * @return HTML
  */
-function set_admin_data_dropdown( $dropdown_data = array(), $field_name = '', $field_id = '', $selected ) {
+function load_primary_converter_display( $review_data = array(), $action = '' ) {
 
-	// Bail without the dropdown.
-	if ( empty( $dropdown_data ) ) {
-		return;
+	// Bail if we shouldn't be here.
+	if ( ! current_user_can( 'manage_options' ) ) {
+		wp_die( __( 'You are not permitted to view this page.', 'woo-better-reviews' ) );
 	}
 
-	// Set up my empty.
-	$setup  = '';
+	// If somehow the reviews didn't come, return our empty.
+	if ( empty( $review_data ) ) {
+		return load_empty_converter_display();
+	}
 
-	// Now our select dropdown.
-	$setup .= '<select name="' . esc_attr( $field_name ) . '" id="' . esc_attr( $field_id ) . '" class="postform">';
+	// Set an empty.
+	$build  = '';
 
-		// Our blank value.
-		$setup .= '<option value="0">' . esc_html__( '(select)', 'woo-better-reviews' ) . '</option>';
+	// Add an introduction.
+	$build .= '<p>' . esc_html__( 'We will convert any existing WooCommerce reviews to the new, more robust system.', 'woo-better-reviews' ) . '</p>';
+	$build .= '<p>' . esc_html__( 'You can select whether or not to preserve the existing data, or purge it after the conversion is complete.', 'woo-better-reviews' ) . '</p>';
 
-		// Now loop them.
-		foreach ( $dropdown_data as $key => $label ) {
-			$setup .= '<option value="' . esc_attr( $key ) . '" ' . selected( $selected, $key, false ) . ' >' . esc_html( $label ) . '</option>';
-		}
+	// Now set the actual form itself.
+	$build .= '<form class="woo-better-reviews-admin-form woo-better-reviews-admin-convert-existing-form" id="woo-better-reviews-admin-convert-existing-form" action="' . esc_url( $action ) . '" method="post">';
 
-	// Close out my select.
-	$setup .= '</select>';
+		// Do the label.
+		$build .= '<label for="wbr-purge-on-import">';
 
-	// Return the setup.
-	return $setup;
+			// Output the checkbox.
+			$build .= '<input type="checkbox" name="wbr-purge-on-import" id="wbr-purge-on-import" value="yes" />';
+
+			// Output the actual text.
+			$build .= '&nbsp;' . __( 'Purge existing reviews after import.', 'woo-better-reviews' );
+
+			// And close the label.
+		$build .=  '</label>';
+
+		// Output the submit button.
+		$build .= '<div class="woo-better-reviews-import-submit-wrapper">';
+
+			// Wrap it in a paragraph.
+			$build .= '<p class="submit">';
+
+				// The actual submit button.
+				$build .= get_submit_button( __( 'Import Existing Reviews', 'woo-better-reviews' ), 'primary', 'import-existing-reviews', false );
+
+				// Our cancel link.
+				$build .= '<span class="cancel-import-link-wrap">';
+					$build .= '<a class="cancel-import-link" href="' . esc_url( $action ) . '">' . esc_html__( 'Cancel', 'woo-better-reviews' ) . '</a>';
+				$build .= '</span>';
+
+			// Close up the paragraph.
+			$build .= '</p>';
+
+			// Output our nonce.
+			$build .= wp_nonce_field( 'wbr_run_import_action', 'wbr_run_import_nonce', true, false );
+
+		// Close up the submit wrap.
+		$build .= '</div>';
+
+	// Close up the form markup.
+	$build .= '</form>';
+
+	// Return the entire form build.
+	return $build;
 }
 
 /**
- * Set the admin stars to show.
- *
- * @param integer $total_score  The total score applied.
+ * Load the page for when no conversion can be done.
  *
  * @return HTML
  */
-function set_admin_star_display( $total_score = 0 ) {
+function load_empty_converter_display() {
 
-	// Determine the score parts.
-	$score_had  = absint( $total_score );
-	$score_left = $score_had < 7 ? 7 - $score_had : 0;
-
-	// Set the aria label.
-	$aria_label = sprintf( __( 'Overall Score: %s', 'woo-better-reviews' ), absint( $score_had ) );
-
-	// Set up my empty.
-	$setup  = '';
-
-	// Wrap it in a span.
-	$setup .= '<span class="woo-better-reviews-single-total-score" aria-label="' . esc_attr( $aria_label ) . '">';
-
-		// Output the full stars.
-		$setup .= str_repeat( '<span class="woo-better-reviews-single-star woo-better-reviews-single-star-full">&#9733;</span>', $score_had );
-
-		// Output the empty stars.
-		if ( $score_left > 0 ) {
-			$setup .= str_repeat( '<span class="woo-better-reviews-single-star woo-better-reviews-single-star-empty">&#9734;</span>', $score_left );
-		}
-
-	// Close the span.
-	$setup .= '</span>';
-
-	// Return the setup.
-	return $setup;
+	// Return just a simple sentence for now.
+	return '<p>' . esc_html__( 'Well, this is awkward. It looks as though you do not have any existing WooCommerce reviews to convert.', 'woo-better-reviews' ) . '</p>';
 }

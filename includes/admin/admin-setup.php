@@ -23,7 +23,6 @@ use WP_Error;
 add_filter( 'removable_query_args', __NAMESPACE__ . '\admin_removable_args' );
 add_filter( 'views_edit-comments', __NAMESPACE__ . '\filter_comment_status_list' );
 add_filter( 'comments_list_table_query_args', __NAMESPACE__ . '\filter_comment_list_args' );
-add_action( 'admin_init', __NAMESPACE__ . '\register_review_converter' );
 
 /**
  * Add our custom strings to the vars.
@@ -109,34 +108,71 @@ function filter_comment_list_args( $query_args ) {
 }
 
 /**
- * Register WordPress based importers.
+ * Set up the dropdown some data.
+ *
+ * @return HTML
  */
-function register_review_converter() {
+function set_admin_data_dropdown( $dropdown_data = array(), $field_name = '', $field_id = '', $selected ) {
 
-	// Make sure the constant is being defined.
-	if ( ! defined( 'WP_LOAD_IMPORTERS' ) ) {
+	// Bail without the dropdown.
+	if ( empty( $dropdown_data ) ) {
 		return;
 	}
 
-	// Attempt to first get the reviews.
-	$maybe_has_reviews  = Queries\get_existing_woo_reviews( 'boolean' );
+	// Set up my empty.
+	$setup  = '';
 
-	// If no reviews exist, don't list it.
-	if ( empty( $maybe_has_reviews ) ) {
-		return;
-	}
+	// Now our select dropdown.
+	$setup .= '<select name="' . esc_attr( $field_name ) . '" id="' . esc_attr( $field_id ) . '" class="postform">';
 
-	// Now load up our new importer.
-	register_importer(
-		'wbr-review-conversion',
-		__( 'Better Product Reviews for WooCommerce', 'woocommerce' ),
-		__( 'Convert any existing WooCommerce reviews to the new.', 'woo-better-reviews' ),
-		__NAMESPACE__ . '\load_review_import_page'
-	);
+		// Our blank value.
+		$setup .= '<option value="0">' . esc_html__( '(select)', 'woo-better-reviews' ) . '</option>';
 
+		// Now loop them.
+		foreach ( $dropdown_data as $key => $label ) {
+			$setup .= '<option value="' . esc_attr( $key ) . '" ' . selected( $selected, $key, false ) . ' >' . esc_html( $label ) . '</option>';
+		}
 
+	// Close out my select.
+	$setup .= '</select>';
+
+	// Return the setup.
+	return $setup;
 }
 
-function load_review_import_page() {
-	echo 'hello';
+/**
+ * Set the admin stars to show.
+ *
+ * @param integer $total_score  The total score applied.
+ *
+ * @return HTML
+ */
+function set_admin_star_display( $total_score = 0 ) {
+
+	// Determine the score parts.
+	$score_had  = absint( $total_score );
+	$score_left = $score_had < 7 ? 7 - $score_had : 0;
+
+	// Set the aria label.
+	$aria_label = sprintf( __( 'Overall Score: %s', 'woo-better-reviews' ), absint( $score_had ) );
+
+	// Set up my empty.
+	$setup  = '';
+
+	// Wrap it in a span.
+	$setup .= '<span class="woo-better-reviews-single-total-score" aria-label="' . esc_attr( $aria_label ) . '">';
+
+		// Output the full stars.
+		$setup .= str_repeat( '<span class="woo-better-reviews-single-star woo-better-reviews-single-star-full">&#9733;</span>', $score_had );
+
+		// Output the empty stars.
+		if ( $score_left > 0 ) {
+			$setup .= str_repeat( '<span class="woo-better-reviews-single-star woo-better-reviews-single-star-empty">&#9734;</span>', $score_left );
+		}
+
+	// Close the span.
+	$setup .= '</span>';
+
+	// Return the setup.
+	return $setup;
 }

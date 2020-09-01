@@ -968,6 +968,11 @@ function maybe_admin_settings_tab( $hook = '' ) {
 		return false;
 	}
 
+	// First check if this is the importer.
+	if ( ! empty( $_GET['import'] ) && 'wbr-review-conversion' === sanitize_text_field( $_GET['import'] ) ) {
+		return true;
+	}
+
 	// Set an array of allowed hooks.
 	$allowed_hooks  = array(
 		'edit.php',
