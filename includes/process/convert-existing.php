@@ -18,6 +18,54 @@ use Nexcess\WooBetterReviews\Database as Database;
 // And pull in any other namespaces.
 use WP_Error;
 
+
+/**
+ * Run the actual query to fetch the existing reviews.
+ *
+ * @param  string $return_type  How to return the data. Defaults to the entire object.
+ *
+ * @return mixed
+ */
+function fetch_existing_woo_reviews( $return_type = 'object' ) {
+
+	// Set my lookup args.
+	$setup_query_args   = array(
+		'status'    => 'approve',
+		'post_type' => 'product',
+		'orderby'   => 'comment_post_ID',
+	);
+
+	// Now fetch my reviews.
+	$maybe_woo_reviews  = get_comments( $setup_query_args );
+
+	// Bail without items.
+	if ( empty( $maybe_woo_reviews ) ) {
+		return false;
+	}
+
+	// Swap between the possible returns.
+	switch ( sanitize_text_field( $return_type ) ) {
+
+		// The first option, which is everything.
+		case 'object' :
+			return $maybe_woo_reviews;
+			break;
+
+		// Return just my comment IDs.
+		case 'ids' :
+			return wp_list_pluck( $maybe_woo_reviews, 'comment_ID' );
+			break;
+
+		// Return the comment ID => product ID pairs.
+		case 'product_ids' :
+			return wp_list_pluck( $maybe_woo_reviews, 'comment_post_ID', 'comment_ID' );
+			break;
+	}
+
+	// Somehow got to the end.
+	return false;
+}
+
 /**
  * Convert the existing WooCommerce comment-based reviews to our new ones.
  *
@@ -38,15 +86,8 @@ function attempt_existing_woo_review_conversion( $convert_type = true, $purge_ex
 		return new WP_Error( 'invalid-conversion-args', __( 'The existing reviews can either be converted or purged, not both. Please choose one.', 'woo-better-reviews' ) );
 	}
 
-	// Set my lookup args.
-	$setup_args = array(
-		'status'    => 'approve',
-		'post_type' => 'product',
-		'orderby'   => 'comment_post_ID',
-	);
-
-	// Now fetch my reviews.
-	$maybe_cmns = get_comments( $setup_args );
+	// Go and fetch my existing reviews.
+	$maybe_cmns = fetch_existing_woo_reviews();
 
 	// Bail with a 'no-reviews' string to look for later.
 	if ( empty( $maybe_cmns ) ) {
@@ -234,7 +275,7 @@ function format_existing_review_data( $review_object, $rebased_score = 0, $produ
 	// Set the timestamp and review name / slugs.
 	$set_timestamp  = strtotime( $review_object->comment_date );
 	$review_title   = sprintf( __( 'Product review for "%s"', 'woo-better-reviews' ), get_the_title( $product_id ) );
-	$review_slug    = sanitize_title_with_dashes( $review_title, null, 'save' ) . '-' . time();
+	$review_slug    = 'wbr-legacy-review-' . absint( $review_object->comment_ID );
 
 	// Pull out the author name and email.
 	$author_name    = ! empty( $review_object->comment_author ) ? $review_object->comment_author : __( 'Review Author', 'woo-better-reviews' );
