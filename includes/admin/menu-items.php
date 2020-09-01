@@ -111,14 +111,13 @@ function filter_comment_status_list( $views ) {
  */
 function filter_comment_list_args( $query_args ) {
 
-	// Don't mess with the query if we didn't ask.
-	if ( empty( $_GET['comment_status'] ) || 'converted' !== sanitize_text_field( $_GET['comment_status'] ) ) {
-		return $query_args;
-	}
+	// Only modify the query if our status is present.
+	if ( ! empty( $_GET['comment_status'] ) && 'converted' === sanitize_text_field( $_GET['comment_status'] ) ) {
 
-	// Now make sure the arg is set how we want.
-	$query_args['status'] = 'converted';
-	$query_args['type']   = 'legacy-review';
+		// Now make sure the arg is set how we want.
+		$query_args['status'] = 'converted';
+		$query_args['type']   = 'legacy-review';
+	}
 
 	// And return the updated args.
 	return $query_args;

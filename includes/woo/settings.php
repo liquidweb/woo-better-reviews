@@ -326,7 +326,7 @@ function get_settings() {
 
 		'templateshow' => array(
 			'title'   => __( 'Email Template', 'woo-better-reviews' ),
-			'linked'  => sprintf( __( '<a href="%s">Click here</a> to view and edit the email template.', 'woo-better-reviews' ), Helpers\get_admin_tab_link( 'email', 'wc_email_customer_review_reminder' ) ),
+			'linked'  => sprintf( __( '<a target="_blank" href="%s">Click here</a> to view and edit the email template.', 'woo-better-reviews' ), Helpers\get_admin_tab_link( 'email', 'wc_email_customer_review_reminder' ) ),
 			'id'      => Core\OPTION_PREFIX . 'template_show',
 			'type'    => 'linkedtext',
 		),
@@ -336,10 +336,17 @@ function get_settings() {
 
 		// Now start the admin / other.
 		'adminheader' => array(
-			'title' => __( 'Admin Settings', 'woo-better-reviews' ),
+			'title' => __( 'Advanced Settings', 'woo-better-reviews' ),
 			'type'  => 'title',
 			'desc'  => '',
 			'id'    => Core\OPTION_PREFIX . 'admin_settings_header',
+		),
+
+		'runconversion' => array(
+			'title'   => __( 'Data Conversaion', 'woo-better-reviews' ),
+			'linked'  => sprintf( __( '<a target="_blank" href="%s">Click here</a> to convert any existing WooCommerce reviews.', 'woo-better-reviews' ), admin_url( 'import.php' ) ),
+			'id'      => Core\OPTION_PREFIX . 'run_conversion',
+			'type'    => 'linkedtext',
 		),
 
 		'preserveondelete' => array(
