@@ -1424,19 +1424,37 @@ function get_ratings_for_review_attribute( $review_id = 0, $attribute_id = 0, $r
  */
 function get_existing_woo_reviews( $return_type = 'object' ) {
 
-	// Set my lookup args.
-	$setup_query_args   = array(
-		'status'    => 'approve',
-		'post_type' => 'product',
-		'orderby'   => 'comment_post_ID',
-	);
+	// Set the key to use in our transient.
+	$ky = Core\HOOK_PREFIX . 'existing_woo_reviews';
 
-	// Now fetch my reviews.
-	$maybe_woo_reviews  = get_comments( $setup_query_args );
+	// If we don't want the cache'd version, delete the transient first.
+	if ( defined( 'WP_DEBUG' ) && WP_DEBUG || ! empty( $purge ) ) {
+		delete_transient( $ky );
+	}
 
-	// Bail without items.
-	if ( empty( $maybe_woo_reviews ) ) {
-		return false;
+	// Attempt to get the review from the cache.
+	$maybe_woo_reviews  = get_transient( $ky );
+
+	// If we have none, do the things.
+	if ( false === $maybe_woo_reviews ) {
+
+		// Set my lookup args.
+		$setup_query_args   = array(
+			'status'    => 'approve',
+			'post_type' => 'product',
+			'orderby'   => 'comment_post_ID',
+		);
+
+		// Now fetch my reviews.
+		$maybe_woo_reviews  = get_comments( $setup_query_args );
+
+		// Bail without items.
+		if ( empty( $maybe_woo_reviews ) ) {
+			return false;
+		}
+
+		// Set our transient with our data.
+		set_transient( $ky, $maybe_woo_reviews, HOUR_IN_SECONDS );
 	}
 
 	// Swap between the possible returns.
@@ -1445,6 +1463,11 @@ function get_existing_woo_reviews( $return_type = 'object' ) {
 		// The first option, which is everything.
 		case 'object' :
 			return $maybe_woo_reviews;
+			break;
+
+		// Just a quick boolean to confirm they exist.
+		case 'boolean' :
+			return true;
 			break;
 
 		// Return just the count.
@@ -1477,20 +1500,38 @@ function get_existing_woo_reviews( $return_type = 'object' ) {
  */
 function get_legacy_woo_reviews( $return_type = 'object' ) {
 
-	// Set my lookup args.
-	$setup_query_args   = array(
-		'status'       => 'converted',
-		'comment_type' => 'legacy-review',
-		'post_type'    => 'product',
-		'orderby'      => 'comment_post_ID',
-	);
+	// Set the key to use in our transient.
+	$ky = Core\HOOK_PREFIX . 'legacy_woo_reviews';
 
-	// Now fetch my reviews.
-	$maybe_woo_reviews  = get_comments( $setup_query_args );
+	// If we don't want the cache'd version, delete the transient first.
+	if ( defined( 'WP_DEBUG' ) && WP_DEBUG || ! empty( $purge ) ) {
+		delete_transient( $ky );
+	}
 
-	// Bail without items.
-	if ( empty( $maybe_woo_reviews ) ) {
-		return false;
+	// Attempt to get the review from the cache.
+	$maybe_has_legacies = get_transient( $ky );
+
+	// If we have none, do the things.
+	if ( false === $maybe_has_legacies ) {
+
+		// Set my lookup args.
+		$setup_query_args   = array(
+			'status'       => 'converted',
+			'comment_type' => 'legacy-review',
+			'post_type'    => 'product',
+			'orderby'      => 'comment_post_ID',
+		);
+
+		// Now fetch my reviews.
+		$maybe_has_legacies = get_comments( $setup_query_args );
+
+		// Bail without items.
+		if ( empty( $maybe_has_legacies ) ) {
+			return false;
+		}
+
+		// Set our transient with our data.
+		set_transient( $ky, $maybe_has_legacies, HOUR_IN_SECONDS );
 	}
 
 	// Swap between the possible returns.
@@ -1498,23 +1539,23 @@ function get_legacy_woo_reviews( $return_type = 'object' ) {
 
 		// The first option, which is everything.
 		case 'object' :
-			return $maybe_woo_reviews;
+			return $maybe_has_legacies;
 			break;
 
 		// Return just the count.
 		case 'count' :
 		case 'counts' :
-			return count( $maybe_woo_reviews );
+			return count( $maybe_has_legacies );
 			break;
 
 		// Return just my comment IDs.
 		case 'ids' :
-			return wp_list_pluck( $maybe_woo_reviews, 'comment_ID' );
+			return wp_list_pluck( $maybe_has_legacies, 'comment_ID' );
 			break;
 
 		// Return the comment ID => product ID pairs.
 		case 'product_ids' :
-			return wp_list_pluck( $maybe_woo_reviews, 'comment_post_ID', 'comment_ID' );
+			return wp_list_pluck( $maybe_has_legacies, 'comment_post_ID', 'comment_ID' );
 			break;
 	}
 

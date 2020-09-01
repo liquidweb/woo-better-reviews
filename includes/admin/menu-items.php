@@ -21,8 +21,6 @@ use WP_Error;
  * Start our engines.
  */
 add_filter( 'plugin_action_links', __NAMESPACE__ . '\add_quick_link', 10, 2 );
-add_filter( 'views_edit-comments', __NAMESPACE__ . '\filter_comment_status_list' );
-add_filter( 'comments_list_table_query_args', __NAMESPACE__ . '\filter_comment_list_args' );
 add_action( 'admin_menu', __NAMESPACE__ . '\load_admin_menus', 43 );
 
 /**
@@ -66,61 +64,6 @@ function add_quick_link( $links, $file ) {
 
 	// Return the resulting array.
 	return $links;
-}
-
-/**
- * Filter and modify the views that are available.
- *
- * @param  array $views  The existing array of views.
- *
- * @return array         The modified array.
- */
-function filter_comment_status_list( $views ) {
-
-	// Get the converted count.
-	$get_legacy_count   = Queries\get_legacy_woo_reviews( 'count' );
-
-	// Bail if we don't have any.
-	if ( empty( $get_legacy_count ) ) {
-		return $views;
-	}
-
-	// Define our link and class.
-	$set_view_link  = add_query_arg( 'comment_status', 'converted', admin_url( 'edit-comments.php' ) );
-	$set_view_label = sprintf( __( 'Legacy Reviews <span class="count">(%d)</span>', 'woo-better-reviews' ), absint( $get_legacy_count ) );
-	$set_view_class = 'wbr-admin-legacy-view-link';
-
-	// Include the 'current' class if we are there.
-	if ( ! empty( $_GET['comment_status'] ) && 'converted' === sanitize_text_field( $_GET['comment_status'] ) ) {
-		$set_view_class .= ' current';
-	}
-
-	// And then add it to the array.
-	$views['converted'] = '<a class="' . esc_attr( $set_view_class ) . '" href="' . $set_view_link . '">' . $set_view_label . '</a>';
-
-	// And return them.
-	return $views;
-}
-
-/**
- * Filter and modify the query list when requested.
- *
- * @param  array $query_args  The existing array of args.
- *
- * @return array         The modified array.
- */
-function filter_comment_list_args( $query_args ) {
-
-	// Only modify the query if our status is present.
-	if ( ! empty( $_GET['comment_status'] ) && 'converted' === sanitize_text_field( $_GET['comment_status'] ) ) {
-
-		// Now make sure the arg is set how we want.
-		$query_args['status'] = 'converted';
-		$query_args['type']   = 'legacy-review';
-	}
-
-	// And return the updated args.
-	return $query_args;
 }
 
 /**

@@ -99,6 +99,7 @@ require_once __DIR__ . '/includes/woo/settings.php';
 
 // Load the admin specific files.
 if ( is_admin() ) {
+	require_once __DIR__ . '/includes/admin/admin-setup.php';
 	require_once __DIR__ . '/includes/admin/menu-items.php';
 	require_once __DIR__ . '/includes/admin/post-columns.php';
 	require_once __DIR__ . '/includes/admin/admin-assets.php';
