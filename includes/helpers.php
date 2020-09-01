@@ -114,6 +114,49 @@ function maybe_reviews_enabled( $product_id = 0 ) {
 }
 
 /**
+ * Check if the conversion was run.
+ *
+ * @param  string $return_type  How to return it. Either a boolean, timestamp, or formatted.
+ *
+ * @return mixed
+ */
+function maybe_reviews_converted( $return_type = 'boolean' ) {
+
+	// First check for the option.
+	$maybe_conversion   = get_option( Core\OPTION_PREFIX . 'converted_woo_reviews', false );
+
+	// Bail if we don't have it.
+	if ( empty( $maybe_conversion ) ) {
+		return false;
+	}
+
+	// Now swap between how we want it.
+	switch ( sanitize_text_field( $return_type ) ) {
+
+		case 'boolean' :
+			return true;
+			break;
+
+		case 'timestamp' :
+			return absint( $maybe_conversion );
+			break;
+
+		case 'display' :
+
+			// First get the formats.
+			$get_date_formt = get_option( 'date_format', 'F j, Y' );
+			$get_time_formt = get_option( 'time_format', 'g:i a' );
+
+			// Now return it.
+			return date( $get_date_formt, $maybe_conversion ) . ' @ ' . date( $get_time_formt, $maybe_conversion );
+			break;
+	}
+
+	// Somehow you got here.
+	return false;
+}
+
+/**
  * Check to see if reminders are enabled.
  *
  * @param  integer $product_id   The ID of the individual product.

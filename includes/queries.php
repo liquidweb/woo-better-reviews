@@ -1416,6 +1416,113 @@ function get_ratings_for_review_attribute( $review_id = 0, $attribute_id = 0, $r
 }
 
 /**
+ * Run the actual query to fetch the existing reviews.
+ *
+ * @param  string $return_type  How to return the data. Defaults to the entire object.
+ *
+ * @return mixed
+ */
+function get_existing_woo_reviews( $return_type = 'object' ) {
+
+	// Set my lookup args.
+	$setup_query_args   = array(
+		'status'    => 'approve',
+		'post_type' => 'product',
+		'orderby'   => 'comment_post_ID',
+	);
+
+	// Now fetch my reviews.
+	$maybe_woo_reviews  = get_comments( $setup_query_args );
+
+	// Bail without items.
+	if ( empty( $maybe_woo_reviews ) ) {
+		return false;
+	}
+
+	// Swap between the possible returns.
+	switch ( sanitize_text_field( $return_type ) ) {
+
+		// The first option, which is everything.
+		case 'object' :
+			return $maybe_woo_reviews;
+			break;
+
+		// Return just the count.
+		case 'count' :
+		case 'counts' :
+			return count( $maybe_woo_reviews );
+			break;
+
+		// Return just my comment IDs.
+		case 'ids' :
+			return wp_list_pluck( $maybe_woo_reviews, 'comment_ID' );
+			break;
+
+		// Return the comment ID => product ID pairs.
+		case 'product_ids' :
+			return wp_list_pluck( $maybe_woo_reviews, 'comment_post_ID', 'comment_ID' );
+			break;
+	}
+
+	// Somehow got to the end.
+	return false;
+}
+
+/**
+ * Run the query to fetch the legacy post-conversion reviews.
+ *
+ * @param  string $return_type  How to return the data. Defaults to the entire object.
+ *
+ * @return mixed
+ */
+function get_legacy_woo_reviews( $return_type = 'object' ) {
+
+	// Set my lookup args.
+	$setup_query_args   = array(
+		'status'       => 'converted',
+		'comment_type' => 'legacy-review',
+		'post_type'    => 'product',
+		'orderby'      => 'comment_post_ID',
+	);
+
+	// Now fetch my reviews.
+	$maybe_woo_reviews  = get_comments( $setup_query_args );
+
+	// Bail without items.
+	if ( empty( $maybe_woo_reviews ) ) {
+		return false;
+	}
+
+	// Swap between the possible returns.
+	switch ( sanitize_text_field( $return_type ) ) {
+
+		// The first option, which is everything.
+		case 'object' :
+			return $maybe_woo_reviews;
+			break;
+
+		// Return just the count.
+		case 'count' :
+		case 'counts' :
+			return count( $maybe_woo_reviews );
+			break;
+
+		// Return just my comment IDs.
+		case 'ids' :
+			return wp_list_pluck( $maybe_woo_reviews, 'comment_ID' );
+			break;
+
+		// Return the comment ID => product ID pairs.
+		case 'product_ids' :
+			return wp_list_pluck( $maybe_woo_reviews, 'comment_post_ID', 'comment_ID' );
+			break;
+	}
+
+	// Somehow got to the end.
+	return false;
+}
+
+/**
  * Get just the review count for a given product ID.
  *
  * @param  integer $product_id  Which product ID we are looking up.

@@ -18,54 +18,6 @@ use Nexcess\WooBetterReviews\Database as Database;
 // And pull in any other namespaces.
 use WP_Error;
 
-
-/**
- * Run the actual query to fetch the existing reviews.
- *
- * @param  string $return_type  How to return the data. Defaults to the entire object.
- *
- * @return mixed
- */
-function fetch_existing_woo_reviews( $return_type = 'object' ) {
-
-	// Set my lookup args.
-	$setup_query_args   = array(
-		'status'    => 'approve',
-		'post_type' => 'product',
-		'orderby'   => 'comment_post_ID',
-	);
-
-	// Now fetch my reviews.
-	$maybe_woo_reviews  = get_comments( $setup_query_args );
-
-	// Bail without items.
-	if ( empty( $maybe_woo_reviews ) ) {
-		return false;
-	}
-
-	// Swap between the possible returns.
-	switch ( sanitize_text_field( $return_type ) ) {
-
-		// The first option, which is everything.
-		case 'object' :
-			return $maybe_woo_reviews;
-			break;
-
-		// Return just my comment IDs.
-		case 'ids' :
-			return wp_list_pluck( $maybe_woo_reviews, 'comment_ID' );
-			break;
-
-		// Return the comment ID => product ID pairs.
-		case 'product_ids' :
-			return wp_list_pluck( $maybe_woo_reviews, 'comment_post_ID', 'comment_ID' );
-			break;
-	}
-
-	// Somehow got to the end.
-	return false;
-}
-
 /**
  * Convert the existing WooCommerce comment-based reviews to our new ones.
  *
@@ -87,7 +39,7 @@ function attempt_existing_woo_review_conversion( $convert_type = true, $purge_ex
 	}
 
 	// Go and fetch my existing reviews.
-	$maybe_cmns = fetch_existing_woo_reviews();
+	$maybe_cmns = Queries\get_existing_woo_reviews();
 
 	// Bail with a 'no-reviews' string to look for later.
 	if ( empty( $maybe_cmns ) ) {
@@ -528,7 +480,8 @@ function convert_legacy_review_ids( $product_id = 0 ) {
 		// approval flag hides them without deleting.
 		$setup_args = array(
 			'comment_ID'       => absint( $existing_id ),
-			'comment_approved' => 'converted-review',
+			'comment_approved' => 'converted',
+			'comment_type'     => 'legacy-review',
 		);
 
 		// Filter the args.
