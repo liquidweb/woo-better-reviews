@@ -51,4 +51,5 @@ function delete_initial_options() {
 	delete_option( Core\OPTION_PREFIX . 'send_reminders' );
 	delete_option( Core\OPTION_PREFIX . 'reminder_wait' );
 	delete_option( Core\OPTION_PREFIX . 'preserve_on_delete' );
+	delete_option( Core\OPTION_PREFIX . 'converted_woo_reviews' );
 }
