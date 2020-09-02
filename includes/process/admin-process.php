@@ -471,12 +471,36 @@ function run_existing_review_import() {
 		wp_die( __( 'Your security nonce failed.', 'woo-better-reviews' ) );
 	}
 
-	// Check the purge flag.
+	// Check for the purge and and set convert flags.
 	$maybe_do_purge = ! empty( $_POST['wbr-purge-on-import'] ) && 'yes' === sanitize_text_field( $_POST['wbr-purge-on-import'] ) ? true : false;
+	$maybe_do_type  = false !== $maybe_do_purge ? false : true;
 
-	// ConvertExisting\asda
+	// Set our base link for handling redirects.
+	$convt_redirect = Helpers\get_admin_importer_link();
 
-	preprint( $_POST, true );
+	// Now get the entire batch of existing reviews.
+	$attempt_import = ConvertExisting\attempt_existing_woo_review_conversion( $maybe_do_type, $maybe_do_purge );
+
+	// Again, make sure we have data.
+	if ( ! empty( $attempt_import ) && 'no-reviews' === $attempt_import ) {
+		redirect_admin_action_result( $convt_redirect, 'missing-existing-reviews' );
+	}
+
+	// Check for some error return or blank.
+	if ( empty( $attempt_import ) || false === $attempt_import || is_wp_error( $attempt_import ) ) {
+
+		// Figure out the error code.
+		$error_code = is_wp_error( $attempt_import ) ? $attempt_import->get_error_code() : 'import-attempt-failed';
+
+		// And redirect.
+		redirect_admin_action_result( $convt_redirect, $error_code );
+	}
+
+	// Add the data to an option to pull later.
+	update_option( Core\OPTION_PREFIX . 'import_result_data', $attempt_import );
+
+	// Redirect a happy one.
+	redirect_admin_action_result( $convt_redirect, false, 'import-complete', true );
 }
 
 /**

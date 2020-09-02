@@ -145,14 +145,6 @@ function load_review_converter() {
 		return;
 	}
 
-	// Attempt to first get the reviews.
-	$maybe_has_reviews  = Queries\get_existing_woo_reviews( 'boolean' );
-
-	// If no reviews exist, don't list it.
-	if ( empty( $maybe_has_reviews ) ) {
-		return;
-	}
-
 	// Now load up our new importer.
 	register_importer(
 		'wbr-review-conversion',

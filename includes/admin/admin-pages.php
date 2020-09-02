@@ -337,10 +337,10 @@ function display_review_import_page() {
 	}
 
 	// Pull in the action link.
-	$action = add_query_arg( 'import', 'wbr-review-conversion', admin_url( 'admin.php' ) );
+	$action = Helpers\get_admin_importer_link();
 
-	// Attempt to first get the reviews.
-	$data   = Queries\get_existing_woo_reviews();
+	// Count how many reviews we have.
+	$counts = Queries\get_existing_woo_reviews( 'counts' );
 
 	// Wrap the entire thing.
 	echo '<div class="wrap woo-better-reviews-admin-wrap woo-better-reviews-admin-converter-wrap">';
@@ -355,7 +355,7 @@ function display_review_import_page() {
 		echo '<div class="woo-better-reviews-converter-wrap">';
 
 			// Load the proper page.
-			echo ! empty( $data ) ? load_primary_converter_display( $data, $action ) : load_empty_converter_display();
+			echo ! empty( $counts ) ? load_primary_converter_display( $counts, $action ) : load_empty_converter_display();
 
 		// Close the dynamic wrapper.
 		echo '</div>';
@@ -1017,35 +1017,38 @@ function load_edit_single_traits_form( $action = '' ) {
 /**
  * Load the form to edit an existing characteristic.
  *
- * @param  array  $review_data  All the actual reviews to display.
- * @param  string $action       The URL to include in the form action.
+ * @param  integer $review_count  How many reviews we have to convert.
+ * @param  string  $action        The URL to include in the form action.
  *
  * @return HTML
  */
-function load_primary_converter_display( $review_data = array(), $action = '' ) {
+function load_primary_converter_display( $review_count = 0, $action = '' ) {
 
 	// Bail if we shouldn't be here.
 	if ( ! current_user_can( 'manage_options' ) ) {
 		wp_die( __( 'You are not permitted to view this page.', 'woo-better-reviews' ) );
 	}
 
-	// If somehow the reviews didn't come, return our empty.
-	if ( empty( $review_data ) ) {
+	// If somehow the review count didn't come, return our empty.
+	if ( empty( $review_count ) ) {
 		return load_empty_converter_display();
 	}
+
+	// Determine how may we have and add a strong tag.
+	$count_existing = '<strong>' . absint( $review_count ) . '</strong>';
 
 	// Set an empty.
 	$build  = '';
 
 	// Add an introduction.
 	$build .= '<p>' . esc_html__( 'We will convert any existing WooCommerce reviews to the new, more robust system.', 'woo-better-reviews' ) . '</p>';
-	$build .= '<p>' . esc_html__( 'You can select whether or not to preserve the existing data, or purge it after the conversion is complete.', 'woo-better-reviews' ) . '</p>';
+	$build .= '<p>' . sprintf( _n( 'You currently have %s review to convert.', 'You currently have %s reviews to convert.', $count_existing, 'woo-better-reviews' ), $count_existing ) . '</p>';
 
 	// Now set the actual form itself.
 	$build .= '<form class="woo-better-reviews-admin-form woo-better-reviews-admin-convert-existing-form" id="woo-better-reviews-admin-convert-existing-form" action="' . esc_url( $action ) . '" method="post">';
 
 		// Do the label.
-		$build .= '<label for="wbr-purge-on-import">';
+		$build .= '<p><label for="wbr-purge-on-import">';
 
 			// Output the checkbox.
 			$build .= '<input type="checkbox" name="wbr-purge-on-import" id="wbr-purge-on-import" value="yes" />';
@@ -1054,7 +1057,7 @@ function load_primary_converter_display( $review_data = array(), $action = '' ) 
 			$build .= '&nbsp;' . __( 'Purge existing reviews after import.', 'woo-better-reviews' );
 
 			// And close the label.
-		$build .=  '</label>';
+		$build .=  '</label></p>';
 
 		// Output the submit button.
 		$build .= '<div class="woo-better-reviews-import-submit-wrapper">';

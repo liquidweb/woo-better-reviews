@@ -1030,6 +1030,22 @@ function get_admin_menu_link( $menu_slug = '' ) {
 }
 
 /**
+ * Get the admin link for our review converter / importer.
+ *
+ * @param  array  $custom_args  The query args to include in the redirect.
+ *
+ * @return string
+ */
+function get_admin_importer_link( $custom_args = array() ) {
+
+	// First set the base link, which we need.
+	$set_base_link  = add_query_arg( 'import', 'wbr-review-conversion', admin_url( 'admin.php' ) );
+
+	// Return the link as-is, or with the new args.
+	return ! empty( $custom_args ) ? add_query_arg( $custom_args, $set_base_link ) : $set_base_link;
+}
+
+/**
  * Return our base link, with function fallbacks.
  *
  * @param  string $menu_slug  Which tab slug to use. Defaults to the primary.
