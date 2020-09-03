@@ -342,10 +342,10 @@ function get_settings() {
 			'id'    => Core\OPTION_PREFIX . 'admin_settings_header',
 		),
 
-		'runconversion' => array(
-			'title'   => __( 'Data Conversaion', 'woo-better-reviews' ),
-			'linked'  => sprintf( __( '<a target="_blank" href="%s">Click here</a> to convert any existing WooCommerce reviews.', 'woo-better-reviews' ), admin_url( 'import.php' ) ),
-			'id'      => Core\OPTION_PREFIX . 'run_conversion',
+		'runimport' => array(
+			'title'   => __( 'Existing Reviews', 'woo-better-reviews' ),
+			'linked'  => sprintf( __( '<a target="_blank" href="%s">Click here</a> to import any existing WooCommerce reviews.', 'woo-better-reviews' ), admin_url( 'import.php' ) ),
+			'id'      => Core\OPTION_PREFIX . 'run_import',
 			'type'    => 'linkedtext',
 		),
 
