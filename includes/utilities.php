@@ -805,20 +805,21 @@ function set_product_metabox_classes( $product_id = 0 ) {
 		return;
 	}
 
-	// Set the allowed array.
+	// Set the allowed array along with the full array.
+	$set_complete_array = (array) $get_product_types['complete'];
 	$set_allowed_array  = ! empty( $get_product_types['allowed'] ) ? $get_product_types['allowed'] : array();
 
 	// Set an empty array.
 	$build_array_args   = array();
 
 	// Now loop my individual types and compare against the allowed.
-	foreach ( $get_product_types['complete'] as $product_type ) {
+	foreach ( $set_complete_array as $product_type ) {
 
 		// Check inside the array to determine the show / hide.
-		$setup_show_hide    = in_array( $product_type, $set_allowed_array ) ? 'show_if_' : 'hide_if_';
+		$set_show_hide_pfx  = in_array( $product_type, $set_allowed_array ) ? 'show_if_' : 'hide_if_';
 
 		// Now set up the class.
-		$build_array_args[] = $setup_show_hide . $product_type;
+		$build_array_args[] = $set_show_hide_pfx . $product_type;
 	}
 
 	// Now sanitize each piece.
@@ -828,7 +829,7 @@ function set_product_metabox_classes( $product_id = 0 ) {
 	$set_class_string   = implode( ' ', $setup_array_args );
 
 	// Now return the class string.
-	return apply_filters( Core\HOOK_PREFIX . 'product_meta_wrapper_class', $set_class_string, $product_id );
+	return apply_filters( Core\HOOK_PREFIX . 'product_meta_wrapper_class', $set_class_string, $product_id, $set_allowed_array, $set_complete_array );
 }
 
 /**
