@@ -18,39 +18,9 @@ use WP_Error;
 /**
  * Start our engines.
  */
-add_action( 'pre_get_posts', __NAMESPACE__ . '\modify_product_sort_query', 1 );
 add_action( 'manage_posts_custom_column', __NAMESPACE__ . '\load_product_column_data', 10, 2 );
 add_filter( 'manage_edit-product_columns', __NAMESPACE__ . '\add_product_column_display' );
 add_filter( 'manage_edit-product_sortable_columns', __NAMESPACE__ . '\add_product_column_sortable' );
-
-/**
- * Check for our review count sort request.
- *
- * @param  object $query  The existing display query.
- *
- * @return void
- */
-function modify_product_sort_query( $query ) {
-
-	// Make sure we're in the right place.
-	if ( ! is_admin() || ! $query->is_main_query() || 'product' !== $query->get( 'post_type' ) ) {
-		return;
-	}
-
-	// If we have one of our orderby keys, modify the query.
-	if ( ! empty( $query->get( 'orderby' ) ) && in_array( $query->get( 'orderby' ), array( 'review_count', 'average_rating' ) ) ) {
-
-		// Determine the query key.
-		$query_key  = esc_attr( $query->get( 'orderby' ) );
-
-		// Set the key itself, enforce the type, and the number key.
-		$query->set( 'meta_key', $query_key );
-		$query->set( 'meta_type', 'NUMERIC' );
-		$query->set( 'orderby', 'meta_value_num' );
-	}
-
-	// No other changes should be required.
-}
 
 /**
  * Generate the data needed for any custom columns.

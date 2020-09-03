@@ -30,7 +30,7 @@ function attempt_existing_woo_review_conversion( $convert_type = true, $purge_ex
 
 	// If both the convert AND purge flags are set to "false", error out.
 	if ( false === $convert_type && false === $purge_existing ) {
-		return new WP_Error( 'invalid-conversion-args', __( 'The existing reviews must either be converted or purged. Please select one.', 'woo-better-reviews' ) );
+		return new WP_Error( 'missing-conversion-args', __( 'The existing reviews must either be converted or purged. Please select one.', 'woo-better-reviews' ) );
 	}
 
 	// If both the convert AND purge flags are set to "true", error out.

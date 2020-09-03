@@ -969,7 +969,7 @@ function maybe_admin_settings_tab( $hook = '' ) {
 	}
 
 	// First check if this is the importer.
-	if ( ! empty( $_GET['import'] ) && 'wbr-review-conversion' === sanitize_text_field( $_GET['import'] ) ) {
+	if ( ! empty( $_GET['import'] ) && Core\IMPORTER_ANCHOR === sanitize_text_field( $_GET['import'] ) ) {
 		return true;
 	}
 
@@ -1039,7 +1039,7 @@ function get_admin_menu_link( $menu_slug = '' ) {
 function get_admin_importer_link( $custom_args = array() ) {
 
 	// First set the base link, which we need.
-	$set_base_link  = add_query_arg( 'import', 'wbr-review-conversion', admin_url( 'admin.php' ) );
+	$set_base_link  = add_query_arg( 'import', Core\IMPORTER_ANCHOR, admin_url( 'admin.php' ) );
 
 	// Return the link as-is, or with the new args.
 	return ! empty( $custom_args ) ? add_query_arg( $custom_args, $set_base_link ) : $set_base_link;
@@ -1258,6 +1258,58 @@ function get_error_notice_text( $return_code = '' ) {
 
 		case 'status-changed-bulk' :
 			return __( 'The selected review statuses have been updated.', 'woo-better-reviews' );
+			break;
+
+		case 'missing-existing-reviews' :
+			return __( 'There are no existing reviews to import.', 'woo-better-reviews' );
+			break;
+
+		case 'import-attempt-failed' :
+			return __( 'The import attempt failed.', 'woo-better-reviews' );
+			break;
+
+		case 'missing-conversion-args' :
+			return __( 'The existing reviews must either be converted or purged. Please select one.', 'woo-better-reviews' );
+			break;
+
+		case 'invalid-conversion-args' :
+			return __( 'The existing reviews can either be converted or purged, not both. Please choose one.', 'woo-better-reviews' );
+			break;
+
+		case 'invalid-product-id' :
+			return __( 'The product ID provided was empty or invalid.', 'woo-better-reviews' );
+			break;
+
+		case 'no-rebased-score' :
+			return __( 'The new review score could not be calculated properly.', 'woo-better-reviews' );
+			break;
+
+		case 'missing-formatting-data' :
+			return __( 'The required formatted data could not be generated.', 'woo-better-reviews' );
+			break;
+
+		case 'content-insert-fail' :
+			return __( 'The formatted review content could not be inserted into the database.', 'woo-better-reviews' );
+			break;
+
+		case 'invalid-scoring-formatting' :
+			return __( 'The required scoring data could not be generated.', 'woo-better-reviews' );
+			break;
+
+		case 'scoring-insert-fail' :
+			return __( 'The formatted review scoring could not be inserted into the database.', 'woo-better-reviews' );
+			break;
+
+		case 'invalid-attribute-formatting' :
+			return __( 'The required product attribute data could not be generated.', 'woo-better-reviews' );
+			break;
+
+		case 'scoring-update-fail' :
+			return __( 'The formatted review scoring could not be updated in the database.', 'woo-better-reviews' );
+			break;
+
+		case 'import-complete' :
+			return __( 'Success! The existing product reviews have been imported.', 'woo-better-reviews' );
 			break;
 
 		case 'unknown' :

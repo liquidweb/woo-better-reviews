@@ -22,7 +22,7 @@ use WP_Error;
  */
 add_filter( 'plugin_action_links', __NAMESPACE__ . '\add_quick_link', 10, 2 );
 add_action( 'admin_menu', __NAMESPACE__ . '\load_admin_menus', 43 );
-add_action( 'admin_init', __NAMESPACE__ . '\load_review_converter' );
+add_action( 'admin_init', __NAMESPACE__ . '\load_review_importer' );
 
 /**
  * Add our "reviews" links to the plugins page.
@@ -136,9 +136,11 @@ function load_admin_menus() {
 }
 
 /**
- * Register WordPress based importers.
+ * Include the importer for existing Woo reviews.
+ *
+ * @return void
  */
-function load_review_converter() {
+function load_review_importer() {
 
 	// Make sure the constant is being defined.
 	if ( ! defined( 'WP_LOAD_IMPORTERS' ) ) {
@@ -147,9 +149,9 @@ function load_review_converter() {
 
 	// Now load up our new importer.
 	register_importer(
-		'wbr-review-conversion',
-		__( 'Better Product Reviews for WooCommerce', 'woocommerce' ),
-		__( 'Convert any existing WooCommerce reviews to the new.', 'woo-better-reviews' ),
+		Core\IMPORTER_ANCHOR,
+		__( 'WooCommerce Product Reviews', 'woocommerce' ),
+		__( 'Import any existing WooCommerce product reviews to the Better Product Reviews for WooCommerce system.', 'woo-better-reviews' ),
 		__NAMESPACE__ . '\load_review_import_page'
 	);
 

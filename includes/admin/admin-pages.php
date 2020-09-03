@@ -343,7 +343,7 @@ function display_review_import_page() {
 	$counts = Queries\get_existing_woo_reviews( 'counts' );
 
 	// Wrap the entire thing.
-	echo '<div class="wrap woo-better-reviews-admin-wrap woo-better-reviews-admin-converter-wrap">';
+	echo '<div class="wrap woo-better-reviews-admin-wrap woo-better-reviews-admin-importer-wrap">';
 
 		// Handle the title.
 		echo '<h1 class="wp-heading-inline woo-better-reviews-admin-title">' . esc_html__( 'WooCommerce Product Review Importer', 'woo-better-reviews' ) . '</h1>';
@@ -352,10 +352,10 @@ function display_review_import_page() {
 		echo '<hr class="wp-header-end">';
 
 		// Set the same div on either.
-		echo '<div class="woo-better-reviews-converter-wrap">';
+		echo '<div class="woo-better-reviews-importer-wrap">';
 
 			// Load the proper page.
-			echo ! empty( $counts ) ? load_primary_converter_display( $counts, $action ) : load_empty_converter_display();
+			echo ! empty( $counts ) ? load_primary_importer_display( $counts, $action ) : load_empty_importer_display();
 
 		// Close the dynamic wrapper.
 		echo '</div>';
@@ -1015,14 +1015,14 @@ function load_edit_single_traits_form( $action = '' ) {
 }
 
 /**
- * Load the form to edit an existing characteristic.
+ * Load the page including the form to trigger an import.
  *
  * @param  integer $review_count  How many reviews we have to convert.
  * @param  string  $action        The URL to include in the form action.
  *
  * @return HTML
  */
-function load_primary_converter_display( $review_count = 0, $action = '' ) {
+function load_primary_importer_display( $review_count = 0, $action = '' ) {
 
 	// Bail if we shouldn't be here.
 	if ( ! current_user_can( 'manage_options' ) ) {
@@ -1031,21 +1031,20 @@ function load_primary_converter_display( $review_count = 0, $action = '' ) {
 
 	// If somehow the review count didn't come, return our empty.
 	if ( empty( $review_count ) ) {
-		return load_empty_converter_display();
+		return load_empty_importer_display();
 	}
 
-	// Determine how may we have and add a strong tag.
-	$count_existing = '<strong>' . absint( $review_count ) . '</strong>';
+	// Set up the button text.
+	$set_button_txt = sprintf( _n( 'Import %d Existing Review', 'Import %d Existing Reviews', absint( $review_count ), 'woo-better-reviews' ), absint( $review_count ) );
 
 	// Set an empty.
 	$build  = '';
 
 	// Add an introduction.
-	$build .= '<p>' . esc_html__( 'We will convert any existing WooCommerce reviews to the new, more robust system.', 'woo-better-reviews' ) . '</p>';
-	$build .= '<p>' . sprintf( _n( 'You currently have %s review to convert.', 'You currently have %s reviews to convert.', $count_existing, 'woo-better-reviews' ), $count_existing ) . '</p>';
+	$build .= '<p>' . esc_html__( 'Import any existing WooCommerce product reviews to the Better Product Reviews for WooCommerce system.', 'woo-better-reviews' ) . '</p>';
 
 	// Now set the actual form itself.
-	$build .= '<form class="woo-better-reviews-admin-form woo-better-reviews-admin-convert-existing-form" id="woo-better-reviews-admin-convert-existing-form" action="' . esc_url( $action ) . '" method="post">';
+	$build .= '<form class="woo-better-reviews-admin-form woo-better-reviews-admin-import-existing-form" id="woo-better-reviews-admin-import-existing-form" action="' . esc_url( $action ) . '" method="post">';
 
 		// Do the label.
 		$build .= '<p><label for="wbr-purge-on-import">';
@@ -1066,7 +1065,7 @@ function load_primary_converter_display( $review_count = 0, $action = '' ) {
 			$build .= '<p class="submit">';
 
 				// The actual submit button.
-				$build .= get_submit_button( __( 'Import Existing Reviews', 'woo-better-reviews' ), 'primary', 'import-existing-reviews', false );
+				$build .= get_submit_button( __( $set_button_txt, 'woo-better-reviews' ), 'primary', 'import-existing-reviews', false );
 
 				// Our cancel link.
 				$build .= '<span class="cancel-import-link-wrap">';
@@ -1090,12 +1089,12 @@ function load_primary_converter_display( $review_count = 0, $action = '' ) {
 }
 
 /**
- * Load the page for when no conversion can be done.
+ * Load the page for when no import can be done.
  *
  * @return HTML
  */
-function load_empty_converter_display() {
+function load_empty_importer_display() {
 
 	// Return just a simple sentence for now.
-	return '<p>' . esc_html__( 'Well, this is awkward. It looks as though you do not have any existing WooCommerce reviews to convert.', 'woo-better-reviews' ) . '</p>';
+	return '<p>' . esc_html__( 'Well, this is awkward. It looks as though you do not have any existing WooCommerce reviews to import.', 'woo-better-reviews' ) . '</p>';
 }
