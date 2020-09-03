@@ -234,8 +234,6 @@ function add_reminder_delay_meta() {
 
 	// Set and filter the wrapper class.
 	$wrapper_class  = Utilities\set_product_metabox_classes( $post->ID );
-	preprint( $wrapper_class, true );
-	// apply_filters( Core\HOOK_PREFIX . 'product_meta_wrapper_class', 'show_if_simple show_if_variable hide_if_external hide_if_grouped' );
 
 	// Throw a group div around it.
 	echo '<div class="options_group wbr-reviews-reminder-product-meta">';
