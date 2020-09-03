@@ -10,6 +10,7 @@ namespace Nexcess\WooBetterReviews\Utilities;
 
 // Set our aliases.
 use Nexcess\WooBetterReviews as Core;
+use Nexcess\WooBetterReviews\Helpers as Helpers;
 use Nexcess\WooBetterReviews\Queries as Queries;
 
 /**
@@ -785,6 +786,49 @@ function set_single_review_div_class( $review = array(), $index = 0 ) {
 
 	// Return, imploded.
 	return implode( ' ', $array_args );
+}
+
+/**
+ * Set up the classes for our product metabox.
+ *
+ * @param  integer $product_id  The individual product ID we are setting.
+ *
+ * @return string
+ */
+function set_product_metabox_classes( $product_id = 0 ) {
+
+	// Get our dataset for making classes.
+	$get_product_types  = Helpers\get_allowed_product_types( 'classes' );
+
+	// Bail without having any types to compare against.
+	if ( empty( $get_product_types['complete'] ) ) {
+		return;
+	}
+
+	// Set the allowed array.
+	$set_allowed_array  = ! empty( $get_product_types['allowed'] ) ? $get_product_types['allowed'] : array();
+
+	// Set an empty array.
+	$build_array_args   = array();
+
+	// Now loop my individual types and compare against the allowed.
+	foreach ( $get_product_types['complete'] as $product_type ) {
+
+		// Check inside the array to determine the show / hide.
+		$setup_show_hide    = in_array( $product_type, $set_allowed_array ) ? 'show_if_' : 'hide_if_';
+
+		// Now set up the class.
+		$build_array_args[] = $setup_show_hide . $product_type;
+	}
+
+	// Now sanitize each piece.
+	$setup_array_args   = array_map( 'sanitize_html_class', $build_array_args );
+
+	// Now set it up as a string, imploded.
+	$set_class_string   = implode( ' ', $setup_array_args );
+
+	// Now return the class string.
+	return apply_filters( Core\HOOK_PREFIX . 'product_meta_wrapper_class', $set_class_string, $product_id );
 }
 
 /**

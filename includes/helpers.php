@@ -10,6 +10,7 @@ namespace Nexcess\WooBetterReviews\Helpers;
 
 // Set our aliases.
 use Nexcess\WooBetterReviews as Core;
+use Nexcess\WooBetterReviews\Utilities as Utilities;
 use Nexcess\WooBetterReviews\Queries as Queries;
 
 /**
@@ -563,6 +564,56 @@ function maybe_first_install() {
 
 	// Return a basic boolean.
 	return empty( $is_run ) ? true : false;
+}
+
+/**
+ * Get the product types and set our allowed.
+ *
+ * @param  string $return_type  The return type we wanna have.
+ *
+ * @return array
+ */
+function get_allowed_product_types( $return_type = 'list' ) {
+
+	// First get all our types.
+	$get_all_types  = wc_get_product_types();
+
+	// Bail without having any types.
+	if ( empty( $get_all_types ) ) {
+		return false;
+	}
+
+	// Set our keys, because we use this.
+	$set_type_keys  = array_keys( $get_all_types );
+
+	// Set the types we allow, which is all of them.
+	$setup_allowed  = apply_filters( Core\HOOK_PREFIX . 'allowed_product_types', $set_type_keys );
+
+	// Determine which thing we're returning.
+	switch ( esc_attr( $return_type ) ) {
+
+		case 'list' :
+			return $get_all_types;
+			break;
+
+		case 'keys' :
+			return $set_type_keys;
+			break;
+
+		case 'names' :
+			return array_values( $get_all_types );
+			break;
+
+		case 'classes' :
+			return array(
+				'allowed'  => $setup_allowed,
+				'complete' => $set_type_keys,
+			);
+			break;
+	}
+
+	// At the end somehow.
+	return false;
 }
 
 /**
