@@ -351,7 +351,7 @@ function parse_converted_attributes_for_scoring( $scoring_array = array() ) {
 	}
 
 	// Return the args, serialized.
-	return ! empty( $setup_args ) ? maybe_serialize( $setup_args ) : '';
+	return ! empty( $setup_args ) ? maybe_serialize( $setup_args ) : array();
 }
 
 /**
