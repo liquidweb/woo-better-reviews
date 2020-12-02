@@ -119,17 +119,16 @@ function attempt_existing_woo_review_conversion( $convert_type = true, $purge_ex
 		// Now pull my attribute data out to add back into the review.
 		$attribute_args = parse_converted_attributes_for_scoring( $scoring_format );
 
-		// Bail if I couldn't parse the attribute data.
-		if ( empty( $attribute_args ) || is_wp_error( $attribute_args ) ) {
-			return new WP_Error( 'invalid-attribute-formatting', __( 'The required product attribute data could not be generated.', 'woo-better-reviews' ) );
-		}
+		// Only proceed with the attribute data if we have some.
+		if ( ! empty( $attribute_args ) && ! is_wp_error( $attribute_args ) ) {
 
-		// Attempt to update the review with the scoring data.
-		$maybe_update   = Database\update( 'content', absint( $new_review_id ), array( 'rating_attributes' => $attribute_args ) );
+			// Attempt to update the review with the scoring data.
+			$maybe_update   = Database\update( 'content', absint( $new_review_id ), array( 'rating_attributes' => $attribute_args ) );
 
-		// Bail on a failed insert.
-		if ( empty( $maybe_update ) || is_wp_error( $maybe_update ) ) {
-			return new WP_Error( 'scoring-update-fail', __( 'The formatted review scoring could not be updated in the database.', 'woo-better-reviews' ) );
+			// Bail on a failed insert.
+			if ( empty( $maybe_update ) || is_wp_error( $maybe_update ) ) {
+				return new WP_Error( 'scoring-update-fail', __( 'The formatted review scoring could not be updated in the database.', 'woo-better-reviews' ) );
+			}
 		}
 
 		// Include the product ID in the array.
@@ -352,7 +351,7 @@ function parse_converted_attributes_for_scoring( $scoring_array = array() ) {
 	}
 
 	// Return the args, serialized.
-	return maybe_serialize( $setup_args );
+	return ! empty( $setup_args ) ? maybe_serialize( $setup_args ) : '';
 }
 
 /**

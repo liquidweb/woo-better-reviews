@@ -132,6 +132,11 @@ function calculate_average_attribute_scoring( $attribute_set = array() ) {
 	// Get all my attributes.
 	$all_attributes = Queries\get_all_attributes( 'indexed' );
 
+	// Just bail without the attributes.
+	if ( empty( $all_attributes ) ) {
+		return;
+	}
+
 	// Parse out some labels.
 	$label_set  = wp_list_pluck( $attribute_set[0], 'label', 'id' );
 
