@@ -135,7 +135,7 @@ function attempt_existing_woo_review_conversion( $convert_type = true, $purge_ex
 		$pids[] = $product_id;
 
 		// Store the legacy review IDs in the product postmeta.
-		store_legacy_review_ids( $original_id, $product_id );
+		process_legacy_review_ids( $original_id, $product_id );
 
 		// Increment the counter.
 		$ccount++;
@@ -362,12 +362,15 @@ function parse_converted_attributes_for_scoring( $scoring_array = array() ) {
  *
  * @return void
  */
-function store_legacy_review_ids( $original_id = 0, $product_id = 0 ) {
+function process_legacy_review_ids( $original_id = 0, $product_id = 0 ) {
 
 	// Bail if parts are missing.
 	if ( empty( $original_id ) || empty( $product_id ) ) {
 		return;
 	}
+
+	// Set our flag for the legacy review.
+	update_comment_meta( $original_id, Core\META_PREFIX . 'converted', true );
 
 	// Get my existing items.
 	$existing_ids   = get_post_meta( $product_id, Core\META_PREFIX . 'legacy_review_ids', true );
