@@ -369,9 +369,6 @@ function process_legacy_review_ids( $original_id = 0, $product_id = 0 ) {
 		return;
 	}
 
-	// Set our flag for the legacy review.
-	update_comment_meta( $original_id, Core\META_PREFIX . 'converted', true );
-
 	// Get my existing items.
 	$existing_ids   = get_post_meta( $product_id, Core\META_PREFIX . 'legacy_review_ids', true );
 
@@ -470,7 +467,7 @@ function convert_legacy_review_ids( $product_id = 0 ) {
 	}
 
 	// Set an update count.
-	$update = 0;
+	$update_count   = 0;
 
 	// Loop and set our update args.
 	foreach ( $existing_ids as $existing_id ) {
@@ -494,7 +491,12 @@ function convert_legacy_review_ids( $product_id = 0 ) {
 
 		// Increment the count if we had success.
 		if ( false !== $run_update ) {
-			$update++;
+
+			// Set our comment meta flag for the legacy review.
+			update_comment_meta( $original_id, Core\META_PREFIX . 'converted', true );
+
+			// And increment the count.
+			$update_count++;
 		}
 
 		// Include an 'after' hook.
@@ -504,7 +506,7 @@ function convert_legacy_review_ids( $product_id = 0 ) {
 	}
 
 	// Return the total updated count.
-	return $update;
+	return $update_count;
 }
 
 /**
