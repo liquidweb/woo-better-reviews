@@ -1046,18 +1046,6 @@ function load_primary_importer_display( $review_count = 0, $action = '' ) {
 	// Now set the actual form itself.
 	$build .= '<form class="woo-better-reviews-admin-form woo-better-reviews-admin-import-existing-form" id="woo-better-reviews-admin-import-existing-form" action="' . esc_url( $action ) . '" method="post">';
 
-		// Do the label.
-		$build .= '<p><label for="wbr-purge-on-import">';
-
-			// Output the checkbox.
-			$build .= '<input type="checkbox" name="wbr-purge-on-import" id="wbr-purge-on-import" value="yes" />';
-
-			// Output the actual text.
-			$build .= '&nbsp;' . __( 'Purge existing reviews after import.', 'woo-better-reviews' );
-
-			// And close the label.
-		$build .=  '</label></p>';
-
 		// Output the submit button.
 		$build .= '<div class="woo-better-reviews-import-submit-wrapper">';
 
@@ -1080,6 +1068,27 @@ function load_primary_importer_display( $review_count = 0, $action = '' ) {
 
 		// Close up the submit wrap.
 		$build .= '</div>';
+
+		// Wrap the purge function inside a checkbox.
+		$build .= '<p class="woo-better-reviews-admin-form-input-wrapper">';
+
+			// Do the label / input wrap.
+			$build .= '<label class="woo-better-reviews-admin-form-label" for="wbr-purge-on-import">';
+
+				// Output the checkbox.
+				$build .= '<input type="checkbox" name="wbr-purge-on-import" id="wbr-purge-on-import" class="woo-better-reviews-admin-form-input" value="yes" />';
+
+				// Output the actual text.
+				$build .= '&nbsp;' . __( 'Purge existing reviews after import.', 'woo-better-reviews' );
+
+				// And close the label.
+			$build .=  '</label>';
+
+			// And our text.
+			$build .= '<span class="description woo-better-reviews-admin-form-description">' . esc_html__( 'When importing data into Better Reviews for WooCommerce plugin, existing reviews are left in the legacy WooCommerce review system in case you\'d like to switch back in the future. If you’d like to remove all legacy reviews, check this box.', 'woo-better-reviews' ) . '</span>';
+
+		// And close the paragraph.
+		$build .= '</p>';
 
 	// Close up the form markup.
 	$build .= '</form>';

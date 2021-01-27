@@ -3,7 +3,29 @@ form.woo-better-reviews-admin-import-existing-form {
 	max-width: 800px;
 }
 
+.woo-better-reviews-admin-form-input-wrapper {
+
+	.woo-better-reviews-admin-form-label {
+		margin-bottom: 4px;
+		display: inline-block;
+	}
+
+	.woo-better-reviews-admin-form-description {
+		display: inline-block;
+		width: auto;
+		padding-left: 25px;
+		font-size: 90%;
+		font-style: italic;
+	}
+
+}
+
+
 .woo-better-reviews-import-submit-wrapper {
+
+	.submit {
+		padding-bottom: 10px;
+	}
 
 	.cancel-import-link-wrap {
 
