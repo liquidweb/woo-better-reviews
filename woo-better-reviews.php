@@ -132,6 +132,7 @@ if ( ! is_admin() ) {
 require_once __DIR__ . '/includes/process/reminders.php';
 require_once __DIR__ . '/includes/process/cron-tasks.php';
 require_once __DIR__ . '/includes/process/convert-existing.php';
+require_once __DIR__ . '/includes/process/convert-custom.php';
 
 // Load the triggered file loads.
 require_once __DIR__ . '/includes/activate.php';

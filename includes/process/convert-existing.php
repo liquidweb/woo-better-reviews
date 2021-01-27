@@ -1,6 +1,6 @@
 <?php
 /**
- * Handle the conversion process.
+ * Handle the native import process.
  *
  * @package WooBetterReviews
  */

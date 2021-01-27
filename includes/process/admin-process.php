@@ -15,6 +15,7 @@ use Nexcess\WooBetterReviews\Utilities as Utilities;
 use Nexcess\WooBetterReviews\Queries as Queries;
 use Nexcess\WooBetterReviews\Database as Database;
 use Nexcess\WooBetterReviews\ConvertExisting as ConvertExisting;
+use Nexcess\WooBetterReviews\ConvertCustom as ConvertCustom;
 
 // And pull in any other namespaces.
 use WP_Error;
@@ -30,6 +31,7 @@ add_action( 'admin_init', __NAMESPACE__ . '\add_new_charstcs' );
 add_action( 'admin_init', __NAMESPACE__ . '\update_existing_charstcs' );
 add_action( 'admin_init', __NAMESPACE__ . '\delete_existing_charstcs' );
 add_action( 'admin_init', __NAMESPACE__ . '\run_existing_review_import' );
+add_action( 'admin_init', __NAMESPACE__ . '\run_custom_review_conversion' );
 
 /**
  * Check for the editing function of an attribute.
@@ -501,6 +503,32 @@ function run_existing_review_import() {
 
 	// Redirect a happy one.
 	redirect_admin_action_result( $convt_redirect, false, 'import-complete', true );
+}
+
+/**
+ * Run our conversion back to native Woo.
+ *
+ * @return void
+ */
+function run_custom_review_conversion() {
+
+	// First check for our flag being present at all.
+	if ( ! isset( $_POST['convert-existing-reviews'] ) ) {
+		return;
+	}
+
+	// Handle the nonce check.
+	if ( empty( $_POST['wbr_run_converter_nonce'] ) || ! wp_verify_nonce( $_POST['wbr_run_converter_nonce'], 'wbr_run_converter_action' ) ) {
+		wp_die( __( 'Your security nonce failed.', 'woo-better-reviews' ) );
+	}
+
+	// Set our base link for handling redirects.
+	$convt_redirect = Helpers\get_admin_converter_link();
+
+	// Now attempt to run the conversion.
+	$attempt_conversion = ConvertExisting\ConvertCustom( $maybe_do_type, $maybe_do_purge );
+
+	preprint( $_POST, true );
 }
 
 /**
