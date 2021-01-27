@@ -1315,6 +1315,10 @@ function get_error_notice_text( $return_code = '' ) {
 			return __( 'There are no existing reviews to import.', 'woo-better-reviews' );
 			break;
 
+		case 'missing-required-tables' :
+			return __( 'The required database tables for the plugin are missing. Please deactivate and reactivate the plugin.', 'woo-better-reviews' );
+			break;
+
 		case 'import-attempt-failed' :
 			return __( 'The import attempt failed.', 'woo-better-reviews' );
 			break;

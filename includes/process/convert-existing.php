@@ -46,6 +46,14 @@ function attempt_existing_woo_review_conversion( $convert_type = true, $purge_ex
 		return 'no-reviews';
 	}
 
+	// Attempt to install the tables as a fallback.
+	$add_tables = Database\maybe_install_tables();
+
+	// Bail if the tables couldn't be made.
+	if ( ! $add_tables ) {
+		return new WP_Error( 'missing-required-tables', __( 'The required database tables for the plugin are missing. Please deactivate and reactivate the plugin.', 'woo-better-reviews' ) );
+	}
+
 	// Set an empty array for the product IDs.
 	$pids   = array();
 
