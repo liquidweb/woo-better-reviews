@@ -1104,6 +1104,19 @@ function load_primary_importer_display( $review_count = 0, $action = '' ) {
  */
 function load_empty_importer_display() {
 
-	// Return just a simple sentence for now.
-	return '<p>' . esc_html__( 'Well, this is awkward. It looks as though you do not have any existing WooCommerce reviews to import.', 'woo-better-reviews' ) . '</p>';
+	// Check to see if an import was already done.
+	$maybe_import_done  = Helpers\maybe_reviews_converted( 'display' );
+
+	// Modify the message based on whether an import was done.
+	if ( false !== $maybe_import_done ) {
+
+		// If we have a value, show that.
+		return '<p>' . sprintf( __( 'You successfully converted the existing reviews on %s.', 'woo-better-reviews' ), esc_attr( $maybe_import_done ) );
+
+	} else {
+
+		// Return the a simple sentence.
+		return '<p>' . esc_html__( 'Well, this is awkward. It looks as though you do not have any existing WooCommerce reviews to import.', 'woo-better-reviews' ) . '</p>';
+	}
+
 }
