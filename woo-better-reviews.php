@@ -62,6 +62,7 @@ define( __NAMESPACE__ . '\REVIEWS_ANCHOR', 'woo-better-reviews' );
 define( __NAMESPACE__ . '\ATTRIBUTES_ANCHOR', 'woo-better-reviews-product-attributes' );
 define( __NAMESPACE__ . '\CHARSTCS_ANCHOR', 'woo-better-reviews-author-characteristics' );
 define( __NAMESPACE__ . '\IMPORTER_ANCHOR', 'wbr-review-importer' );
+define( __NAMESPACE__ . '\CONVERTER_ANCHOR', 'wbr-review-converter' );
 
 // Set the option key and DB versions used to store the schemas.
 define( __NAMESPACE__ . '\DB_VERS', '1' );

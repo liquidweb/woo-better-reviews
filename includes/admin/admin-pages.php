@@ -323,9 +323,7 @@ function display_author_traits_page() {
 }
 
 /**
- * Load the form to edit an existing characteristic.
- *
- * @param  string $action  The URL to include in the form action.
+ * Load the form to import native Woo reviews to ours.
  *
  * @return HTML
  */
@@ -356,6 +354,46 @@ function display_review_import_page() {
 
 			// Load the proper page.
 			echo ! empty( $counts ) ? load_primary_importer_display( $counts, $action ) : load_empty_importer_display();
+
+		// Close the dynamic wrapper.
+		echo '</div>';
+
+	// Close the entire thing.
+	echo '</div>';
+}
+
+/**
+ * Load the form to convert our reviews back to native Woo.
+ *
+ * @return HTML
+ */
+function display_review_convert_page() {
+
+	// Bail if we shouldn't be here.
+	if ( ! current_user_can( 'manage_options' ) ) {
+		wp_die( __( 'You are not permitted to view this page.', 'woo-better-reviews' ) );
+	}
+
+	// Pull in the action link.
+	$action = Helpers\get_admin_converter_link();
+
+	// Count how many reviews we have.
+	$counts = Queries\get_reviews_for_admin( 'counts' );
+
+	// Wrap the entire thing.
+	echo '<div class="wrap woo-better-reviews-admin-wrap woo-better-reviews-admin-importer-wrap">';
+
+		// Handle the title.
+		echo '<h1 class="wp-heading-inline woo-better-reviews-admin-title">' . esc_html__( 'Better Product Reviews for WooCommerce Converter', 'woo-better-reviews' ) . '</h1>';
+
+		// Cut off the header.
+		echo '<hr class="wp-header-end">';
+
+		// Set the same div on either.
+		echo '<div class="woo-better-reviews-importer-wrap">';
+
+			// Load the proper page.
+			echo ! empty( $counts ) ? load_primary_converter_display( $counts, $action ) : load_empty_converter_display();
 
 		// Close the dynamic wrapper.
 		echo '</div>';
@@ -1085,7 +1123,7 @@ function load_primary_importer_display( $review_count = 0, $action = '' ) {
 			$build .=  '</label>';
 
 			// And our text.
-			$build .= '<span class="description woo-better-reviews-admin-form-description">' . esc_html__( 'When importing data into Better Reviews for WooCommerce plugin, existing reviews are left in the legacy WooCommerce review system in case you\'d like to switch back in the future. If you’d like to remove all legacy reviews, check this box.', 'woo-better-reviews' ) . '</span>';
+			$build .= '<span class="description woo-better-reviews-admin-import-description woo-better-reviews-admin-form-description">' . esc_html__( 'When importing data into Better Reviews for WooCommerce plugin, existing reviews are left in the legacy WooCommerce review system in case you\'d like to switch back in the future. If you’d like to remove all legacy reviews, check this box.', 'woo-better-reviews' ) . '</span>';
 
 		// And close the paragraph.
 		$build .= '</p>';
@@ -1105,13 +1143,13 @@ function load_primary_importer_display( $review_count = 0, $action = '' ) {
 function load_empty_importer_display() {
 
 	// Check to see if an import was already done.
-	$maybe_import_done  = Helpers\maybe_reviews_converted( 'display' );
+	$maybe_import_done  = Helpers\maybe_reviews_imported( 'display' );
 
 	// Modify the message based on whether an import was done.
 	if ( false !== $maybe_import_done ) {
 
 		// If we have a value, show that.
-		return '<p>' . sprintf( __( 'You successfully converted the existing reviews on %s.', 'woo-better-reviews' ), esc_attr( $maybe_import_done ) );
+		return '<p>' . sprintf( __( 'You successfully imported the existing reviews on %s.', 'woo-better-reviews' ), esc_attr( $maybe_import_done ) );
 
 	} else {
 
@@ -1119,4 +1157,89 @@ function load_empty_importer_display() {
 		return '<p>' . esc_html__( 'Well, this is awkward. It looks as though you do not have any existing WooCommerce reviews to import.', 'woo-better-reviews' ) . '</p>';
 	}
 
+	// No remaining content here.
+}
+
+/**
+ * Load the page including the form to trigger an import.
+ *
+ * @param  integer $review_count  How many reviews we have to convert.
+ * @param  string  $action        The URL to include in the form action.
+ *
+ * @return HTML
+ */
+function load_primary_converter_display( $review_count = 0, $action = '' ) {
+
+	// Bail if we shouldn't be here.
+	if ( ! current_user_can( 'manage_options' ) ) {
+		wp_die( __( 'You are not permitted to view this page.', 'woo-better-reviews' ) );
+	}
+
+	// If somehow the review count didn't come, return our empty.
+	if ( empty( $review_count ) ) {
+		return load_empty_converter_display();
+	}
+
+	// Set up the button text.
+	$set_button_txt = sprintf( _n( 'Convert %d Existing Review', 'Convert %d Existing Reviews', absint( $review_count ), 'woo-better-reviews' ), absint( $review_count ) );
+
+	// Set an empty.
+	$build  = '';
+
+	// Add an introduction.
+	$build .= '<p>' . esc_html__( 'Convert any data from the Better Product Reviews for WooCommerce plugin back to the native WooCommerce review format.', 'woo-better-reviews' ) . '</p>';
+
+	// Now set the actual form itself.
+	$build .= '<form class="woo-better-reviews-admin-form woo-better-reviews-admin-convert-existing-form" id="woo-better-reviews-admin-convert-existing-form" action="' . esc_url( $action ) . '" method="post">';
+
+		// Output the submit button.
+		$build .= '<div class="woo-better-reviews-convert-submit-wrapper">';
+
+			// Wrap it in a paragraph.
+			$build .= '<p class="submit">';
+
+				// The actual submit button.
+				$build .= get_submit_button( __( $set_button_txt, 'woo-better-reviews' ), 'primary', 'convert-existing-reviews', false );
+
+				// Our cancel link.
+				$build .= '<span class="cancel-convert-link-wrap">';
+					$build .= '<a class="cancel-convert-link" href="' . esc_url( $action ) . '">' . esc_html__( 'Cancel', 'woo-better-reviews' ) . '</a>';
+				$build .= '</span>';
+
+			// Close up the paragraph.
+			$build .= '</p>';
+
+			// Output our nonce.
+			$build .= wp_nonce_field( 'wbr_run_converter_action', 'wbr_run_converter_nonce', true, false );
+
+		// Close up the submit wrap.
+		$build .= '</div>';
+
+		// Wrap the purge function inside a checkbox.
+		$build .= '<p class="woo-better-reviews-admin-form-input-wrapper">';
+
+			// And our text.
+			$build .= '<span class="description woo-better-reviews-admin-convert-description woo-better-reviews-admin-form-description">' . esc_html__( 'Remember that the additional contextual data managed by Better Product Reviews for WooCommerce will no longer be available in the native WooCommerce format.', 'woo-better-reviews' ) . '</span>';
+
+		// And close the paragraph.
+		$build .= '</p>';
+
+	// Close up the form markup.
+	$build .= '</form>';
+
+	// Return the entire form build.
+	return $build;
+}
+
+/**
+ * Load the page for when no conversion can be done.
+ *
+ * @return HTML
+ */
+function load_empty_converter_display() {
+
+	// Return the a simple sentence.
+	return '<p>' . esc_html__( 'This is gonna say something.', 'woo-better-reviews' ) . '</p>';
+
+	// No remaining content here.
 }

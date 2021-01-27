@@ -1,5 +1,6 @@
 
-form.woo-better-reviews-admin-import-existing-form {
+form.woo-better-reviews-admin-import-existing-form,
+form.woo-better-reviews-admin-convert-existing-form {
 	max-width: 800px;
 }
 
@@ -13,28 +14,34 @@ form.woo-better-reviews-admin-import-existing-form {
 	.woo-better-reviews-admin-form-description {
 		display: inline-block;
 		width: auto;
-		padding-left: 25px;
-		font-size: 90%;
 		font-style: italic;
+
+		&.woo-better-reviews-admin-import-description {
+			padding-left: 25px;
+			font-size: 90%;
+		}
 	}
 
 }
 
 
-.woo-better-reviews-import-submit-wrapper {
+.woo-better-reviews-import-submit-wrapper,
+.woo-better-reviews-convert-submit-wrapper {
 
 	.submit {
 		padding-bottom: 10px;
 	}
 
-	.cancel-import-link-wrap {
+	.cancel-import-link-wrap,
+	.cancel-convert-link-wrap {
 
 		line-height: 28px;
 		vertical-align: middle;
 		text-align: left;
 		margin-left: 8px;
 
-		.cancel-import-link {
+		.cancel-import-link,
+		.cancel-convert-link {
 			color: #a00;
 			text-decoration: none;
 		}

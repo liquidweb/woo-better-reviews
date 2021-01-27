@@ -18,13 +18,14 @@ use Nexcess\WooBetterReviews\Database as Database;
 use WP_Error;
 
 /**
- * Get all the reviews.
+ * Get all the review data for an admin query.
  *
- * @param  boolean $purge  Optional to purge the cache'd version before looking up.
+ * @param  string  $return_type  What type of return we want. Accepts "counts", "objects", or fields.
+ * @param  boolean $purge        Optional to purge the cache'd version before looking up.
  *
  * @return mixed
  */
-function get_reviews_for_admin( $purge = false ) {
+function get_reviews_for_admin( $return_type = 'objects', $purge = false ) {
 
 	// Set the key to use in our transient.
 	$ky = Core\HOOK_PREFIX . 'admin_reviews';
@@ -65,8 +66,22 @@ function get_reviews_for_admin( $purge = false ) {
 		$cached_dataset = $query_run;
 	}
 
-	// Return the entire dataset.
-	return $cached_dataset;
+	// Now switch between my return types.
+	switch ( sanitize_text_field( $return_type ) ) {
+
+		case 'counts' :
+			return count( $cached_dataset );
+			break;
+
+		case 'objects' :
+			return $cached_dataset;
+			break;
+
+		// No more case breaks, no more return types.
+	}
+
+	// No reason we should get down this far but here we go.
+	return false;
 }
 
 /**

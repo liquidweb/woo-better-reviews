@@ -115,19 +115,19 @@ function maybe_reviews_enabled( $product_id = 0 ) {
 }
 
 /**
- * Check if the conversion was run.
+ * Check if the native Woo import was run.
  *
  * @param  string $return_type  How to return it. Either a boolean, timestamp, or formatted.
  *
  * @return mixed
  */
-function maybe_reviews_converted( $return_type = 'boolean' ) {
+function maybe_reviews_imported( $return_type = 'boolean' ) {
 
 	// First check for the option.
-	$maybe_conversion   = get_option( Core\OPTION_PREFIX . 'converted_woo_reviews', false );
+	$maybe_imported = get_option( Core\OPTION_PREFIX . 'imported_woo_reviews', false );
 
 	// Bail if we don't have it.
-	if ( empty( $maybe_conversion ) ) {
+	if ( empty( $maybe_imported ) ) {
 		return false;
 	}
 
@@ -139,7 +139,7 @@ function maybe_reviews_converted( $return_type = 'boolean' ) {
 			break;
 
 		case 'timestamp' :
-			return absint( $maybe_conversion );
+			return absint( $maybe_imported );
 			break;
 
 		case 'display' :
@@ -149,7 +149,7 @@ function maybe_reviews_converted( $return_type = 'boolean' ) {
 			$get_time_formt = get_option( 'time_format', 'g:i a' );
 
 			// Now return it.
-			return date( $get_date_formt, $maybe_conversion ) . ' @ ' . date( $get_time_formt, $maybe_conversion );
+			return date( $get_date_formt, $maybe_imported ) . ' @ ' . date( $get_time_formt, $maybe_imported );
 			break;
 	}
 
@@ -1020,7 +1020,7 @@ function maybe_admin_settings_tab( $hook = '' ) {
 	}
 
 	// First check if this is the importer.
-	if ( ! empty( $_GET['import'] ) && Core\IMPORTER_ANCHOR === sanitize_text_field( $_GET['import'] ) ) {
+	if ( ! empty( $_GET['import'] ) && in_array( sanitize_text_field( $_GET['import'] ), array( Core\IMPORTER_ANCHOR, Core\CONVERTER_ANCHOR ) ) ) {
 		return true;
 	}
 
@@ -1081,7 +1081,7 @@ function get_admin_menu_link( $menu_slug = '' ) {
 }
 
 /**
- * Get the admin link for our review converter / importer.
+ * Get the admin link for our review importer.
  *
  * @param  array  $custom_args  The query args to include in the redirect.
  *
@@ -1091,6 +1091,22 @@ function get_admin_importer_link( $custom_args = array() ) {
 
 	// First set the base link, which we need.
 	$set_base_link  = add_query_arg( 'import', Core\IMPORTER_ANCHOR, admin_url( 'admin.php' ) );
+
+	// Return the link as-is, or with the new args.
+	return ! empty( $custom_args ) ? add_query_arg( $custom_args, $set_base_link ) : $set_base_link;
+}
+
+/**
+ * Get the admin link for our review converter.
+ *
+ * @param  array  $custom_args  The query args to include in the redirect.
+ *
+ * @return string
+ */
+function get_admin_converter_link( $custom_args = array() ) {
+
+	// First set the base link, which we need.
+	$set_base_link  = add_query_arg( 'import', Core\CONVERTER_ANCHOR, admin_url( 'admin.php' ) );
 
 	// Return the link as-is, or with the new args.
 	return ! empty( $custom_args ) ? add_query_arg( $custom_args, $set_base_link ) : $set_base_link;

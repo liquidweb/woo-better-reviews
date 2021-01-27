@@ -22,7 +22,7 @@ use WP_Error;
  */
 add_filter( 'plugin_action_links', __NAMESPACE__ . '\add_quick_link', 10, 2 );
 add_action( 'admin_menu', __NAMESPACE__ . '\load_admin_menus', 43 );
-add_action( 'admin_init', __NAMESPACE__ . '\load_review_importer' );
+add_action( 'admin_init', __NAMESPACE__ . '\load_review_importers' );
 
 /**
  * Add our "reviews" links to the plugins page.
@@ -140,19 +140,27 @@ function load_admin_menus() {
  *
  * @return void
  */
-function load_review_importer() {
+function load_review_importers() {
 
 	// Make sure the constant is being defined.
 	if ( ! defined( 'WP_LOAD_IMPORTERS' ) ) {
 		return;
 	}
 
-	// Now load up our new importer.
+	// Now load up our importer.
 	register_importer(
 		Core\IMPORTER_ANCHOR,
 		__( 'WooCommerce Product Reviews', 'woocommerce' ),
 		__( 'Import any existing WooCommerce product reviews to the Better Product Reviews for WooCommerce system.', 'woo-better-reviews' ),
 		__NAMESPACE__ . '\load_review_import_page'
+	);
+
+	// Now load up our converter.
+	register_importer(
+		Core\CONVERTER_ANCHOR,
+		__( 'Better Product Reviews for WooCommerce', 'woocommerce' ),
+		__( 'Convert any existing Better Product Reviews for WooCommerce data to native WooCommerce product reviews.', 'woo-better-reviews' ),
+		__NAMESPACE__ . '\load_review_convert_page'
 	);
 
 	// That's it.
@@ -186,12 +194,21 @@ function load_author_traits_page() {
 }
 
 /**
- * Load our review converter page.
+ * Load our review import page.
  *
  * @return void
  */
 function load_review_import_page() {
 	AdminPages\display_review_import_page();
+}
+
+/**
+ * Load our review converter page.
+ *
+ * @return void
+ */
+function load_review_convert_page() {
+	AdminPages\display_review_convert_page();
 }
 
 /**

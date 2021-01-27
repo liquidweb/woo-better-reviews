@@ -159,7 +159,7 @@ function attempt_existing_woo_review_conversion( $convert_type = true, $purge_ex
 	Utilities\purge_transients( null, 'reviews' );
 
 	// Update the option that we have run the conversion.
-	update_option( Core\OPTION_PREFIX . 'converted_woo_reviews', current_time( 'timestamp', false ) );
+	update_option( Core\OPTION_PREFIX . 'imported_woo_reviews', current_time( 'timestamp', false ) );
 
 	// Set up the return message.
 	$return_msg = sprintf( _n( '%d review converted.', '%d reviews converted.', absint( $ccount ), 'woo-better-reviews' ), absint( $ccount ) );
