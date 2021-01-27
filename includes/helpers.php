@@ -1339,6 +1339,10 @@ function get_error_notice_text( $return_code = '' ) {
 			return __( 'The import attempt failed.', 'woo-better-reviews' );
 			break;
 
+		case 'conversion-attempt-failed' :
+			return __( 'The conversion attempt failed.', 'woo-better-reviews' );
+			break;
+
 		case 'missing-conversion-args' :
 			return __( 'The existing reviews must either be converted or purged. Please select one.', 'woo-better-reviews' );
 			break;

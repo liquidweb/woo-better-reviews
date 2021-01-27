@@ -523,12 +523,25 @@ function run_custom_review_conversion() {
 	}
 
 	// Set our base link for handling redirects.
-	$convt_redirect = Helpers\get_admin_converter_link();
+	$set_page_redirect  = Helpers\get_admin_converter_link();
 
 	// Now attempt to run the conversion.
-	$attempt_conversion = ConvertExisting\ConvertCustom( $maybe_do_type, $maybe_do_purge );
+	$attempt_conversion = ConvertCustom\attempt_custom_review_conversion();
 
-	preprint( $_POST, true );
+	// Again, make sure we have data.
+	if ( ! empty( $attempt_conversion ) && 'no-reviews' === $attempt_conversion ) {
+		redirect_admin_action_result( $set_page_redirect, 'missing-existing-reviews' );
+	}
+
+	// Check for some error return or blank.
+	if ( empty( $attempt_conversion ) || false === $attempt_conversion || is_wp_error( $attempt_conversion ) ) {
+
+		// Figure out the error code.
+		$error_code = is_wp_error( $attempt_conversion ) ? $attempt_conversion->get_error_code() : 'conversion-attempt-failed';
+
+		// And redirect.
+		redirect_admin_action_result( $set_page_redirect, $error_code );
+	}
 }
 
 /**

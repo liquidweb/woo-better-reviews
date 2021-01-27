@@ -153,7 +153,7 @@ function attempt_existing_woo_review_conversion( $convert_type = true, $purge_ex
 	$product_id_array   = array_unique( $pids );
 
 	// Handle our functions related to the product ID array.
-	update_products_post_conversion( $product_id_array, $convert_type, $purge_existing );
+	update_products_post_import( $product_id_array, $convert_type, $purge_existing );
 
 	// Now delete my big list of review data cached.
 	Utilities\purge_transients( null, 'reviews' );
@@ -412,7 +412,7 @@ function process_legacy_review_ids( $original_id = 0, $product_id = 0 ) {
  *
  * @return void
  */
-function update_products_post_conversion( $product_ids = array(), $convert_type = true, $purge_existing = false ) {
+function update_products_post_import( $product_ids = array(), $convert_type = true, $purge_existing = false ) {
 
 	// Bail if we don't have product IDs.
 	if ( empty( $product_ids ) ) {
@@ -449,7 +449,7 @@ function update_products_post_conversion( $product_ids = array(), $convert_type 
 	}
 
 	// Include an action for all the product IDs.
-	do_action( Core\HOOK_PREFIX . 'after_update_products_post_conversion', $product_ids );
+	do_action( Core\HOOK_PREFIX . 'after_update_products_post_import', $product_ids );
 }
 
 /**
