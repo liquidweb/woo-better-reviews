@@ -9,7 +9,7 @@
  * Text Domain: woo-better-reviews
  * Domain Path: /languages
  * WC requires at least: 4.2.0
- * WC tested up to: 4.4.1
+ * WC tested up to: 5.3.1
  * License:     MIT
  * License URI: https://opensource.org/licenses/MIT
  *
